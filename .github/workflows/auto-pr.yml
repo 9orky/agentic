@@ -7,12 +7,15 @@ on:
       - master
 
 permissions:
-  contents: write
+  contents: read
   pull-requests: write
 
 jobs:
   auto-pr:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.ref_name }}
+      cancel-in-progress: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
