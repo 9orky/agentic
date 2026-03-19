@@ -39,9 +39,11 @@ jobs:
             
             echo "Successfully created PR: $PR_URL"
             
-            # Attempt to formally request a review from the copilot app (if configured this way in your org)
-            # This handles gracefully if the specific reviewer handle is not supported.
-            gh pr edit "$PR_URL" --add-reviewer copilot || echo "Could not explicitly assign 'copilot' reviewer (it may be automatically handled via label or workflow app configuration)."
+            # Attempt to formally request a review from the copilot app
+            gh pr edit "$PR_URL" --add-reviewer copilot || true
+            
+            # As a fallback, trigger Copilot via the standard review comment 
+            gh pr comment "$PR_URL" --body "@copilot review" || echo "Failed to post Copilot review comment."
             
             # Output to Actions summary
             echo "## PR Created 🚀" >> $GITHUB_STEP_SUMMARY
