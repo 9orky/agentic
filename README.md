@@ -11,16 +11,19 @@ my-project/
 │   ├── rules/                    <-- Static, read-only architectural rules
 │   │   ├── example-rule.md     
 │   │   └── project-specific/     <-- Custom instructions for this project (Gitignored except .gitkeep)
-│   ├── arch-config.json          <-- Standardized JSON config for the engine (has simple example, project rules must be configured here)
+│   ├── arch-config.json.dist     <-- Standardized JSON config template (copy to arch-config.json)
 │   └── README.md                 <-- Core instructions (you are here)
 └── src/                          <-- Your actual application code
 ```
 
 ## How to Configure (`agentic/arch-config.json`)
 
-The engine reads technical parsing boundaries from `agentic/arch-config.json`. This file contains a basic example to get you started - you must configure it with your own project rules and boundaries. Note that the `rules/project-specific` folder is gitignored (except for `.gitkeep`), meaning you can store ephemeral custom rules or configurations there.
+1. Copy the template: `cp agentic/arch-config.json.dist agentic/arch-config.json`
+2. Configure it with your active project rules and boundaries.
 
-**Example `agentic/arch-config.json`:**
+The engine reads technical parsing boundaries from `arch-config.json`. Note that `arch-config.json` is gitignored so each environment maintains its own rules, while the `.dist` file serves as the version-controlled template. (Similarly, `rules/project-specific/` is gitignored for custom local instructions).
+
+**Example `agentic/arch-config.json.dist`:**
 ```json
 {
   "language": "python",
@@ -44,7 +47,7 @@ The engine reads technical parsing boundaries from `agentic/arch-config.json`. T
 
 To ensure the integrity of the architecture engine, the following constraints strictly apply:
 1. **`rules/` is READ-ONLY:** Agents **must never** rename, edit, or touch the contents of this folder once populated. Exception: The `rules/project-specific/` folder is explicitly meant for custom instructions.
-2. **`arch-config.json` is for Boundaries:** This file must be configured with your actual architectural rules and boundaries.
+2. **`arch-config.json` is for Boundaries:** The `.dist` template must be copied to `arch-config.json` and configured with your actual architectural rules.
 3. **No Artifact Dumping:** None of the above folders are a place to put active session docs, task checklists, or execution plans.
 4. **Reporting Issues:** If you encounter bugs, missing features, or structural issues with the architecture checker itself, create and commit an `ISSUES.md` file next to this `README.md` to document them.
 

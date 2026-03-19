@@ -45,6 +45,7 @@ def run_tests():
     if not config_path:
         print("Error: Could not find arch-config.json")
         print("Looked in the project root, project_root/agentic, and next to this script.")
+        print("Please copy arch-config.json.dist to arch-config.json and configure your boundaries.")
         sys.exit(1)
         
     with open(config_path, 'r', encoding='utf-8') as f:

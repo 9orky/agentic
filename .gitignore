@@ -1,2 +1,5 @@
 rules/project-specific/*
 !rules/project-specific/.gitkeep
+
+# Ignore instance-specific architectural configuration
+arch-config.json
