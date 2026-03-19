@@ -6,18 +6,45 @@ import subprocess
 
 import argparse
 
+
+def resolve_config_path(project_root, checker_dir, explicit_config_path=None):
+    candidates = []
+
+    if explicit_config_path:
+        candidates.append(os.path.abspath(explicit_config_path))
+
+    candidates.extend([
+        os.path.join(project_root, 'arch-config.json'),
+        os.path.join(project_root, 'agentic', 'arch-config.json'),
+        os.path.join(os.path.dirname(checker_dir), 'arch-config.json'),
+    ])
+
+    seen = set()
+    for candidate in candidates:
+        normalized = os.path.normpath(candidate)
+        if normalized in seen:
+            continue
+        seen.add(normalized)
+
+        if os.path.exists(normalized):
+            return normalized
+
+    return None
+
 def run_tests():
     parser = argparse.ArgumentParser(description="Architecture Rule Checker")
     parser.add_argument("--project-root", type=str, default=os.getcwd(), help="Path to the project root directory")
+    parser.add_argument("--config", type=str, help="Path to arch-config.json")
     args = parser.parse_args()
     
     project_root = os.path.abspath(args.project_root)
+    checker_dir = os.path.dirname(os.path.realpath(__file__))
 
     # 1. Read config from the project root
-    config_path = os.path.join(project_root, 'arch-config.json')
-    if not os.path.exists(config_path):
-        print(f"Error: Could not find {config_path}")
-        print("Please ensure 'arch-config.json' exists at the root of your project.")
+    config_path = resolve_config_path(project_root, checker_dir, args.config)
+    if not config_path:
+        print("Error: Could not find arch-config.json")
+        print("Looked in the project root, project_root/agentic, and next to this script.")
         sys.exit(1)
         
     with open(config_path, 'r', encoding='utf-8') as f:
@@ -28,7 +55,6 @@ def run_tests():
     exclusions = config.get('exclusions', [])
     
     # 2. Run appropriate extractor
-    checker_dir = os.path.dirname(os.path.realpath(__file__))
     extractor_map = {
         'python': ['python3', os.path.join(checker_dir, 'extractors', 'python_extractor.py')],
         'typescript': ['node', os.path.join(checker_dir, 'extractors', 'typescript_extractor.js')],

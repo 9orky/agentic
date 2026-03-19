@@ -2,19 +2,64 @@
   "language": "typescript",
   "exclusions": [
     "node_modules/",
-    "tests/",
+    "__tests__/",
+    ".test.ts",
+    ".spec.ts",
     "dist/",
-    ".arch-checker/"
+    ".arch-checker/",
+    "agentic/"
   ],
   "rules": {
     "boundaries": [
       {
-        "source": "src/domain",
-        "disallow": ["src/infrastructure", "src/ui"]
+        "source": "src/features/subject",
+        "disallow": [
+          "src/features/constraint",
+          "src/features/scoring",
+          "src/features/scheduling",
+          "src/features/tracing",
+          "src/features/validation"
+        ]
       },
       {
-        "source": "src/application",
-        "disallow": ["src/ui"]
+        "source": "src/features/constraint",
+        "disallow": [
+          "src/features/scoring",
+          "src/features/scheduling",
+          "src/features/tracing",
+          "src/features/validation"
+        ]
+      },
+      {
+        "source": "src/features/scoring",
+        "disallow": [
+          "src/features/constraint",
+          "src/features/scheduling",
+          "src/features/tracing",
+          "src/features/validation"
+        ]
+      },
+      {
+        "source": "src/features/tracing",
+        "disallow": [
+          "src/features/constraint",
+          "src/features/scoring",
+          "src/features/scheduling",
+          "src/features/validation"
+        ]
+      },
+      {
+        "source": "src/features/validation",
+        "disallow": [
+          "src/features/constraint",
+          "src/features/scoring",
+          "src/features/scheduling",
+          "src/features/tracing"
+        ]
+      },
+      {
+        "source": "src/features/scheduling",
+        "disallow": ["src/features/validation"]
       }
     ]
   }

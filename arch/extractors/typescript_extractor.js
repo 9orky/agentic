@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-const fs = require('fs');
-const path = require('path');
+import fs from 'node:fs';
+import path from 'node:path';
 
 const targetDir = process.argv[2] || process.cwd();
 const exclusions = process.argv[3] ? JSON.parse(process.argv[3]) : [];

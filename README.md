@@ -56,6 +56,13 @@ From the root of your project, run:
 python3 agentic/arch/run_tests.py
 ```
 
+The runner will look for `arch-config.json` in these locations, in order:
+
+1. `--config <path>` if provided
+2. `<project-root>/arch-config.json`
+3. `<project-root>/agentic/arch-config.json`
+4. Next to the `agentic/arch` folder
+
 If boundaries are breached, the script will output a clear list of violations:
 ```text
 [VIOLATION] src/domain/Logic.py
