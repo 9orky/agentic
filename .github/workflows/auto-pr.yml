@@ -1,0 +1,56 @@
+name: Auto Pull Request
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - master
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  auto-pr:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.ref_name }}
+      cancel-in-progress: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create PR and Request Copilot Review
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Find the default branch
+          DEFAULT_BRANCH=$(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)
+          
+          # Check if PR already exists for this branch
+          PR_EXISTS=$(gh pr list --head "${GITHUB_REF_NAME}" --state open --json number --jq length)
+          
+          if [ "$PR_EXISTS" -eq "0" ]; then
+            echo "Creating PR for ${GITHUB_REF_NAME}..."
+            
+            # Create the PR automatically using gh CLI
+            PR_URL=$(gh pr create \
+              --base "$DEFAULT_BRANCH" \
+              --head "${GITHUB_REF_NAME}" \
+              --title "${GITHUB_REF_NAME}" \
+              --body "Automated PR created by GitHub Actions. @copilot please review.")
+            
+            echo "Successfully created PR: $PR_URL"
+            
+            # Attempt to formally request a review from the copilot app
+            gh pr edit "$PR_URL" --add-reviewer copilot || true
+            
+            # As a fallback, trigger Copilot via the standard review comment 
+            gh pr comment "$PR_URL" --body "@copilot review" || echo "Failed to post Copilot review comment."
+            
+            # Output to Actions summary
+            echo "## PR Created 🚀" >> $GITHUB_STEP_SUMMARY
+            echo "[View Pull Request]($PR_URL)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "An open PR already exists for ${GITHUB_REF_NAME}."
+          fi

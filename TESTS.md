@@ -85,6 +85,7 @@ A passing test with weak assertions, the wrong seam, or a fake backdoor is a fai
 2. If test setup is hard to read, improve the local helpers before adding more cases.
 3. If failure assertions are hard to write, check whether the public contract is missing a clear failure mode.
 4. Do not weaken assertions just to make a test pass more easily.
+5. **Circuit Breaker**: If validation or test execution fails twice on the same boundary, STOP and ask for clarification. Do not engage in exhaustive trial-and-error.
 
 ## Acceptance Check
 
