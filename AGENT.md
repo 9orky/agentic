@@ -8,20 +8,23 @@ Do three things here:
 2. choose the next document by task scope
 3. avoid duplicating general rules in scoped documents
 
-Use the other documents by scope:
+## Reading Order
 
-- `_PROJECT.md` for project-specific exceptions, naming conventions, and local overrides
-- `PLANNING.md` for plan creation, approval, and execution-step breakdown
-- `MODULE.md` for directory, file, naming, and module API rules
-- `FEATURE.md` for feature composition and feature boundaries
-- `TESTS.md` for test strategy, public test seams, and test helper rules
-- `REFACTORING.md` for migration and structural change rules
+Read in this order:
 
-Do not treat every document as equally relevant for every task. Surf to the document that matches the scope.
+1. the project's task manifest, task runner config, or documented command entry point
+2. `AGENT.md`
+3. `_PROJECT.md` if present
 
-Keep the shared documents tech-stack agnostic.
+Then route by task:
 
-If the project needs local exceptions, naming conventions, entry-point conventions, task-runner rules, or allowed architectural deviations, put them in `_PROJECT.md` instead of scattering them across the shared documents.
+- planning task: read `PLANNING.md`
+- module or file-structure task: read `MODULE.md`
+- feature design or feature implementation task: read `FEATURE.md` and `MODULE.md`
+- test-writing or verification task: read `TESTS.md` plus the governing feature or module document
+- refactor task: read `REFACTORING.md`, then the relevant feature or module guidance
+
+If a feature has a local plan, read it after the shared docs.
 
 ## Cross-Doc Quick Matrix
 
@@ -38,6 +41,22 @@ If the project needs local exceptions, naming conventions, entry-point conventio
 Read across the row, not just the first matching cell.
 
 If the task fits more than one row, read all matching rows before acting.
+
+Use the other documents by scope:
+
+- `_PROJECT.md` for project-specific exceptions, naming conventions, and local overrides
+- `PLANNING.md` for plan creation, approval, and execution-step breakdown
+- `MODULE.md` for directory, file, naming, and module API rules
+- `FEATURE.md` for feature composition and feature boundaries
+- `TESTS.md` for test strategy, public test seams, and test helper rules
+- `REFACTORING.md` for migration and structural change rules
+
+Do not treat every document as equally relevant for every task. Surf to the document that matches the scope.
+
+Keep the shared documents tech-stack agnostic.
+
+If the project needs local exceptions, naming conventions, entry-point conventions, task-runner rules, or allowed architectural deviations, put them in `_PROJECT.md` instead of scattering them across the shared documents.
+
 
 ## Decision Order
 
@@ -68,7 +87,7 @@ Run every development task through the same base sequence.
 
 1. classify the task
 2. load the relevant documents
-3. inspect the current state only as much as needed
+3. inspect the current state only as much as needed (e.g., list directory structure or use file search tools to find consumers before modifying a file; do not read downstream implementation files unless the build or validation step fails)
 4. identify the owning boundary and public seam
 5. define the target change before editing
 6. choose the smallest valid slice that satisfies the task
@@ -97,23 +116,6 @@ Before finishing, always verify:
 - boundaries were respected
 - the chosen validation path actually ran or was explicitly unavailable
 
-## Reading Order
-
-Read in this order:
-
-1. the project's task manifest, task runner config, or documented command entry point
-2. `AGENT.md`
-3. `_PROJECT.md` if present
-
-Then route by task:
-
-- planning task: read `PLANNING.md`
-- module or file-structure task: read `MODULE.md`
-- feature design or feature implementation task: read `FEATURE.md` and `MODULE.md`
-- test-writing or verification task: read `TESTS.md` plus the governing feature or module document
-- refactor task: read `REFACTORING.md`, then the relevant feature or module guidance
-
-If a feature has a local plan, read it after the shared docs.
 
 ## Precedence Rules
 
@@ -126,7 +128,7 @@ Resolve guidance in this order:
 5. scoped document for the task type
 6. current code as behavioral reference only
 
-Use the project's declared task runner, task manifest, or documented command entry points as the source of truth for runnable tasks.
+Always inspect the project's primary package manager configuration, task manifest, or build scripts first to find the authorized test and build commands before attempting to execute standard CLI tools or manual shell scripts.
 
 If two sources conflict, prefer the higher item in the list.
 

@@ -64,6 +64,8 @@ Present the high-level plan for acceptance.
 
 Do not treat any `PLAN_STEP_X.md` file as an active execution plan until the high-level plan is accepted.
 
+**Scratchpad Protocol**: Use temporary scratchpads (like `/tmp/` files or the agent's internal artifact systems) to draft architectures and perform exploratory debugging. Do not write premature implementation details into `PLAN_STEP_X.md` until the approach is validated.
+
 If step files already exist from an older planning pass, replace or remove them until the new high-level plan is accepted.
 
 If scope changes materially, update the high-level plan before changing step contracts.

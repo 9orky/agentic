@@ -20,32 +20,32 @@ State the concrete result this step must achieve.
 
 ## Inputs
 
-List the exact inputs this step consumes.
+List the exact inputs this step consumes. Check these off explicitly during planning and execution.
 
-- source documents
-- source files or modules
-- approved decisions
-- required data or interfaces
+- [ ] source documents
+- [ ] source files or modules
+- [ ] approved decisions
+- [ ] required data or interfaces
 
 ## Outputs
 
-List the exact outputs this step must produce.
+List the exact outputs this step must produce. Check these off explicitly during execution to verify completion.
 
-- changed files
-- new files
-- preserved contracts
-- verification artifacts
+- [ ] changed files
+- [ ] new files
+- [ ] preserved contracts
+- [ ] verification artifacts
 
 ## Module Tree
 
-Describe the relevant module tree for this step.
+Describe the relevant module tree for this step. Use checklists `[ ]` to confirm verification of each mapped boundary.
 
 Include:
 
-- directories, packages, and modules in scope
-- public seams exposed by module entry points or feature boundaries
-- exposed public API signatures at those seams
-- boundaries that must remain internal
+- [ ] directories, packages, and modules in scope
+- [ ] public seams exposed by module entry points or feature boundaries
+- [ ] exposed public API signatures at those seams
+- [ ] boundaries that must remain internal
 
 Use a compact tree plus signatures, for example:
 
