@@ -6,20 +6,21 @@ This repository acts as an intelligent, zero-dependency "drop-in brain" meant fo
 
 ```text
 my-project/
-├── arch/                         <-- The test engine & extractors
-├── project-specific/             <-- Custom instructions for this project (Gitignored except .gitkeep)
-│   └── arch-config.json          <-- Standardized JSON config for the engine
-├── rules/                        <-- Static, read-only architectural rules
-│   └── example-rule.md     
-├── README.md                     <-- Core instructions (you are here)
+├── agentic/                      <-- This repository (the drop-in brain)
+│   ├── arch/                     <-- The test engine & extractors
+│   ├── project-specific/         <-- Custom instructions for this project (Gitignored except .gitkeep)
+│   │   └── arch-config.json      <-- Standardized JSON config for the engine
+│   ├── rules/                    <-- Static, read-only architectural rules
+│   │   └── example-rule.md     
+│   └── README.md                 <-- Core instructions (you are here)
 └── src/                          <-- Your actual application code
 ```
 
-## How to Configure (`project-specific/arch-config.json`)
+## How to Configure (`agentic/project-specific/arch-config.json`)
 
-The engine reads technical parsing boundaries from `project-specific/arch-config.json`. Note that the `project-specific` folder is gitignored (except for `.gitkeep`), meaning these configs are ephemeral or maintained by individual developers/agents locally.
+The engine reads technical parsing boundaries from `agentic/project-specific/arch-config.json`. Note that the `project-specific` folder is gitignored (except for `.gitkeep`), meaning these configs are ephemeral or maintained by individual developers/agents locally.
 
-**Example `project-specific/arch-config.json`:**
+**Example `agentic/project-specific/arch-config.json`:**
 ```json
 {
   "language": "python",
@@ -51,7 +52,7 @@ To ensure the integrity of the architecture engine, the following constraints st
 **For Agents & Humans:**
 From the root of your project, run:
 ```bash
-python3 arch/run_tests.py
+python3 agentic/arch/run_tests.py
 ```
 
 If boundaries are breached, the script will output a clear list of violations:
