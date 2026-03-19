@@ -8,19 +8,19 @@ This repository acts as an intelligent, zero-dependency "drop-in brain" meant fo
 my-project/
 ├── agentic/                      <-- This repository (the drop-in brain)
 │   ├── arch/                     <-- The test engine & extractors
-│   ├── project-specific/         <-- Custom instructions for this project (Gitignored except .gitkeep)
-│   │   └── arch-config.json      <-- Standardized JSON config for the engine
 │   ├── rules/                    <-- Static, read-only architectural rules
-│   │   └── example-rule.md     
+│   │   ├── example-rule.md     
+│   │   └── project-specific/     <-- Custom instructions for this project (Gitignored except .gitkeep)
+│   ├── arch-config.json          <-- Standardized JSON config for the engine (has simple example, project rules must be configured here)
 │   └── README.md                 <-- Core instructions (you are here)
 └── src/                          <-- Your actual application code
 ```
 
-## How to Configure (`agentic/project-specific/arch-config.json`)
+## How to Configure (`agentic/arch-config.json`)
 
-The engine reads technical parsing boundaries from `agentic/project-specific/arch-config.json`. Note that the `project-specific` folder is gitignored (except for `.gitkeep`), meaning these configs are ephemeral or maintained by individual developers/agents locally.
+The engine reads technical parsing boundaries from `agentic/arch-config.json`. This file contains a basic example to get you started - you must configure it with your own project rules and boundaries. Note that the `rules/project-specific` folder is gitignored (except for `.gitkeep`), meaning you can store ephemeral custom rules or configurations there.
 
-**Example `agentic/project-specific/arch-config.json`:**
+**Example `agentic/arch-config.json`:**
 ```json
 {
   "language": "python",
@@ -43,9 +43,10 @@ The engine reads technical parsing boundaries from `agentic/project-specific/arc
 ## 🚨 Guidelines for AI Agents
 
 To ensure the integrity of the architecture engine, the following constraints strictly apply:
-1. **`rules/` is READ-ONLY:** Agents **must never** rename, edit, or touch the contents of this folder once populated.
-2. **`project-specific/` is for Custom Configs:** Used strictly for instructions and JSON config overrides tailored to the local environment.
+1. **`rules/` is READ-ONLY:** Agents **must never** rename, edit, or touch the contents of this folder once populated. Exception: The `rules/project-specific/` folder is explicitly meant for custom instructions.
+2. **`arch-config.json` is for Boundaries:** This file must be configured with your actual architectural rules and boundaries.
 3. **No Artifact Dumping:** None of the above folders are a place to put active session docs, task checklists, or execution plans.
+4. **Reporting Issues:** If you encounter bugs, missing features, or structural issues with the architecture checker itself, create and commit an `ISSUES.md` file next to this `README.md` to document them.
 
 ## Running the Tests
 

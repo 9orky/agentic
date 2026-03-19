@@ -4,12 +4,20 @@ import sys
 import json
 import subprocess
 
+import argparse
+
 def run_tests():
-    # 1. Read config from the dedicated project-specific folder
-    config_path = os.path.join(os.getcwd(), 'project-specific', 'arch-config.json')
+    parser = argparse.ArgumentParser(description="Architecture Rule Checker")
+    parser.add_argument("--project-root", type=str, default=os.getcwd(), help="Path to the project root directory")
+    args = parser.parse_args()
+    
+    project_root = os.path.abspath(args.project_root)
+
+    # 1. Read config from the project root
+    config_path = os.path.join(project_root, 'arch-config.json')
     if not os.path.exists(config_path):
         print(f"Error: Could not find {config_path}")
-        print("Please create 'project-specific/arch-config.json' with your boundaries.")
+        print("Please ensure 'arch-config.json' exists at the root of your project.")
         sys.exit(1)
         
     with open(config_path, 'r', encoding='utf-8') as f:
@@ -31,7 +39,7 @@ def run_tests():
         print(f"Error: Unsupported language '{language}'")
         sys.exit(1)
         
-    cmd = extractor_map[language] + [os.getcwd(), json.dumps(exclusions)]
+    cmd = extractor_map[language] + [project_root, json.dumps(exclusions)]
     
     try:
         # Run extractor and read JSON map from stdout

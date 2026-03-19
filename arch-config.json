@@ -1,0 +1,21 @@
+{
+  "language": "typescript",
+  "exclusions": [
+    "node_modules/",
+    "tests/",
+    "dist/",
+    ".arch-checker/"
+  ],
+  "rules": {
+    "boundaries": [
+      {
+        "source": "src/domain",
+        "disallow": ["src/infrastructure", "src/ui"]
+      },
+      {
+        "source": "src/application",
+        "disallow": ["src/ui"]
+      }
+    ]
+  }
+}

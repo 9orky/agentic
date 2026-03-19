@@ -56,20 +56,31 @@ getAllFiles(targetDir).forEach(file => {
     const classes = [];
     const functions = [];
     
+    function addImport(impPath) {
+        if (impPath.startsWith('.')) {
+            const fileDir = path.dirname(file);
+            const absPath = path.resolve(fileDir, impPath);
+            const relToTarget = path.relative(targetDir, absPath).split(path.sep).join('/');
+            imports.push(relToTarget);
+        } else {
+            imports.push(impPath);
+        }
+    }
+    
     const importRegex = /import\s+.*?\s+from\s+['"](.*?)['"]/g;
     let match;
     while ((match = importRegex.exec(content)) !== null) {
-        imports.push(match[1]);
+        addImport(match[1]);
     }
     
     const dynamicImportRegex = /import\(['"](.*?)['"]\)/g;
     while ((match = dynamicImportRegex.exec(content)) !== null) {
-        imports.push(match[1]);
+        addImport(match[1]);
     }
     
     const requireRegex = /require\(['"](.*?)['"]\)/g;
     while ((match = requireRegex.exec(content)) !== null) {
-        imports.push(match[1]);
+        addImport(match[1]);
     }
     
     const classRegex = /class\s+(\w+)/g;

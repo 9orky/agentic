@@ -38,7 +38,21 @@ def extract(directory, exclusions):
                                 for alias in node.names:
                                     imports.append(alias.name)
                             elif isinstance(node, ast.ImportFrom):
-                                if node.module:
+                                if node.level > 0:
+                                    rel_dir = os.path.dirname(os.path.relpath(path, directory)).replace('\\', '/')
+                                    parts = rel_dir.split('/') if rel_dir and rel_dir != '.' else []
+                                    if node.level > 1:
+                                        parts = parts[:-(node.level - 1)]
+                                    base = ".".join(parts) if parts else ""
+                                    
+                                    if node.module:
+                                        resolved = f"{base}.{node.module}" if base else node.module
+                                        imports.append(resolved)
+                                    else:
+                                        for alias in node.names:
+                                            resolved = f"{base}.{alias.name}" if base else alias.name
+                                            imports.append(resolved)
+                                elif node.module:
                                     imports.append(node.module)
                             elif isinstance(node, ast.ClassDef):
                                 classes.append(node.name)

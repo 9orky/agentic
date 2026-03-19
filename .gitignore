@@ -1,2 +1,2 @@
-project-specific/*
-!project-specific/.gitkeep
+rules/project-specific/*
+!rules/project-specific/.gitkeep
