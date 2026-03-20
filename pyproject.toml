@@ -28,9 +28,8 @@ where = ["src"]
 agentic = [
     "resources/agentic.yaml",
     "resources/rules/*.md",
+    "resources/rules/overrides/.gitkeep",
     "resources/rules/project-specific/.gitkeep",
-    "resources/guide/*.md",
-    "resources/reference/*.md",
     "resources/arch/extractors/*.py",
     "resources/arch/extractors/*.js",
     "resources/arch/extractors/*.php",

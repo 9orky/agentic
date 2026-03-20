@@ -4,30 +4,19 @@ from collections.abc import Iterable
 from importlib.resources import files
 from pathlib import Path
 
-from ..domain.sync_policy import CONFIG_FILE_NAME, SHARED_RESOURCE_DIRECTORIES
+from ..domain.sync_policy import CONFIG_FILE_NAME, CORE_RULE_DOCUMENTS
 from ..ports import ResourceDocument
 
 
 class PackagedWorkspaceResources:
     def iter_shared_documents(self) -> Iterable[ResourceDocument]:
-        resource_root = files("agentic").joinpath("resources")
-        for directory_name in SHARED_RESOURCE_DIRECTORIES:
-            yield from self._walk_directory(
-                resource_root.joinpath(directory_name),
-                prefix=Path(directory_name),
+        rules_root = files("agentic").joinpath("resources", "rules")
+        for document_name in CORE_RULE_DOCUMENTS:
+            yield ResourceDocument(
+                relative_path=Path("rules") / document_name,
+                text=rules_root.joinpath(
+                    document_name).read_text(encoding="utf-8"),
             )
 
     def default_config_text(self) -> str:
         return files("agentic").joinpath("resources", CONFIG_FILE_NAME).read_text(encoding="utf-8")
-
-    def _walk_directory(self, node, *, prefix: Path) -> Iterable[ResourceDocument]:
-        for child in node.iterdir():
-            child_prefix = prefix / child.name
-            if child.is_dir():
-                yield from self._walk_directory(child, prefix=child_prefix)
-                continue
-            if child.is_file():
-                yield ResourceDocument(
-                    relative_path=child_prefix,
-                    text=child.read_text(encoding="utf-8"),
-                )

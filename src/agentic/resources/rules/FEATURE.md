@@ -1,143 +1,110 @@
 # Feature Rules
 
-Use this document to define and protect feature boundaries.
+A feature owns one business capability and one public boundary.
 
-This file is part of the durable `agentic/` collaboration contract, so feature guidance here should capture reusable project understanding rather than one-session tactics.
+This document defines the shared default feature anatomy. It is a constraint, not a preference.
 
-Treat a feature as a set of modules behind one public boundary. Apply `MODULE.md` inside the feature. Use this file for feature-level ownership and dependency rules.
+The public boundary is the externally visible contract of the feature. The public seam is the single entry point to that boundary.
 
-Use this document to make feature-boundary decisions predictable.
+A feature enclosure may grow internally, but it must not spread responsibilities, seams, or coordination outside its boundary.
 
-Use the standard development run from `AGENT.md`.
+## Active Anatomy
 
-This document specializes feature ownership and boundary decisions inside that shared run.
+1. This file defines the default feature anatomy shipped by the package.
+2. A project may replace it through `rules/overrides/FEATURE.md` and any companion files it names.
+3. If a repo-local override defines a different anatomy, that local anatomy governs.
+4. Different local anatomy is not a defect by itself. The requirement is determinism, not sameness across repositories.
+5. A repo-local anatomy must be documented with the same precision as this default: clear structural parts, ownership, dependency direction, public seams, and acceptance checks.
+6. If the code clearly follows a different stable anatomy but the local docs do not define it, stop before structural refactoring and document or confirm that anatomy first.
 
-This document is not complete by itself for internal module structure or refactor execution.
+## Default Shape
 
-Also read:
+1. Keep each feature in its own folder.
+2. Give the feature one public boundary reached through one public seam.
+3. Under the shared default, use exactly these top-level layers: `ui/`, `application/`, `infrastructure/`, and `domain/`.
+4. Under the shared default, do not add sibling root buckets such as `contracts/`, `ports/`, `adapters/`, `services/`, `types/`, or `utils/`.
+5. Internal file names and subfolders may vary, but every file must belong clearly to one owning part of the governing anatomy.
+6. Keep feature-to-feature adaptation inside the owning coordination part. Under the shared default, that part is `application`.
 
-- `MODULE.md` for internal module shape and public entry-point rules
-- `TESTS.md` when verification or test coverage changes
-- `REFACTORING.md` when the feature work is a migration or replacement
-- `PLANNING.md` when the feature work is driven by an approved plan step
+## Default Dependency Direction
 
-Do not treat a missing instruction here as permission to break a relevant module, refactor, or plan rule.
+Under the shared default:
 
-## Core Rules
+1. `ui` may depend only on `application`.
+2. `application` may depend on `domain` and `infrastructure`.
+3. `infrastructure` may depend on `domain`.
+4. `domain` must not depend outward.
 
-1. Expose one primary public feature boundary.
-2. Export only the intended feature boundary from the feature's public entry point.
-3. Do not allow cross-feature deep imports.
-4. Keep internal helper modules out of the public API.
-5. Keep consumer-owned orchestration in the consumer.
-6. Do not re-export a secondary boundary module through the feature's primary public entry point.
+Forbidden examples:
 
-## Feature Execution Focus
+1. `ui -> domain`
+2. `ui -> infrastructure`
+3. `application -> ui`
+4. `infrastructure -> application`
+5. `domain -> application`
+6. `domain -> infrastructure`
 
-During the shared run, focus on these feature-specific checkpoints:
+## Default Ownership
 
-1. confirm the owning feature
-2. confirm the public feature seam
-3. confirm which collaboration stays inside the consumer
-4. isolate unfinished downstream dependencies locally if needed
-5. verify through the feature boundary
+### `domain/`
 
-## Feature As A Set Of Modules
+- business rules and core domain concepts
+- entities, value objects, policies, invariants, and pure transforms
+- business-owned abstractions
+- no outward dependencies
 
-Split feature responsibilities into internal modules as needed.
+### `infrastructure/`
 
-Typical internal modules include:
+- external systems, runtime integrations, persistence, filesystem, network, subprocess, framework, and serialization details
+- implementations of abstractions owned by `domain` or `application`
+- technical-boundary translation
+- may depend on `domain`, but not on `application` or `ui`
 
-- ports
-- adapters
-- services
-- policies
-- models
-- orchestration
-- phases
+### `application/`
 
-Keep those modules internal unless there is a deliberate public reason to expose something through the feature boundary.
+- use cases, orchestration, workflow coordination, and feature-to-feature adaptation
+- translation needed to execute a use case
+- application-owned abstractions for outward capabilities
+- may depend on `domain` and `infrastructure`, but not on `ui`
 
-## Ownership
+### `ui/`
 
-- the contract layer owns caller-facing data shapes
-- the shared domain layer owns shared domain language
-- each feature owns its local internals and models
-- the shared/common layer owns generic helpers only
+- the outermost delivery layer
+- command handlers, controllers, route handlers, presenters, renderers, and request or response mapping
+- input collection, output formatting, and user-facing interaction concerns
+- thin coordination only; business rules and workflow logic do not live here
+- may depend only on `application`
 
-Keep one owner per concept. Do not create a fake universal type layer.
+## Default Placement Rules
 
-If the project has ownership exceptions, document them in `_PROJECT.md`.
+Under the shared default:
 
-## Boundary Rules
+1. Do not create a root-level `contracts` bucket. Put types where their meaning belongs.
+2. Do not create a root-level `ports` bucket. Put abstractions where their reason belongs.
+3. Business abstractions belong in `domain`.
+4. Outward capability abstractions used by use cases belong in `application`.
+5. External-system types belong in `infrastructure`.
+6. Input and output types belong in `ui`.
 
-1. Communicate across features only through the target feature boundary or public entry point.
-2. If another feature needs a capability, expose it through the public feature boundary instead of exporting helpers.
-3. Do not export validators, adapters, registries, resolvers, stages, or similar internal mechanics.
-4. Keep cross-feature adaptation in the consuming feature when practical.
-5. If a downstream feature is unfinished, isolate it behind a local port and stub adapter.
-6. If a feature owns more than one boundary module, import the needed seam from that boundary module directly.
-7. Do not surface a feature's cli seam through `__init__.py` just to shorten imports.
+A repo-local replacement must define equally clear placement rules for its own parts.
 
-If another feature needs a helper instead of a capability, do not export the helper. Either keep the adaptation in the consumer or promote a deliberate capability to the feature boundary.
+## Cross-Feature Rules
 
-## Dependency Rules
-
-1. Keep the dependency graph acyclic.
-2. Do not let lower-level features depend on their consumers.
-3. Let consumers derive artifacts from other feature decisions only when ownership stays with the consumer.
-
-If the project uses a specific layer map or allowed dependency direction, document it in `_PROJECT.md`.
-
-## Ownership Defaults
-
-When feature ownership is unclear, use these defaults:
-
-1. the feature that owns the business invariant owns the decision logic
-2. the consuming feature owns artifacts derived from another feature's output
-3. boundary translation belongs at the consumer side unless the owning feature deliberately exposes a stable external contract
-4. unfinished downstream collaboration should be hidden behind a local port, not solved with deeper imports
-
-If two features could own something, prefer the owner with the narrower stable responsibility.
-
-## Relation To Module Rules
-
-Read `MODULE.md` for:
-
-- file naming patterns
-- one-primary-construct-per-file guidance
-- public entry point rules for module APIs
-- module-boundary rules inside a feature
-
-Use this file for:
-
-- the public feature boundary
-- ownership across features
-- dependency direction between features
-- internal module composition inside one feature
+1. External callers use the feature boundary through its public seam only.
+2. Cross-feature calls go through the target feature boundary, never internal files.
+3. Cross-feature adaptation stays in the owning coordination part. Under the shared default, that part is `application`.
+4. Under the shared default, `domain` must not depend on another feature, including another feature's public types or errors.
+5. Do not export helpers, mappers, validators, or intermediate models from the feature boundary.
+6. Do not let cross-feature pressure collapse the enclosure or move foreign logic into the wrong owner.
 
 ## Acceptance Check
 
-Before accepting a feature change, verify:
-
-1. the owning feature is clear
-2. the public boundary is still the intended feature seam
-3. internal modules remain internal by default
-4. the feature public entry point is minimal
-5. other features do not reach behind the boundary
-6. the implementation follows `MODULE.md`
-
-## Fallback Guidance
-
-When feature progress is blocked by an unfinished neighbor:
-
-1. keep the public feature boundary clean
-2. add a local port in the consumer
-3. use a stub or adapter locally
-4. avoid exporting new helper internals from the neighbor just to unblock work
-
-This keeps work moving without normalizing hacks into the architecture.
-
-If the fallback changes module shape inside the feature, re-check `MODULE.md` before implementing it.
-
-Keep the run shape stable: inspect, define feature seam, implement minimal slice, verify through the boundary.
+1. The feature boundary and public seam are clear and minimal.
+2. When the shared default governs, the feature root contains only the four layer folders and the minimum public seam files.
+3. Every internal file belongs clearly to one owning part of the governing anatomy.
+4. Dependency direction matches the governing anatomy.
+5. Cross-feature work stays in the owning coordination part defined by the governing anatomy.
+6. Callers do not deep-import feature internals.
+7. The implemented shape follows the governing feature rules as a constraint.
+8. The enclosure allows internal growth without spreading ownership, seams, or coordination outside it.
+9. The enclosure produces deterministic ownership, routing, and change placement.

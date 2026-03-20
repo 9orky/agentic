@@ -39,22 +39,43 @@ If the current directory does not already contain an `agentic/` folder, the comm
 1. the bundled shared rules shipped with the package
 2. a starter YAML config file at `agentic/agentic.yaml`
 
-It does not overwrite existing local files.
+It is safe to rerun. Existing local files are preserved instead of overwritten.
 
 After bootstrap, the command prints the next step:
 
 ```bash
-agentic --llm
+agentic llm
 ```
 
 That command prints the handoff prompt for the user's LLM. The intent is:
 
-1. the LLM reads the shared `agentic` rules,
-2. reads the extracted architecture-map contract,
-3. scans the repository,
-4. asks the user to define missing architecture boundaries,
-5. writes project-specific guidance into `agentic/rules/project-specific/`,
-6. and establishes the local `agentic/` folder as the project's SSOT.
+1. the LLM reruns `agentic llm` anchors to recover current collaboration, rule, config, and architecture facts,
+2. scans the repository for task-specific code facts,
+3. asks the user to define missing architecture and rule decisions,
+4. uses `agentic check` for architecture validation and `agentic update` for shared-rule refresh,
+5. writes stable local rule updates into `agentic/rules/overrides/` or `agentic/rules/project-specific/`,
+6. and treats the local `agentic/` folder as the project's durable collaboration surface.
+
+## Deterministic Usage Checklist
+
+Use this checklist from first bootstrap through steady-state use:
+
+1. Bootstrap the local collaboration surface with `agentic` if `agentic/` does not exist yet or is missing expected shared files.
+2. Start each new LLM session with `agentic llm`.
+3. At the beginning of each request, rerun the relevant fact anchors:
+  - `agentic llm bootstrap`
+  - `agentic llm rules`
+  - `agentic llm config`
+  - `agentic llm architecture`
+4. Treat those anchors as the source of current `agentic` facts instead of trusting stale prompt text, old chat context, or internal package layout.
+5. If rules or architecture are still underspecified, run a first-configuration interview with the user before making boundary or ownership decisions.
+6. Record durable decisions only in the local contract:
+  - `agentic/agentic.yaml` for config, exclusions, and boundaries
+  - `agentic/rules/overrides/` for repo-local replacements of shared rules
+  - `agentic/rules/project-specific/` for new repo-local rules
+7. After meaningful rule, config, or code changes, rerun the relevant anchors and run `agentic check`.
+8. Use `agentic update` only to refresh packaged shared docs, then rerun anchors to recover fresh facts.
+9. Keep `agentic/` readable for future sessions: no scratchpads, temporary logs, or disposable notes.
 
 ## Communication Model
 
@@ -62,12 +83,12 @@ The local `agentic/` folder is the shared contract between the user and the user
 
 In practice that means:
 
-1. bundled docs under `agentic/rules/` define stable rails,
-2. `agentic/guide/` contains operational usage docs,
-3. `agentic/reference/` contains technical reference docs,
+1. bundled core docs under `agentic/rules/*.md` define stable rails,
+2. `agentic/rules/overrides/` records repo-local updates to those core docs,
+3. `agentic/rules/project-specific/` records new repo-local rules future runs must inherit,
 4. `agentic/agentic.yaml` records the user-editable architecture agreement,
-5. `agentic/rules/project-specific/` records repo-specific clarifications future LLM runs must inherit,
-6. language-specific extractors build one common architecture map shape so checks and LLM reasoning operate on the same structure.
+5. language-specific extractors build one common architecture map shape so checks and LLM reasoning operate on the same structure,
+6. the `agentic llm` anchor commands are the stable way to recover current collaboration, rule, config, and architecture facts.
 
 `agentic/` is not a scratchpad. It is the durable surface that future sessions should be able to read without hidden context.
 
@@ -79,19 +100,14 @@ After running `agentic` in a project, the local structure looks like this:
 my-project/
 ├── agentic/
 │   ├── agentic.yaml
-│   ├── guide/
-│   │   ├── COMMANDS.md
-│   │   └── WORKFLOW.md
-│   ├── reference/
-│   │   └── ARCHITECTURE_MAP.md
 │   └── rules/
 │       ├── AGENT.md
 │       ├── FEATURE.md
 │       ├── MODULE.md
-│       ├── PLAN_STEP_TEMPLATE.md
 │       ├── PLANNING.md
 │       ├── REFACTORING.md
 │       ├── TESTS.md
+│       ├── overrides/
 │       └── project-specific/
 └── src/
 ```
@@ -134,7 +150,7 @@ rules:
 
 Config is validated with Pydantic when `agentic check` runs.
 
-Rule evaluation does not read source files directly in the checker. Each language extractor emits one shared architecture-map shape, documented in `agentic/reference/ARCHITECTURE_MAP.md`, and the checker evaluates boundaries against that normalized data.
+Rule evaluation does not read source files directly in the checker. Each language extractor emits one shared architecture-map shape keyed by repo-relative file path. Each entry contains `imports`, `classes`, and `functions`, and the checker evaluates boundaries against that normalized data.
 
 Boundary rules support glob patterns.
 
@@ -157,7 +173,14 @@ Supported config locations, in order:
 
 ## Commands
 
-The bootstrapped `agentic/guide/COMMANDS.md` file is the short command reference intended for future human and LLM runs.
+Use `agentic help` or `agentic --help` to discover the command surface in a target project.
+
+The stable top-level workflow is:
+
+1. `agentic` bootstraps or refreshes the local collaboration surface safely.
+2. `agentic llm` prints the default downstream handoff contract.
+3. `agentic check` validates the configured architecture boundaries.
+4. `agentic update` refreshes packaged shared rules.
 
 Bootstrap the local folder:
 
@@ -181,7 +204,17 @@ agentic update --project-root /path/to/project
 Print the LLM handoff prompt:
 
 ```bash
-agentic --llm
+agentic llm
+```
+
+Re-query current agentic facts through the implemented anchors:
+
+```bash
+agentic llm bootstrap
+agentic llm rules
+agentic llm config
+agentic llm architecture
+agentic llm update
 ```
 
 Print the command summary:
@@ -220,14 +253,24 @@ The generated `agentic/` folder is meant to become a long-lived collaboration bo
 
 The expected operating model is:
 
-1. shared docs under `agentic/rules/` stay stable,
-2. `agentic/guide/` documents how to operate the local contract during a session,
-3. `agentic/reference/ARCHITECTURE_MAP.md` explains the shared extracted schema the checker and LLMs rely on,
-4. project-specific rules are added under `agentic/rules/project-specific/`,
-5. the architecture config in `agentic/agentic.yaml` defines technical boundaries,
-6. future LLM runs read the guide docs first and then use `agentic/rules/AGENT.md` for coding rules.
+1. shared core docs under `agentic/rules/*.md` stay stable and may be refreshed by `agentic update`,
+2. local updates to those core docs go under `agentic/rules/overrides/`,
+3. new repo-specific rules go under `agentic/rules/project-specific/`,
+4. the architecture config in `agentic/agentic.yaml` defines technical boundaries,
+5. `agentic llm` owns the LLM-facing command family and the anchors under it are the stable fact-recovery surface,
+6. future LLM sessions begin with `agentic llm` and rerun the relevant anchors instead of trusting stale prompt text,
+7. first configuration is an interactive conversation with the user about boundaries, exclusions, ownership, and update habits,
+8. `agentic check` is the architecture validation boundary and `agentic update` is the shared-rule refresh boundary.
 
-When a repo-specific clarification is needed, record it in `project-specific/`.
+Operationally, the safest default is:
+
+1. `agentic` ensures the local collaboration surface exists.
+2. `agentic llm` and its anchors recover the current contract at the start of each request.
+3. the user and LLM close missing decisions through a first-configuration interview.
+4. durable decisions are written back into `agentic/`.
+5. `agentic check` validates the result.
+
+When a repo-specific clarification is needed, record it in the smallest applicable extension folder.
 
 When a shared bundled rule is wrong or incomplete, keep the local clarification explicit and note that the package itself should be improved upstream rather than silently mutating the shared rail for one repo.
 

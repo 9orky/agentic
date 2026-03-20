@@ -19,11 +19,21 @@ class BootstrapProjectTests(unittest.TestCase):
             self.assertTrue((project_root / "agentic" /
                             "rules" / "AGENT.md").exists())
             self.assertTrue((project_root / "agentic" /
-                            "guide" / "COMMANDS.md").exists())
+                            "rules" / "FEATURE.md").exists())
             self.assertTrue((project_root / "agentic" /
-                            "guide" / "WORKFLOW.md").exists())
+                            "rules" / "MODULE.md").exists())
             self.assertTrue((project_root / "agentic" /
-                            "reference" / "ARCHITECTURE_MAP.md").exists())
+                            "rules" / "PLANNING.md").exists())
+            self.assertTrue((project_root / "agentic" /
+                            "rules" / "REFACTORING.md").exists())
+            self.assertTrue((project_root / "agentic" /
+                            "rules" / "TESTS.md").exists())
+            self.assertTrue((project_root / "agentic" /
+                            "rules" / "overrides").is_dir())
+            self.assertTrue((project_root / "agentic" /
+                            "rules" / "project-specific").is_dir())
+            self.assertFalse((project_root / "agentic" / "guide").exists())
+            self.assertFalse((project_root / "agentic" / "reference").exists())
 
     def test_bootstrap_preserves_existing_files(self) -> None:
         with TemporaryDirectory() as temp_dir:
@@ -49,7 +59,10 @@ class BootstrapProjectTests(unittest.TestCase):
             config_path = project_root / "agentic" / "agentic.yaml"
             project_specific_path = project_root / "agentic" / \
                 "rules" / "project-specific" / "LOCAL.md"
+            override_path = project_root / "agentic" / \
+                "rules" / "overrides" / "TESTS.md"
             project_specific_path.write_text("local note\n", encoding="utf-8")
+            override_path.write_text("local override\n", encoding="utf-8")
 
             shared_doc_path.write_text(
                 "locally modified shared doc\n", encoding="utf-8")
@@ -68,6 +81,8 @@ class BootstrapProjectTests(unittest.TestCase):
                 encoding="utf-8"), "language: php\n")
             self.assertEqual(project_specific_path.read_text(
                 encoding="utf-8"), "local note\n")
+            self.assertEqual(override_path.read_text(
+                encoding="utf-8"), "local override\n")
 
     def test_update_marks_unchanged_shared_docs_as_updated(self) -> None:
         with TemporaryDirectory() as temp_dir:

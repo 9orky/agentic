@@ -1,150 +1,45 @@
 # Module Rules
 
-Use this document to shape directories and files as modules.
+A module has one public boundary reached through one public seam.
 
-This file is part of the durable `agentic/` collaboration contract, so module guidance here should be readable and stable for future human and LLM runs.
+Inside a feature, module boundaries support the owning enclosure. They allow internal growth and composition, but they do not replace or widen the governing feature anatomy.
 
-Treat a module as a directory, package, or equivalent boundary by default. Treat a feature as a set of modules. Use `FEATURE.md` for feature-level rules and this file for module-level structure.
+The governing feature anatomy is the shared default in `FEATURE.md` unless a repo-local override replaces it.
 
-Use this document to make module decisions predictable.
+## Form
 
-Use the standard development run from `AGENT.md`.
+1. Use a single file while the module is simple.
+2. Convert the module to a folder only when private composition is needed.
+3. A folder module is composition behind one public seam.
+4. Do not create a folder before there is private structure to hide.
 
-This document specializes module decisions inside that shared run.
+## Public API
 
-This document is not complete by itself when the module belongs to a feature or is being refactored.
+1. Expose the minimum public API.
+2. Widen it only when multiple external consumers need it or an approved plan requires it.
+3. Do not widen it to avoid local wiring work.
+4. Callers import through the public seam only.
+5. Do not use a module API to bypass or dilute the owning feature boundary.
 
-Also read:
+## Internals
 
-- `FEATURE.md` when the module change affects a feature boundary or cross-feature collaboration
-- `TESTS.md` when verification or test coverage changes
-- `REFACTORING.md` when the module change is part of migration, replacement, or structural cleanup
-- `PLANNING.md` when the module change is governed by an approved plan step
+1. Keep helpers, policies, services, and intermediate models private.
+2. Split internal parts by responsibility.
+3. Deep imports into internal files are forbidden.
 
-Do not treat a missing instruction here as permission to break a relevant feature, refactor, or plan rule.
+## Dependencies
 
-## Core Rules
-
-1. Treat every directory, package, or equivalent container as a module boundary.
-2. Keep the public API minimal.
-3. Publish the module API through the module's public entry point.
-4. Do not import from behind another module's public entry point.
-5. Keep helpers, policies, services, and models inside the owning module.
-
-## Module Execution Focus
-
-During the shared run, focus on these module-specific checkpoints:
-
-1. confirm the owning module boundary
-2. confirm the intended public API in the module's public entry point
-3. confirm which symbols stay internal
-4. make the smallest structural change that satisfies the task
-5. verify that no caller needs a deep import after the change
-
-## Ownership Defaults
-
-When ownership is unclear, use these defaults:
-
-1. the module that defines the policy owns the policy logic
-2. the module that defines the public contract owns the boundary mapping for that contract
-3. the consumer owns derived artifacts created from another module's output
-4. shared/common code belongs in a shared location only if it is truly generic and not feature-specific
-
-If ownership is still ambiguous, prefer the narrower local owner over a broader shared location.
-
-## File Naming Patterns
-
-Use descriptive file and directory names that match the project's naming convention.
-
-Use these role-based naming patterns by default when the stack supports them:
-
-- the project's standard public entry file for the module public API
-- `something-feature` for a feature boundary
-- `something-service` for an internal service
-- `something-adapter` for an adapter
-- `something-validator` for validation logic
-- `something-policy` for policy logic
-- `something-types` only when a dedicated type or interface file is justified
-
-Choose names that describe responsibility. Do not use vague technical filler names.
-
-## One Primary Construct Per File
-
-Keep one primary construct per file by default.
-
-Break this rule only for a tiny helper that has no independent value outside the file.
-
-Do not create extra files only to satisfy the rule mechanically. Cohesion is more important than ceremony.
-
-## Public API Rule
-
-Expose the smallest possible public surface through the module's public entry point.
-
-That means:
-
-- export only what other modules may depend on
-- do not export helpers for convenience
-- do not export intermediate models unless they are deliberate public contract
-- do not re-export another boundary module's public seam through a different entry point just to shorten imports
-- keep construction details internal when the module can own them
-
-If unsure whether something should be public, keep it internal first.
-
-Do not widen the public API for local convenience.
-
-## Placeholder Guidance
-
-If a module needs a placeholder during a refactor, treat it as a temporary file or function that explains what final wiring remains to be done.
-
-That means:
-
-- keep the placeholder inside the owning module by default
-- document the intended final seam or wiring path clearly in the placeholder itself
-- do not export a placeholder broadly unless preparing the deliberate public seam is the point of the step
-- replace the placeholder once the real wiring exists instead of layering more logic into it
-
-## Caller And Orchestration Rule
-
-Keep caller-owned orchestration in the shared parent or root module.
-
-Do not force a child module to expose multiple internals so a parent can assemble them manually.
-
-Prefer one child-owned entry seam.
-
-If the child cannot yet own a clean seam, keep orchestration in the caller temporarily and keep the child internals private.
-
-## Dependency Rule
-
-Keep module dependencies directional and readable.
-
-Do not introduce:
-
-- deep imports into another module
-- circular dependencies
-- shared dumping-ground modules for feature-specific code
-- leaked child-module assembly details in parent modules
+1. Dependencies stay directional.
+2. Circular dependencies are forbidden.
+3. A parent may depend on a child module's public seam only.
+4. A child must not depend on its consumer.
+5. Inside a feature, module dependencies must also respect the dependency direction of the governing feature anatomy.
 
 ## Acceptance Check
 
-Before accepting a module shape, verify:
-
-1. the module boundary has a clear ownership boundary
-2. the public entry point is minimal
-3. every public export is intentional
-4. primary constructs live in their own files by default
-5. other modules do not reach behind the public entry point
-
-## Fallback Guidance
-
-When a module rule and local delivery pressure conflict:
-
-1. preserve the module boundary
-2. avoid deep imports
-3. choose the smallest internal change that works
-4. do not add fake public seams just to unblock a caller
-
-If progress still requires a public contract change, stop and ask.
-
-If the module change also affects feature ownership or refactor sequencing, resolve that through `FEATURE.md` or `REFACTORING.md` before proceeding.
-
-Keep the run shape stable: inspect, define module seam, implement minimal slice, verify the public entry point and boundaries.
+1. The module uses the simplest valid form.
+2. The public boundary and public seam are clear.
+3. Public API is minimal.
+4. Internal files stay private.
+5. No caller needs a deep import.
+6. The module boundary reinforces the governing feature anatomy and owning enclosure by containing growth instead of spreading it.

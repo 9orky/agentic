@@ -3,6 +3,16 @@ from __future__ import annotations
 from pathlib import Path
 
 
-SHARED_RESOURCE_DIRECTORIES = ("rules", "guide", "reference")
-PROJECT_SPECIFIC_DIRECTORY = Path("rules") / "project-specific"
+CORE_RULE_DOCUMENTS = (
+    "AGENT.md",
+    "FEATURE.md",
+    "MODULE.md",
+    "PLANNING.md",
+    "REFACTORING.md",
+    "TESTS.md",
+)
+LOCAL_EXTENSION_DIRECTORIES = (
+    Path("rules") / "overrides",
+    Path("rules") / "project-specific",
+)
 CONFIG_FILE_NAME = "agentic.yaml"

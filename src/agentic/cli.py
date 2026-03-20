@@ -9,15 +9,11 @@ from .features.workspace_contract.cli import workspace_contract_cli
 
 
 @click.group(name="agentic", invoke_without_command=True)
-@click.option("--llm", is_flag=True, help="Print the handoff prompt for the user's LLM")
 @click.pass_context
-def agentic_cli(ctx: click.Context, llm: bool) -> int | None:
-    """Compose feature-owned CLI apps for agentic."""
+def agentic_cli(ctx: click.Context) -> int | None:
+    """Bootstrap a project's agentic surface, hand it to an LLM, validate architecture, and refresh shared rules."""
     if ctx.invoked_subcommand is not None:
         return None
-
-    if llm:
-        return ctx.invoke(agentic_cli.commands["llm"], project_root=".")
 
     return ctx.invoke(agentic_cli.commands["init"], project_root=".")
 

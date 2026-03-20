@@ -2,8 +2,9 @@
 # agentic/ communication boundary. Humans and LLMs should both treat it as
 # durable project state, not temporary prompt context.
 #
-# The checker evaluates these rules against the common architecture-map schema
-# documented in agentic/reference/ARCHITECTURE_MAP.md.
+# The checker evaluates these rules against a normalized architecture map keyed
+# by repo-relative file path. Each entry contains imports, classes, and
+# functions.
 
 language: python
 

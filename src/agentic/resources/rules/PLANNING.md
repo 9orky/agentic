@@ -2,202 +2,86 @@
 
 Use this document to create, approve, and expand plans.
 
-This file is part of the durable `agentic/` collaboration contract, so approved plans should survive beyond one LLM session and remain understandable to the next one.
+## Flow
 
-Use the standard development run from `AGENT.md`.
+1. Produce one high-level plan for approval.
+2. Do not create active step files before that plan is accepted.
+3. After approval, split the plan into zero-padded `PLAN_STEP_XX.md` files.
+4. Replace or remove stale step files from older planning passes.
 
-This document specializes the planning part of that run. It does not replace the shared run shape.
+## High-Level Plan
 
-This document is not sufficient by itself for architecture or boundary decisions.
-
-If a plan touches module structure, feature boundaries, or refactor strategy, also read the matching scoped document before executing:
-
-- `MODULE.md` for module structure
-- `FEATURE.md` for feature ownership and boundaries
-- `TESTS.md` for verification strategy when the plan defines tests
-- `REFACTORING.md` for migration and replacement work
-
-Do not treat missing architecture detail here as permission to improvise against those documents.
-
-Planning always has two phases:
-
-1. produce one high-level plan for approval
-2. only after that plan is accepted, split it into `PLAN_STEP_X.md` files
-
-Do not create, keep, or treat `PLAN_STEP_X.md` files as active execution plans before the high-level plan is accepted.
-
-Treat the approved high-level plan as the contract. A step plan may change internally, but it must not silently change approved inputs, outputs, or acceptance intent.
-
-## Planning Goal
-
-Make the next correct action obvious.
-
-Make repeated agent runs similar by making the execution order, boundaries, and verification path explicit before coding starts.
-
-The plan should remove uncertainty about:
-
-- what is being changed
-- what must stay stable
-- what success looks like
-- when the agent may adapt internally without asking
-- when the agent must stop and ask
-
-## Planning Flow
-
-### 1. Produce The High-Level Plan First
-
-Start with one reviewable high-level plan.
+Keep the plan at the boundary and contract level.
 
 Include:
 
 - objective
 - scope
+- active feature anatomy for the current project
+- owning enclosure, public boundary, and public seam
+- affected features and the owning part of each touched responsibility
+- intended dependency direction across touched parts
 - assumptions
 - major phases or steps
 - expected inputs and outputs for each step
 - acceptance criteria
 - known risks or open questions
+- upstream and downstream dependencies when they affect ownership or sequencing
 
-Do not start with file-level implementation detail.
+Resolve material ambiguity with the user before locking the plan.
 
-### 2. Get Approval Before Expansion
+Do not leave placement implicit. If a touched responsibility cannot be placed clearly in the governing feature anatomy, the plan is not ready.
 
-Present the high-level plan for acceptance.
+If the project clearly follows a different anatomy from the shared default and the local docs do not define it, the first plan outcome is to document or confirm that anatomy before structural refactoring.
 
-Do not treat any `PLAN_STEP_X.md` file as an active execution plan until the high-level plan is accepted.
+## Step Contract Rules
 
-**Scratchpad Protocol**: Use temporary scratchpads (like `/tmp/` files or the agent's internal artifact systems) to draft architectures and perform exploratory debugging. Do not write premature implementation details into `PLAN_STEP_X.md` until the approach is validated.
+1. Preserve approved inputs, outputs, and acceptance criteria.
+2. Make each step end to end, verifiable, and narrow enough to execute safely.
+3. Name owner, enclosure, public boundary, public seam, scope, and out-of-scope area explicitly.
+4. Name the owning part of each touched responsibility explicitly.
+5. State the allowed dependency direction for the touched parts explicitly.
+6. End each step file with a `Files Tree` section.
+7. In the `Files Tree`, annotate each file with its owning part.
+8. If the step moves code between structural parts, state the intended source and target ownership.
+9. Under the shared default, do not preserve or introduce root buckets such as `contracts`, `ports`, `adapters`, `services`, `types`, or `utils`.
+10. Let later steps depend on earlier outputs, but not redefine earlier contracts.
+11. Internal sequencing and helper extraction are fine while the contract stays intact and ownership stays explicit.
+12. Revise the plan before changing scope, ownership, enclosure boundaries, structural ownership, dependency direction, public contracts, or acceptance criteria.
+13. Cross-boundary fixes require a plan amendment or explicit approval.
 
-If step files already exist from an older planning pass, replace or remove them until the new high-level plan is accepted.
+## Step File Template
 
-If scope changes materially, update the high-level plan before changing step contracts.
+Required sections:
 
-### 3. Split The Plan Into Step Files
+- `Goal`
+- `Inputs`
+- `Outputs`
+- `Scope`
+- `Out of Scope`
+- `Constraints`
+- `Layer Ownership`
+- `Dependency Direction`
+- `Execution Order`
+- `Allowed Adaptations`
+- `Stop And Ask If`
+- `Implementation Notes`
+- `Decision Log`
+- `Verification`
+- `Completion Criteria`
+- `Handoff Notes`
+- `Files Tree`
 
-After approval, create step documents such as:
-
-- `PLAN_STEP_01.md`
-- `PLAN_STEP_02.md`
-- `PLAN_STEP_03.md`
-
-Use zero-padded numbering when order matters.
-
-Make every step independent and complete.
-
-Every step file must define:
-
-- why the step exists
-- what inputs it consumes
-- what outputs it produces
-- what constraints it must respect
-- what module tree it introduces or changes
-- what public API signatures are exposed at module or feature boundaries
-- what boundaries must remain private
-- how success is verified
-- what public seam each verification method uses when tests are involved
-
-Use `PLAN_STEP_TEMPLATE.md` for the file shape.
-
-### 4. Preserve Stable Step Contracts
-
-Keep each step contract stable:
-
-- declared input data stays the same
-- declared output data stays the same
-- declared acceptance result stays the same
-
-You may change the internal method while executing the step.
-
-Allowed internal changes:
-
-- reorder files or subtasks
-- extract helpers
-- change internal sequencing
-- replace an internal adapter or service with a better one
-
-Do not do the following without revising the parent plan:
-
-- change required input data
-- change promised output data
-- move responsibilities across step boundaries in a way that changes the approved flow
-- silently broaden step scope
-
-### 5. Adaptation Without Contract Drift
-
-Allow the executing agent to adjust internals when the step contract stays intact.
-
-Allowed without re-approval:
-
-- reorder implementation work inside the step
-- add or remove internal helpers
-- replace an internal adapter, service, or local abstraction
-- narrow a technical tactic that was too broad as long as the promised outputs stay the same
-
-Do not require re-approval for harmless internal cleanup. Over-constraining the step encourages hacks.
-
-Require plan revision before proceeding when any of these would change:
-
-- declared scope
-- ownership boundary
-- public input or output contract
-- acceptance criteria
-
-## Required Step Sections
-
-Every `PLAN_STEP_X.md` must include:
-
-1. `Goal`
-2. `Inputs`
-3. `Outputs`
-4. `Module Tree`
-5. `Scope`
-6. `Out of Scope`
-7. `Constraints`
-8. `Implementation Notes`
-9. `Verification`
-10. `Completion Criteria`
-11. `Handoff Notes`
-
-## Module Tree Requirement
-
-Every step must include a module tree when the step creates, moves, removes, or reshapes code structure.
-
-That tree must show:
-
-- the relevant directories, packages, or modules in scope
-- the intended public seams
-- exposed public API signatures at those seams
-- boundaries that must stay internal
-
-The goal is to make structure explicit before implementation starts.
-
-Do not leave the tree implicit when the step changes architecture, module shape, or feature collaboration.
-
-When a step does not change structure, the module tree may be brief, but it should still confirm the unchanged public boundary the step relies on.
-
-## Planning Rules
-
-1. Make every step independently understandable.
-2. Make every step verifiable.
-3. Preserve the approved input and output contract for every step.
-4. Keep each step narrow enough to execute safely and complete enough to be meaningful.
-5. Let later steps depend on earlier outputs, but do not let them redefine earlier contracts.
-6. If a step reveals a design mistake, revise the high-level plan before changing the step contract.
-7. Write the step so the agent can continue without inventing disposable scaffolding.
-8. Prefer explicit fallback behavior over vague “figure it out later” instructions.
-9. Write steps so different agents would execute them in roughly the same order.
-10. State the public seam, private boundaries, and validation path explicitly enough to reduce run-to-run drift.
-11. Do not let a plan require verification through private seams.
+`Files Tree` must be the final section. Keep it concise and include only relevant signatures, owning parts, and short notes.
 
 ## Guidance
 
-- prefer stable step boundaries over clever sequencing
-- keep plan files focused on execution intent, not speculative implementation detail
-- when the task touches architecture, align the plan with `FEATURE.md`, `MODULE.md`, and `REFACTORING.md`
-- when a step is complete, make sure its output is usable by the next step without reinterpretation
-- state the allowed adaptation space so the agent does not freeze on local implementation details
-- state stop-and-ask conditions only for contract, scope, or ownership changes
-- if the plan leaves a structural detail unspecified, resolve it through the relevant scoped document instead of inventing a local exception
-- use the module tree to make public API exposure and private boundaries visible before code changes start
-- structure the step so execution naturally follows: inspect, define target, implement, verify
-- describe verification through intended boundaries, and route test-specific rules to `TESTS.md`
+1. Prefer stable step boundaries over clever sequencing.
+2. Keep plan files focused on execution intent, not speculative detail.
+3. Align architecture-sensitive plans with `FEATURE.md`, `MODULE.md`, and `REFACTORING.md`.
+4. Use `FEATURE.md` as the default source of truth unless a repo-local override replaces it.
+5. Resolve file placement during planning, not during implementation.
+6. If a file or type does not fit clearly in one owning part, stop and tighten the plan before coding.
+7. Make each completed step usable by the next step without reinterpretation.
+8. Once `Files Tree` captures the involved files, owning parts, signatures, and short notes, remove repeated file-path and boundary prose unless it adds new contract information.
+9. Plan around preserving or strengthening the owning enclosure so the feature may grow internally without spreading responsibilities, seams, or coordination outside it.
