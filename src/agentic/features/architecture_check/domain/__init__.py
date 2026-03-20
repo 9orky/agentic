@@ -1,0 +1,1 @@
+"""Internal domain policy for the architecture_check feature."""

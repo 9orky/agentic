@@ -1,5 +1,10 @@
-rules/project-specific/*
-!rules/project-specific/.gitkeep
+# Local development artifacts
+.venv/
+build/
+dist/
+*.egg-info/
+__pycache__/
+.pytest_cache/
 
-# Ignore instance-specific architectural configuration
-arch-config.json
+# Bootstrapped project-local agentic folder
+/agentic/

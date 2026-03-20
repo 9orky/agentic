@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentic"
+version = "0.1.0"
+description = "Bootstrap and run project-local architecture rules for humans and LLMs."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "click>=8.1",
+    "pydantic>=2.8",
+    "PyYAML>=6.0",
+]
+
+[project.scripts]
+agentic = "agentic.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+agentic = [
+    "resources/agentic.yaml",
+    "resources/rules/*.md",
+    "resources/rules/project-specific/.gitkeep",
+    "resources/guide/*.md",
+    "resources/reference/*.md",
+    "resources/arch/extractors/*.py",
+    "resources/arch/extractors/*.js",
+    "resources/arch/extractors/*.php",
+]

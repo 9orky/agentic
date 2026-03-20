@@ -1,0 +1,31 @@
+# This file is the user-editable architecture agreement inside the local
+# agentic/ communication boundary. Humans and LLMs should both treat it as
+# durable project state, not temporary prompt context.
+#
+# The checker evaluates these rules against the common architecture-map schema
+# documented in agentic/reference/ARCHITECTURE_MAP.md.
+
+language: python
+
+exclusions:
+  - tests/**
+  - node_modules/**
+  - dist/**
+  - build/**
+  - .venv/**
+  - agentic/**
+
+rules:
+  boundaries:
+    - source: src/domain
+      disallow:
+        - src/infra
+        - src/ui
+
+    # Example for scalable feature isolation:
+    # - source: src/features/*
+    #   disallow:
+    #     - src/features/*
+    #   allow_same_match: true
+    #   allow:
+    #     - src/features/*
