@@ -6,7 +6,7 @@ from ..adapters.filesystem import LocalWorkspaceFilesystem
 from ..contracts import BootstrapError
 from ..adapters.resources import PackagedWorkspaceResources
 from ..contracts import SyncResult, WorkspaceContractSummary
-from ..domain.sync_policy import CONFIG_FILE_NAME, CORE_RULE_DOCUMENTS, LOCAL_EXTENSION_DIRECTORIES
+from ..domain.sync_policy import CONFIG_FILE_NAME, LOCAL_EXTENSION_DIRECTORIES, SHARED_RULE_PATHS
 from ..ports import WorkspaceFilesystem, WorkspaceResources
 
 
@@ -47,8 +47,8 @@ def describe_workspace_contract(project_root: Path) -> WorkspaceContractSummary:
     shared_rule_paths = []
     missing_shared_rule_paths = []
 
-    for document_name in CORE_RULE_DOCUMENTS:
-        document_path = target_dir / "rules" / document_name
+    for relative_rule_path in SHARED_RULE_PATHS:
+        document_path = target_dir / "rules" / relative_rule_path
         if document_path.exists():
             shared_rule_paths.append(document_path)
         else:

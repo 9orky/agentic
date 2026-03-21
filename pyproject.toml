@@ -27,7 +27,15 @@ where = ["src"]
 [tool.setuptools.package-data]
 agentic = [
     "resources/agentic.yaml",
-    "resources/rules/*.md",
+    "resources/README.md",
+    "resources/rules/AGENT.md",
+    "resources/rules/feature/*.md",
+    "resources/rules/feature/layers/*.md",
+    "resources/rules/module/*.md",
+    "resources/rules/planning/*.md",
+    "resources/rules/planning/phases/*.md",
+    "resources/rules/refactoring/*.md",
+    "resources/rules/tests/*.md",
     "resources/rules/overrides/.gitkeep",
     "resources/rules/project-specific/.gitkeep",
     "resources/arch/extractors/*.py",

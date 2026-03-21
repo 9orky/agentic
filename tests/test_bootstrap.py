@@ -6,6 +6,22 @@ import unittest
 from agentic.features.workspace_contract import bootstrap_project, update_project
 
 
+EXPECTED_SHARED_RULE_PATHS = (
+    Path("rules") / "AGENT.md",
+    Path("rules") / "feature" / "FEATURE.md",
+    Path("rules") / "feature" / "layers" / "DOMAIN.md",
+    Path("rules") / "feature" / "layers" / "INFRASTRUCTURE.md",
+    Path("rules") / "feature" / "layers" / "APPLICATION.md",
+    Path("rules") / "feature" / "layers" / "UI.md",
+    Path("rules") / "module" / "MODULE.md",
+    Path("rules") / "planning" / "PLANNING.md",
+    Path("rules") / "planning" / "phases" / "BIG_PICTURE.md",
+    Path("rules") / "planning" / "phases" / "STEPS.md",
+    Path("rules") / "refactoring" / "REFACTORING.md",
+    Path("rules") / "tests" / "TESTS.md",
+)
+
+
 class BootstrapProjectTests(unittest.TestCase):
     def test_bootstrap_creates_local_agentic_folder(self) -> None:
         with TemporaryDirectory() as temp_dir:
@@ -16,18 +32,9 @@ class BootstrapProjectTests(unittest.TestCase):
             self.assertTrue(result.created_dir)
             self.assertTrue(
                 (project_root / "agentic" / "agentic.yaml").exists())
-            self.assertTrue((project_root / "agentic" /
-                            "rules" / "AGENT.md").exists())
-            self.assertTrue((project_root / "agentic" /
-                            "rules" / "FEATURE.md").exists())
-            self.assertTrue((project_root / "agentic" /
-                            "rules" / "MODULE.md").exists())
-            self.assertTrue((project_root / "agentic" /
-                            "rules" / "PLANNING.md").exists())
-            self.assertTrue((project_root / "agentic" /
-                            "rules" / "REFACTORING.md").exists())
-            self.assertTrue((project_root / "agentic" /
-                            "rules" / "TESTS.md").exists())
+            for relative_path in EXPECTED_SHARED_RULE_PATHS:
+                self.assertTrue(
+                    (project_root / "agentic" / relative_path).exists())
             self.assertTrue((project_root / "agentic" /
                             "rules" / "overrides").is_dir())
             self.assertTrue((project_root / "agentic" /

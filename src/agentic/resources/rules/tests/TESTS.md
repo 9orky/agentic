@@ -2,7 +2,7 @@
 
 Use this document to define test strategy, scope, helpers, fixtures, and assertions.
 
-Use the public boundary and public seam defined by the governing feature anatomy for the current project.
+Read the governing feature or module bootstrap file first when the test needs architecture-specific placement context.
 
 ## Default Strategy
 
@@ -20,7 +20,6 @@ Use the public boundary and public seam defined by the governing feature anatomy
 4. If something is hard to test through the public seam, fix the design or choose the correct seam.
 5. Use owner-defined contracts and shared domain names in fixtures instead of redefining parallel local types.
 6. Do not weaken an enclosure in tests just to make internal behavior easier to reach.
-7. Do not use tests to force the shared default anatomy onto a project that documents a different local anatomy.
 
 ## Test Shape
 
@@ -32,19 +31,9 @@ Use the public boundary and public seam defined by the governing feature anatomy
 
 ## Helpers
 
-1. Treat helper design as part of the test suite.
-2. Keep helpers local to the test area they support.
-3. Name helpers by domain intent, not testing mechanics.
-4. Use helpers to remove setup noise, not hide behavior.
-5. Do not create a generic dumping ground of global test utilities for local needs.
-
-## Failure Rules
-
-1. Test expected failures explicitly.
-2. Assert the intended error, message, or failure shape instead of any generic failure.
-3. Do not hide expected failures behind broad catch blocks.
-4. If the test needs a production backdoor, redesign the seam or the test approach.
-5. Follow the `AGENT.md` circuit-breaker rule when the same boundary or tactic fails twice.
+1. Keep helpers local to the test area they support.
+2. Name helpers by domain intent, not testing mechanics.
+3. Use helpers to remove setup noise, not hide behavior.
 
 ## Acceptance Check
 
@@ -52,6 +41,4 @@ Use the public boundary and public seam defined by the governing feature anatomy
 2. The public boundary under test is named and intentional.
 3. No test-only production seam was added.
 4. Helpers are local and keep tests readable.
-5. Fixtures use owner-defined contracts and domain names.
-6. Assertions prove behavior, not implementation trivia.
-7. The test approach preserves the governing feature anatomy and owning enclosure and does not normalize spreading beyond it.
+5. Assertions prove behavior, not implementation trivia.

@@ -2,9 +2,7 @@
 
 A module has one public boundary reached through one public seam.
 
-Inside a feature, module boundaries support the owning enclosure. They allow internal growth and composition, but they do not replace or widen the governing feature anatomy.
-
-The governing feature anatomy is the shared default in `FEATURE.md` unless a repo-local override replaces it.
+Use this file for module-shape work after the governing feature or task bootstrap has identified that module structure is the right level of concern.
 
 ## Form
 
@@ -33,7 +31,7 @@ The governing feature anatomy is the shared default in `FEATURE.md` unless a rep
 2. Circular dependencies are forbidden.
 3. A parent may depend on a child module's public seam only.
 4. A child must not depend on its consumer.
-5. Inside a feature, module dependencies must also respect the dependency direction of the governing feature anatomy.
+5. Inside a feature, module dependencies must also respect the governing feature anatomy.
 
 ## Acceptance Check
 
@@ -42,4 +40,3 @@ The governing feature anatomy is the shared default in `FEATURE.md` unless a rep
 3. Public API is minimal.
 4. Internal files stay private.
 5. No caller needs a deep import.
-6. The module boundary reinforces the governing feature anatomy and owning enclosure by containing growth instead of spreading it.

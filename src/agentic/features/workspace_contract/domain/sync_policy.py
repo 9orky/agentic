@@ -3,14 +3,19 @@ from __future__ import annotations
 from pathlib import Path
 
 
-CORE_RULE_DOCUMENTS = (
-    "AGENT.md",
-    "FEATURE.md",
-    "FEATURE_LAYOUT.md",
-    "MODULE.md",
-    "PLANNING.md",
-    "REFACTORING.md",
-    "TESTS.md",
+SHARED_RULE_PATHS = (
+    Path("AGENT.md"),
+    Path("feature") / "FEATURE.md",
+    Path("feature") / "layers" / "DOMAIN.md",
+    Path("feature") / "layers" / "INFRASTRUCTURE.md",
+    Path("feature") / "layers" / "APPLICATION.md",
+    Path("feature") / "layers" / "UI.md",
+    Path("module") / "MODULE.md",
+    Path("planning") / "PLANNING.md",
+    Path("planning") / "phases" / "BIG_PICTURE.md",
+    Path("planning") / "phases" / "STEPS.md",
+    Path("refactoring") / "REFACTORING.md",
+    Path("tests") / "TESTS.md",
 )
 LOCAL_EXTENSION_DIRECTORIES = (
     Path("rules") / "overrides",

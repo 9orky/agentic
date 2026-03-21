@@ -1,116 +1,31 @@
 # Agent Rules
 
-Use this file as the routing hub for the shared rules.
+`agentic` packages a rules tree that an agent can navigate step by step instead of loading as one flat document set.
 
-Shared docs live under `rules/*.md`.
-Local changes belong only in:
+Read this file first. Then follow one markdown link to the governing bootstrap file for the current task.
 
-- `rules/overrides/` for repo-local replacements of shared docs
-- `rules/project-specific/` for new repo-local rules
+## Available Rule Sets
 
-## Reading Order
+| Rule Set | Information You Can Obtain | Bootstrap |
+| --- | --- | --- |
+| Rules maintenance | how the packaged rules tree should be navigated, split, and kept under continuous refinement | [../README.md](../README.md) |
+| Feature rules | which feature layer owns a responsibility and which next layer document can resolve placement questions | [feature/FEATURE.md](feature/FEATURE.md) |
+| Planning rules | which planning stage applies now and which planning document gives the next level of detail | [planning/PLANNING.md](planning/PLANNING.md) |
+| Module rules | the module-boundary rules that define public seams, private internals, and dependency direction | [module/MODULE.md](module/MODULE.md) |
+| Refactoring rules | the target-design refactoring rules and whether placement questions must route into feature guidance | [refactoring/REFACTORING.md](refactoring/REFACTORING.md) |
+| Testing rules | the verification rules for choosing seams, assertions, helpers, and test scope | [tests/TESTS.md](tests/TESTS.md) |
 
-1. Read the project's task runner, manifest, or documented entry point.
-2. Read `AGENT.md`.
-3. Read the governing doc for the task.
-4. Read matching files in `rules/overrides/`.
-5. Read relevant files in `rules/project-specific/`.
+## Navigation Rule
 
-Route by task:
+1. Read only the document you are in.
+2. Follow only the next link that matches the task.
+3. If that document offers child options, choose from those options there.
+4. Do not skip across the tree without a link from the current document.
 
-- planning: `PLANNING.md`
-- module shape or public API: `MODULE.md`
-- feature ownership or collaboration: `FEATURE.md`, then `MODULE.md`
-- testing or verification: `TESTS.md` plus the governing feature or module doc
-- refactor or migration: `REFACTORING.md` plus the governing feature or module doc
-- approved plan step: the step file plus docs named in `Constraints`
+## Local Bootstrap
 
-If the task crosses scopes, read all matching docs.
+If the task is to bootstrap or refresh the local `agentic/` guidance entrypoint in a project, use [../README.md](../README.md) to obtain:
 
-## Active Feature Anatomy
-
-For feature work, resolve the governing feature anatomy first.
-
-1. Start with the shared default in `FEATURE.md`.
-2. If a file in `rules/overrides/` or `rules/project-specific/` replaces it, the local anatomy governs.
-3. If the code shows a stable different anatomy but the docs do not define it, stop before structural refactoring and get that anatomy documented.
-
-## Shared Defaults
-
-1. Keep one owner per concept.
-2. Follow the governing feature anatomy with the same strictness whether it is shared or repo-local.
-3. Do not introduce structure that violates the governing feature anatomy.
-4. Add structure only when complexity requires it, unless a governing doc requires it.
-5. Expose the minimum public boundary through the minimum public seam.
-6. Cross boundaries only through the target boundary's public seam.
-7. Preserve feature enclosures.
-8. Preserve explicit inputs and outputs unless the user or approved plan changes them.
-9. Verify through the intended public boundary and public seam.
-10. Use the project's declared commands or task runner.
-11. Stay in scope. Stop and ask before changing scope, ownership, or a public contract.
-12. After two failed attempts on the same boundary or tactic, stop and ask.
-13. Do not add summaries unless the user explicitly asks for one.
-14. Do not add comments in code.
-15. Prefer silent execution: code first, speak only when the user needs a decision, blocker, or verification result.
-
-## Standard Run
-
-1. Classify the task.
-2. Load the governing docs.
-3. Resolve the active feature anatomy.
-4. Inspect only the needed context.
-5. Identify owner, enclosure, public boundary, and public seam.
-6. Define the smallest valid change.
-7. Implement through the correct boundary.
-8. Verify through the intended public boundary and public seam.
-9. Record any plan or doc delta if understanding changed.
-
-## Guardrails
-
-Before editing, know:
-
-- task type
-- owner
-- active feature anatomy
-- enclosure being preserved
-- owning part of each touched responsibility
-- allowed dependency direction across touched parts
-- public boundary and public seam
-- private boundaries that must stay private
-- verification path
-
-Before finishing, verify:
-
-- scope stayed contained
-- enclosure stayed intact
-- no touched file escaped the governing feature anatomy
-- no project-default mismatch was introduced by assuming the wrong anatomy
-- dependency direction still matches the governing rules
-- public contracts still mean what they say
-- boundaries were respected
-- the intended validation path ran or was explicitly unavailable
-
-## Precedence
-
-Use this order:
-
-1. explicit user request
-2. approved plan and active step contract
-3. relevant override file
-4. relevant project-specific file
-5. core doc for the task
-6. current code as behavioral reference only
-
-If a conflict would change scope, ownership, or a promised output, stop and ask. Otherwise choose the narrowest reversible option.
-
-If local docs replace the shared default feature anatomy, the local docs govern.
-
-If current code conflicts with the governing documented feature anatomy, treat the code as refactor input, not as architectural authority.
-
-## Rule Maintenance
-
-1. Keep shared reusable rules in the shared docs.
-2. Do not edit local core docs; they are update-owned.
-3. Put repo-local replacements of shared docs in `rules/overrides/`.
-4. Put new repo-local rules in `rules/project-specific/`.
-5. Do not fork the same rule across multiple documents.
+1. the cleanup rule for existing project instructions and caches
+2. the default location for the bootstrap instruction file
+3. the exact minimal markdown text to place there
