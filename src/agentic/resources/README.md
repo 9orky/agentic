@@ -11,6 +11,22 @@ Use this README when the task is about changing the rule sets themselves, not wh
 3. If that bootstrap file offers child documents, choose one of those child links there.
 4. Continue step by step instead of skipping across the tree.
 
+## Agent Navigation And Discovery Guidelines
+
+Manage the rules tree so an agent can discover the governing rule set with the fewest possible decisions and without loading unrelated detail.
+
+Guidelines:
+
+1. keep discovery at the router level and detailed guidance at the leaf level
+2. make the next valid link explicit instead of expecting the agent to infer the next document
+3. keep one rule set responsible for one concern, then link outward when another concern becomes governing
+4. make document purpose legible from its title, headings, and link table before any detailed reading begins
+5. keep the same discovery path stable over time unless the old path has become noisy, leaky, or ambiguous
+6. when adding a new rule split, update the parent router so the agent can discover it through normal navigation rather than by coincidence
+7. if a task needs another rule set, link to that rule set instead of restating its detailed rules locally
+
+The goal is not only clean documentation. The goal is reliable agent routing: the agent should be able to identify the current governing rule set, the next valid document, and the stopping point for loaded detail without guesswork.
+
 ## Router Versus Leaf
 
 Router documents exist to send the reader to the next document.
@@ -52,8 +68,20 @@ The risks below are standing guidance and should stay visible whenever the packa
 2. under-splitting preserves the context-window problem that the navigation model is meant to solve
 3. router bloat makes AGENT.md or a bootstrap file drift back into a rules dump
 4. abstraction leaks happen when one rule set embeds another rule set's detailed logic instead of linking to it
+5. duplicated manifests of the packaged rules tree create drift; when code needs the tree shape, enumerate the packaged source-of-truth tree directly instead of copying file lists into multiple places
 
 Treat these risks as active maintenance pressure. The correct structure is not fixed permanently. It should be refined whenever the navigation model becomes noisy, leaky, or harder to supervise.
+
+## Heavy Violations
+
+Treat the cases below as heavy violations when editing the packaged rules tree.
+
+1. a router document or bootstrap file explains the detailed content of another rule set instead of linking to it
+2. a rule document mixes discovery for one concern with detailed instructions owned by a different rule set
+3. a parent document removes the agent's need to navigate by embedding downstream detail inline
+4. a new rule set is added without making it discoverable from its governing router
+
+These violations are heavy because they break the navigation model itself. They make discovery ambiguous, increase context noise, and cause the agent to load the wrong detail at the wrong level.
 
 ## Local Agentic Bootstrap
 

@@ -2,6 +2,10 @@
 
 Use this file after a high-level plan is accepted and the work is being split into executable steps.
 
+Executable step files must be named `PLAN_STEP_0X.md` in the order they are intended to run.
+Executable step files must live at the same directory level as their owning `PLAN.md`.
+Do not place step files in nested planning subdirectories.
+
 ## Core Rules
 
 1. Preserve approved inputs, outputs, and acceptance criteria.
@@ -11,6 +15,9 @@ Use this file after a high-level plan is accepted and the work is being split in
 5. State which domain concepts are created, changed, moved, or intentionally left unchanged.
 6. If introducing a repository, name the owner of the abstraction and the owner of the concrete adapter separately.
 7. Do not mix unfinished work from multiple layers inside one step.
+8. Each step file must show the target files tree for that step clearly enough that the intended file names and owned responsibilities are visible before implementation starts.
+9. After completing a step, check the code against both the approved high-level plan and the active step file, then update the step file if the verified implementation differs in a still-approved way.
+10. After the last step, run one final alignment check across the code, the high-level plan, and the full step set.
 
 ## Sequencing Model
 
@@ -49,6 +56,22 @@ Each step file must include:
 20. `Files Tree`
 
 `Files Tree` must be the final section.
+
+`Files Tree` is the target files tree for the step. It must show the planned file names and owning responsibilities so the intended implementation shape is reviewable before coding.
+
+## Step Lifecycle
+
+For each approved step:
+
+1. implement the step through the owning layer
+2. verify the code against the active step file
+3. verify the code still aligns with the approved high-level plan
+4. update the step file if the verified implementation changed in a way that remains within approved scope
+
+After the final step:
+
+1. run a final alignment check across the codebase, the approved high-level plan, and all `PLAN_STEP_0X.md` files
+2. resolve any drift or record the approved final state in the relevant plan files
 
 ## Layer Routing
 

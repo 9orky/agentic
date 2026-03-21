@@ -2,6 +2,8 @@
 
 Use this file for the high-level plan before any executable step files exist.
 
+The first planning response is the big-picture plan. Do not create step files until that plan is accepted.
+
 ## Required Content
 
 Keep the high-level plan at the boundary and contract level.
@@ -39,3 +41,13 @@ Before locking the plan:
 ## Placement Rule
 
 Do not leave placement implicit. If a touched responsibility cannot be placed clearly in the governing feature anatomy, the plan is not ready.
+
+## Handoff To Step Planning
+
+After the high-level plan is accepted:
+
+1. split the approved plan into executable step files named `PLAN_STEP_0X.md`
+2. place every `PLAN_STEP_0X.md` file at the same directory level as the owning `PLAN.md`
+3. do not create nested planning subdirectories for step files
+4. keep the step sequence aligned with the approved phase order
+5. move file-level implementation detail, target file naming, and step verification into the step files rather than overloading the big-picture plan

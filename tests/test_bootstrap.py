@@ -6,20 +6,29 @@ import unittest
 from agentic.features.workspace_contract import bootstrap_project, update_project
 
 
-EXPECTED_SHARED_RULE_PATHS = (
-    Path("rules") / "AGENT.md",
-    Path("rules") / "feature" / "FEATURE.md",
-    Path("rules") / "feature" / "layers" / "DOMAIN.md",
-    Path("rules") / "feature" / "layers" / "INFRASTRUCTURE.md",
-    Path("rules") / "feature" / "layers" / "APPLICATION.md",
-    Path("rules") / "feature" / "layers" / "UI.md",
-    Path("rules") / "module" / "MODULE.md",
-    Path("rules") / "planning" / "PLANNING.md",
-    Path("rules") / "planning" / "phases" / "BIG_PICTURE.md",
-    Path("rules") / "planning" / "phases" / "STEPS.md",
-    Path("rules") / "refactoring" / "REFACTORING.md",
-    Path("rules") / "tests" / "TESTS.md",
-)
+def _expected_shared_rule_paths() -> tuple[Path, ...]:
+    rules_root = files("agentic").joinpath("resources", "rules")
+    return tuple(
+        Path("rules") / relative_path
+        for relative_path in _iter_packaged_rule_paths(rules_root, Path())
+    )
+
+
+def _iter_packaged_rule_paths(directory, relative_path: Path):
+    for child in sorted(directory.iterdir(), key=lambda item: item.name):
+        child_relative_path = relative_path / child.name
+        if child.is_dir():
+            if child.name in {"overrides", "project-specific"}:
+                continue
+            yield from _iter_packaged_rule_paths(child, child_relative_path)
+            continue
+
+        if child.name.startswith("."):
+            continue
+        if child_relative_path.suffix != ".md":
+            continue
+
+        yield child_relative_path
 
 
 class BootstrapProjectTests(unittest.TestCase):
@@ -32,7 +41,7 @@ class BootstrapProjectTests(unittest.TestCase):
             self.assertTrue(result.created_dir)
             self.assertTrue(
                 (project_root / "agentic" / "agentic.yaml").exists())
-            for relative_path in EXPECTED_SHARED_RULE_PATHS:
+            for relative_path in _expected_shared_rule_paths():
                 self.assertTrue(
                     (project_root / "agentic" / relative_path).exists())
             self.assertTrue((project_root / "agentic" /
@@ -91,7 +100,7 @@ class BootstrapProjectTests(unittest.TestCase):
             self.assertEqual(override_path.read_text(
                 encoding="utf-8"), "local override\n")
 
-    def test_update_marks_unchanged_shared_docs_as_updated(self) -> None:
+    def test_update_preserves_unchanged_shared_docs(self) -> None:
         with TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)
             bootstrap_project(project_root)
@@ -100,8 +109,8 @@ class BootstrapProjectTests(unittest.TestCase):
 
             result = update_project(project_root)
 
-            self.assertIn(shared_doc_path, result.updated_files)
-            self.assertNotIn(shared_doc_path, result.preserved_files)
+            self.assertNotIn(shared_doc_path, result.updated_files)
+            self.assertIn(shared_doc_path, result.preserved_files)
 
 
 if __name__ == "__main__":
