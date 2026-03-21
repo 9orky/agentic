@@ -1,7 +1,7 @@
 from pathlib import Path
 import unittest
 
-from agentic.features.workspace_contract.domain import SharedRulePath, SyncAction, SyncPolicy, WorkspaceContractLayout
+from agentic.features.workspace_contract.domain import RuleDocumentClass, RuleDocumentSchema, RuleSchemaPolicy, SharedRulePath, SyncAction, SyncPolicy, WorkspaceContractLayout
 
 
 class SharedRulePathTests(unittest.TestCase):
@@ -123,6 +123,118 @@ class SyncPolicyTests(unittest.TestCase):
         self.assertEqual(summary.override_paths, tuple(override_paths))
         self.assertEqual(summary.project_specific_paths,
                          tuple(project_specific_paths))
+
+
+class RuleDocumentSchemaTests(unittest.TestCase):
+    def test_navigational_schema_exposes_expected_required_sections(self) -> None:
+        schema = RuleDocumentSchema.navigational()
+
+        self.assertEqual(schema.document_class, RuleDocumentClass.NAVIGATIONAL)
+        self.assertEqual(
+            tuple(
+                requirement.canonical_heading for requirement in schema.required_sections()),
+            ("Purpose", "Use This When", "Available Options",
+             "Navigation Rule", "Exit Condition"),
+        )
+        self.assertTrue(schema.navigation_targets_required)
+
+    def test_leaf_schema_supports_scope_as_ownership_alias(self) -> None:
+        schema = RuleDocumentSchema.leaf()
+
+        self.assertEqual(schema.document_class, RuleDocumentClass.LEAF)
+        ownership_requirement = schema.required_sections()[2]
+        self.assertTrue(ownership_requirement.matches("Ownership"))
+        self.assertTrue(ownership_requirement.matches("Scope"))
+        self.assertFalse(schema.navigation_targets_required)
+
+
+class RuleSchemaPolicyTests(unittest.TestCase):
+    def test_validates_navigational_document_with_required_sections(self) -> None:
+        violations = RuleSchemaPolicy().validate_document(
+            document_class=RuleDocumentClass.NAVIGATIONAL,
+            observed_section_headings=(
+                "Purpose",
+                "Use This When",
+                "Available Options",
+                "Navigation Rule",
+                "Local Context",
+                "Exit Condition",
+            ),
+            has_navigation_targets=True,
+        )
+
+        self.assertEqual(violations, ())
+
+    def test_reports_missing_required_leaf_section(self) -> None:
+        violations = RuleSchemaPolicy().validate_document(
+            document_class=RuleDocumentClass.LEAF,
+            observed_section_headings=(
+                "Purpose",
+                "Applies When",
+                "Scope",
+                "Constraints",
+                "Acceptance Check",
+            ),
+            has_navigation_targets=False,
+        )
+
+        self.assertEqual([violation.code for violation in violations], [
+                         "missing-section"])
+        self.assertEqual(violations[0].section_heading, "Core Rules")
+
+    def test_reports_invalid_required_section_order(self) -> None:
+        violations = RuleSchemaPolicy().validate_document(
+            document_class=RuleDocumentClass.LEAF,
+            observed_section_headings=(
+                "Purpose",
+                "Applies When",
+                "Scope",
+                "Constraints",
+                "Core Rules",
+                "Acceptance Check",
+            ),
+            has_navigation_targets=False,
+        )
+
+        self.assertEqual([violation.code for violation in violations], [
+                         "invalid-section-order"])
+        self.assertEqual(
+            violations[0].message,
+            "Section order is invalid: Constraints appears before Core Rules",
+        )
+
+    def test_reports_missing_navigation_targets_only_for_navigational_documents(self) -> None:
+        policy = RuleSchemaPolicy()
+
+        navigational_violations = policy.validate_document(
+            document_class=RuleDocumentClass.NAVIGATIONAL,
+            observed_section_headings=(
+                "Purpose",
+                "Use This When",
+                "Available Options",
+                "Navigation Rule",
+                "Exit Condition",
+            ),
+            has_navigation_targets=False,
+        )
+        leaf_violations = policy.validate_document(
+            document_class=RuleDocumentClass.LEAF,
+            observed_section_headings=(
+                "Purpose",
+                "Applies When",
+                "Ownership",
+                "Core Rules",
+                "Constraints",
+                "Acceptance Check",
+            ),
+            has_navigation_targets=False,
+        )
+
+        self.assertEqual(
+            [violation.code for violation in navigational_violations],
+            ["missing-navigation-targets"],
+        )
+        self.assertEqual(leaf_violations, ())
 
 
 if __name__ == "__main__":

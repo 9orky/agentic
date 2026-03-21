@@ -36,9 +36,39 @@ class WorkspaceReader:
         return tuple(
             sorted(
                 (
-                    active_layout.shared_rule_destination(project_root, shared_rule_path)
+                    active_layout.shared_rule_destination(
+                        project_root, shared_rule_path)
                     for shared_rule_path in shared_rule_paths
                     if active_layout.shared_rule_destination(project_root, shared_rule_path).exists()
+                ),
+                key=lambda path: path.as_posix(),
+            )
+        )
+
+    def existing_rule_document_paths(
+        self,
+        project_root: Path,
+        *,
+        layout: WorkspaceContractLayout | None = None,
+    ) -> tuple[Path, ...]:
+        active_layout = layout or WorkspaceContractLayout()
+        rules_dir = active_layout.rules_dir(project_root)
+        if not rules_dir.is_dir():
+            return ()
+
+        ignored_directories = {
+            active_layout.overrides_dir_name,
+            active_layout.project_specific_dir_name,
+        }
+
+        return tuple(
+            sorted(
+                (
+                    path
+                    for path in rules_dir.rglob("*.md")
+                    if path.is_file()
+                    and not any(part in ignored_directories for part in path.relative_to(rules_dir).parts)
+                    and not any(part.startswith(".") for part in path.relative_to(rules_dir).parts)
                 ),
                 key=lambda path: path.as_posix(),
             )

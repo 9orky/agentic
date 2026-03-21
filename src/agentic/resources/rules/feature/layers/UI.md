@@ -1,5 +1,13 @@
 # UI Layer Rules
 
+Document Class: leaf
+
+## Purpose
+
+`ui` owns delivery entrypoints, request and response mapping, and presentation shaping.
+
+## Applies When
+
 Read this file when the task affects command binding, controllers, presenters, request parsing, or response formatting.
 
 ## Ownership
@@ -13,7 +21,9 @@ Read this file when the task affects command binding, controllers, presenters, r
 
 `ui` may depend only on `application`.
 
-## Layout Constraints
+## Core Rules
+
+### Layout Constraints
 
 Use these anchors as the minimum delivery surface:
 
@@ -23,7 +33,9 @@ Use these anchors as the minimum delivery surface:
 
 Each anchor may be a file or a same-named package. If an anchor needs multiple delivery handlers or presenters, switch it to package form.
 
-## Placement Rules
+## Constraints
+
+### Placement Rules
 
 1. Keep business rules and workflows out of `ui`.
 2. Do not deep-import application internals.

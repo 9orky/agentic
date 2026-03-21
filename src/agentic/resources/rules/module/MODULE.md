@@ -1,17 +1,29 @@
 # Module Rules
 
+Document Class: leaf
+
+## Purpose
+
 A module has one public boundary reached through one public seam.
+
+## Applies When
 
 Use this file for module-shape work after the governing feature or task bootstrap has identified that module structure is the right level of concern.
 
-## Form
+## Scope
+
+This file governs module form, public seam design, private internals, and dependency direction once module structure is the right level of concern.
+
+## Core Rules
+
+### Form
 
 1. Use a single file while the module is simple.
 2. Convert the module to a folder only when private composition is needed.
 3. A folder module is composition behind one public seam.
 4. Do not create a folder before there is private structure to hide.
 
-## Public API
+### Public API
 
 1. Expose the minimum public API.
 2. Widen it only when multiple external consumers need it or an approved plan requires it.
@@ -19,19 +31,27 @@ Use this file for module-shape work after the governing feature or task bootstra
 4. Callers import through the public seam only.
 5. Do not use a module API to bypass or dilute the owning feature boundary.
 
-## Internals
+### Internals
 
 1. Keep helpers, policies, services, and intermediate models private.
 2. Split internal parts by responsibility.
 3. Deep imports into internal files are forbidden.
 
-## Dependencies
+### Dependencies
 
 1. Dependencies stay directional.
 2. Circular dependencies are forbidden.
 3. A parent may depend on a child module's public seam only.
 4. A child must not depend on its consumer.
 5. Inside a feature, module dependencies must also respect the governing feature anatomy.
+
+## Constraints
+
+1. Do not widen the public API to avoid local wiring work.
+2. Do not bypass or dilute the owning feature boundary through the module API.
+3. Do not deep-import internal files.
+4. Do not create a folder before private structure exists.
+5. Do not allow circular dependencies.
 
 ## Acceptance Check
 

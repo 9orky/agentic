@@ -12,9 +12,15 @@ class PackagedRulesReader:
         rules_root = files("agentic").joinpath("resources", "rules")
         return tuple(self._iter_shared_rule_paths(rules_root, Path()))
 
+    def iter_rule_document_paths(self) -> tuple[Path, ...]:
+        return tuple(shared_rule_path.relative_path for shared_rule_path in self.iter_shared_rule_paths())
+
     def read_document_text(self, shared_rule_path: SharedRulePath) -> str:
         rules_root = files("agentic").joinpath("resources", "rules")
         return rules_root.joinpath(*shared_rule_path.relative_path.parts).read_text(encoding="utf-8")
+
+    def read_rule_document_text(self, relative_path: Path) -> str:
+        return self.read_document_text(SharedRulePath(relative_path))
 
     def default_config_text(self) -> str:
         return files("agentic").joinpath("resources", "agentic.yaml").read_text(encoding="utf-8")

@@ -1,10 +1,17 @@
 # Agent Rules
 
+Document Class: navigational
+
+## Purpose
+
 `agentic` packages a rules tree that an agent can navigate step by step instead of loading as one flat document set.
 
-Read this file first. Then follow one markdown link to the governing bootstrap file for the current task.
+## Use This When
 
-## Available Rule Sets
+1. Start here when the task needs the packaged rule tree.
+2. Use this file to choose the governing rule-set bootstrap for the current task.
+
+## Available Options
 
 | Rule Set | Information You Can Obtain | Bootstrap |
 | --- | --- | --- |
@@ -22,10 +29,15 @@ Read this file first. Then follow one markdown link to the governing bootstrap f
 3. If that document offers child options, choose from those options there.
 4. Do not skip across the tree without a link from the current document.
 
-## Local Bootstrap
+## Local Context
 
 If the task is to bootstrap or refresh the local `agentic/` guidance entrypoint in a project, use [../README.md](../README.md) to obtain:
 
 1. the cleanup rule for existing project instructions and caches
 2. the default location for the bootstrap instruction file
 3. the exact minimal markdown text to place there
+
+## Exit Condition
+
+1. You have selected the governing rule-set bootstrap file for the current task.
+2. The next read should be exactly one linked document from the chosen option.

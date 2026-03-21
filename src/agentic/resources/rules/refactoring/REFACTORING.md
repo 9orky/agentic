@@ -1,8 +1,18 @@
 # Refactoring Rules
 
+Document Class: leaf
+
+## Purpose
+
+Use this file to reshape existing code toward the target design when replacing or restructuring an existing implementation.
+
+## Applies When
+
 Use this file when reshaping existing code or replacing an existing structure.
 
-If the task raises placement or ownership ambiguity, use [../feature/FEATURE.md](../feature/FEATURE.md) to obtain the next valid feature links and then follow only the layer document that resolves that ambiguity.
+## Scope
+
+This file governs target-design refactoring, fresh-slice decisions, feature enclosure preservation, and verified swap behavior.
 
 ## Core Rules
 
@@ -21,7 +31,7 @@ If the task raises placement or ownership ambiguity, use [../feature/FEATURE.md]
 13. After the refactor is complete and verified through the intended boundary, swap the folders so the refactored folder becomes canonical and remove the legacy folder.
 14. Delete migration scaffolding after the canonical path is active and verified.
 
-## Execution Pattern
+### Execution Pattern
 
 1. Confirm the target enclosure, public boundary, public seam, and governing feature anatomy.
 2. Decide between in-place refactor and a fresh slice.
@@ -43,7 +53,13 @@ If the task raises placement or ownership ambiguity, use [../feature/FEATURE.md]
 7. Do not skip the `<feature_name>_refactor` folder when the refactor is being executed as a fresh start.
 8. Do not keep both legacy and refactored feature folders active after the verified swap.
 
-## Verification
+## If Ambiguous, Go To
+
+If the task raises placement or ownership ambiguity, use [../feature/FEATURE.md](../feature/FEATURE.md) to obtain the next valid feature links and then follow only the layer document that resolves that ambiguity.
+
+## Acceptance Check
+
+### Verification
 
 Before accepting a refactor step, verify:
 

@@ -1,5 +1,13 @@
 # Infrastructure Layer Rules
 
+Document Class: leaf
+
+## Purpose
+
+`infrastructure` owns persistence, integrations, serialization, and concrete adapters.
+
+## Applies When
+
 Read this file when the task affects persistence, subprocesses, filesystem, network, external services, or concrete adapter implementations.
 
 ## Ownership
@@ -14,14 +22,18 @@ Read this file when the task affects persistence, subprocesses, filesystem, netw
 
 `infrastructure` may depend on `domain`, but not on `application` or `ui`.
 
-## Layout Constraints
+## Core Rules
+
+### Layout Constraints
 
 1. Use `repository` as the anchor when infrastructure implements repository contracts.
 2. If repository implementation needs multiple files, use `repository/` rather than loose sibling files.
 3. Larger integrations may split by external system or adapter type as long as ownership stays in infrastructure.
 4. Cross-layer consumers may import infrastructure symbols only through `infrastructure/__init__.py` or the owning anchor shim.
 
-## Placement Rules
+## Constraints
+
+### Placement Rules
 
 1. Put concrete adapters here, not in `application`.
 2. Keep external-system types and mappings here.

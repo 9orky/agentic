@@ -1,5 +1,13 @@
 # Application Layer Rules
 
+Document Class: leaf
+
+## Purpose
+
+`application` owns use cases, workflow orchestration, and feature-to-feature coordination.
+
+## Applies When
+
 Read this file when the task affects use cases, workflow orchestration, or feature-to-feature coordination.
 
 ## Ownership
@@ -14,7 +22,9 @@ Read this file when the task affects use cases, workflow orchestration, or featu
 
 `application` may depend on `domain` and `infrastructure`, but not on `ui`.
 
-## Required Anchors
+## Core Rules
+
+### Required Anchors
 
 Under the shared default, `application/` is organized only behind these anchors:
 
@@ -25,7 +35,7 @@ Under the shared default, `application/` is organized only behind these anchors:
 
 Do not leave loose application-owned files directly under `application/` outside those anchors.
 
-## Layout Constraints
+### Layout Constraints
 
 1. `commands` and `queries` are required anchors.
 2. If multiple handlers are needed, use package form for that anchor.
@@ -33,7 +43,9 @@ Do not leave loose application-owned files directly under `application/` outside
 4. Cross-feature adaptation grows behind `adapters/`.
 5. Cross-layer consumers may import application symbols only through `application/__init__.py` or the owning anchor shim.
 
-## Placement Rules
+## Constraints
+
+### Placement Rules
 
 1. Keep business concepts in `domain`, not `application`.
 2. Keep technical adapters in `infrastructure`, not `application`.

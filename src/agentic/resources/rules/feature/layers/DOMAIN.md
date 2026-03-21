@@ -1,5 +1,13 @@
 # Domain Layer Rules
 
+Document Class: leaf
+
+## Purpose
+
+`domain` owns business concepts, invariants, and domain-owned abstractions.
+
+## Applies When
+
 Read this file when the task affects business concepts, invariants, or domain-owned abstractions.
 
 ## Ownership
@@ -14,7 +22,9 @@ Read this file when the task affects business concepts, invariants, or domain-ow
 
 `domain` must not depend on `application`, `infrastructure`, or `ui`.
 
-## Core Constraints
+## Core Rules
+
+### Core Constraints
 
 1. Domain code is class-based under the shared default.
 2. Free functions are forbidden in domain.
@@ -22,7 +32,7 @@ Read this file when the task affects business concepts, invariants, or domain-ow
 4. If an anchor needs more than one class, switch that anchor to package form.
 5. Do not place loose domain classes directly under `domain/` outside a required anchor.
 
-## Required Anchors
+### Required Anchors
 
 Use these anchors as the baseline shape:
 
@@ -33,13 +43,15 @@ Use these anchors as the baseline shape:
 
 Each anchor may be a file or a same-named package.
 
-## Placement Rules
+## Constraints
+
+### Placement Rules
 
 1. Put repository contracts in `domain` only when they express domain language or protect domain invariants.
 2. If an abstraction exists only as an execution dependency of a use case, it belongs in `application`, not `domain`.
 3. Helper logic that cannot justify a domain class does not belong in `domain`.
 
-## Layer Shim Rule
+### Layer Shim Rule
 
 Other layers may consume domain symbols only through `domain/__init__.py` or the owning anchor shim.
 

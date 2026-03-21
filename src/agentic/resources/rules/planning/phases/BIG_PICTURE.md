@@ -1,10 +1,22 @@
 # High-Level Planning Rules
 
-Use this file for the high-level plan before any executable step files exist.
+Document Class: leaf
+
+## Purpose
+
+Use this file to define the high-level plan before any executable step files exist.
+
+## Applies When
 
 The first planning response is the big-picture plan. Do not create step files until that plan is accepted.
 
-## Required Content
+## Scope
+
+Keep the high-level plan at the boundary and contract level before file-level execution planning begins.
+
+## Core Rules
+
+### Required Content
 
 Keep the high-level plan at the boundary and contract level.
 
@@ -28,7 +40,7 @@ Include:
 16. acceptance criteria
 17. known risks or open questions
 
-## Strategic Domain Modeling
+### Strategic Domain Modeling
 
 Before locking the plan:
 
@@ -38,11 +50,13 @@ Before locking the plan:
 4. state the identity, invariants, lifecycle, and owning layer for each material concept
 5. stop and tighten the model if a concept cannot be classified or placed deterministically
 
-## Placement Rule
+## Constraints
+
+### Placement Rule
 
 Do not leave placement implicit. If a touched responsibility cannot be placed clearly in the governing feature anatomy, the plan is not ready.
 
-## Handoff To Step Planning
+### Handoff To Step Planning
 
 After the high-level plan is accepted:
 
@@ -51,3 +65,10 @@ After the high-level plan is accepted:
 3. do not create nested planning subdirectories for step files
 4. keep the step sequence aligned with the approved phase order
 5. move file-level implementation detail, target file naming, and step verification into the step files rather than overloading the big-picture plan
+
+## Acceptance Check
+
+1. The high-level plan stays at the boundary and contract level.
+2. Material concepts are classified and placed deterministically.
+3. Step files are not created before the high-level plan is accepted.
+4. The plan names assumptions, phases, acceptance criteria, and open questions explicitly.

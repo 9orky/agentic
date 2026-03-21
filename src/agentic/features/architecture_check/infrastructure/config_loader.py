@@ -3,25 +3,22 @@ from __future__ import annotations
 from pathlib import Path
 
 import yaml
+from agentic.project_layout import AgenticProjectLayout
 
 from ..domain.value_object import ArchitectureCheckConfigError
 
 
 class ConfigLoader:
+    def __init__(self, layout: AgenticProjectLayout | None = None) -> None:
+        self._layout = layout or AgenticProjectLayout()
+
     def resolve_path(self, project_root: Path, explicit_config_path: str | None = None) -> Path | None:
         candidates: list[Path] = []
         if explicit_config_path:
             candidates.append(
                 Path(explicit_config_path).expanduser().resolve())
 
-        candidates.extend(
-            [
-                project_root / "agentic" / "agentic.yaml",
-                project_root / "agentic" / "agentic.yml",
-                project_root / "agentic.yaml",
-                project_root / "agentic.yml",
-            ]
-        )
+        candidates.extend(self._layout.config_candidate_paths(project_root))
 
         seen: set[Path] = set()
         for candidate in candidates:
@@ -32,6 +29,9 @@ class ConfigLoader:
             if normalized.exists():
                 return normalized
         return None
+
+    def config_search_description(self) -> str:
+        return ", ".join(self._layout.config_candidate_labels())
 
     def read_text(self, path: Path) -> str:
         try:

@@ -1,6 +1,16 @@
 # Step Planning Rules
 
+Document Class: leaf
+
+## Purpose
+
+Use this file to define executable step contracts after a high-level plan is accepted.
+
+## Applies When
+
 Use this file after a high-level plan is accepted and the work is being split into executable steps.
+
+## Scope
 
 Executable step files must be named `PLAN_STEP_0X.md` in the order they are intended to run.
 Executable step files must live at the same directory level as their owning `PLAN.md`.
@@ -19,7 +29,7 @@ Do not place step files in nested planning subdirectories.
 9. After completing a step, check the code against both the approved high-level plan and the active step file, then update the step file if the verified implementation differs in a still-approved way.
 10. After the last step, run one final alignment check across the code, the high-level plan, and the full step set.
 
-## Sequencing Model
+### Sequencing Model
 
 Default implementation order:
 
@@ -30,7 +40,9 @@ Default implementation order:
 
 If a higher layer reveals a missing lower-layer concept, amend the plan and return to the owning layer instead of patching around the gap.
 
-## Required Sections
+## Constraints
+
+### Required Sections
 
 Each step file must include:
 
@@ -59,7 +71,7 @@ Each step file must include:
 
 `Files Tree` is the target files tree for the step. It must show the planned file names and owning responsibilities so the intended implementation shape is reviewable before coding.
 
-## Step Lifecycle
+### Step Lifecycle
 
 For each approved step:
 
@@ -73,6 +85,15 @@ After the final step:
 1. run a final alignment check across the codebase, the approved high-level plan, and all `PLAN_STEP_0X.md` files
 2. resolve any drift or record the approved final state in the relevant plan files
 
-## Layer Routing
+## If Ambiguous, Go To
+
+### Layer Routing
 
 When a step needs layer-specific constraints, read only the matching file under `rules/feature/layers/`.
+
+## Acceptance Check
+
+1. Each step is narrow, end to end, verifiable, and owned by exactly one layer.
+2. Each step file contains the required sections, with `Files Tree` last.
+3. The implementation order respects the approved plan and layer ownership.
+4. Step execution includes verification against both the active step file and the approved high-level plan.

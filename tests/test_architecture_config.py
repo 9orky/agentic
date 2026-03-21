@@ -3,6 +3,9 @@ from tempfile import TemporaryDirectory
 import unittest
 
 from agentic.features.architecture_check import load_config
+from agentic.features.architecture_check.application.queries.load_config import LoadConfigQuery
+from agentic.features.architecture_check.infrastructure import ConfigLoader
+from agentic.project_layout import AgenticProjectLayout
 
 
 class ArchitectureConfigTests(unittest.TestCase):
@@ -57,6 +60,27 @@ class ArchitectureConfigTests(unittest.TestCase):
 
             self.assertEqual(result.path, explicit_config.resolve())
             self.assertEqual(result.config.language, "typescript")
+
+    def test_load_query_can_use_shared_layout_override(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            project_root = Path(temp_dir)
+            custom_layout = AgenticProjectLayout(
+                agentic_dir_name="workspace-contract",
+                config_file_stem="ruleset",
+            )
+            managed_config = project_root / "workspace-contract" / "ruleset.yaml"
+            managed_config.parent.mkdir()
+            managed_config.write_text(
+                "language: python\nrules:\n  boundaries: []\n",
+                encoding="utf-8",
+            )
+
+            result = LoadConfigQuery(
+                config_loader=ConfigLoader(layout=custom_layout)
+            ).load(project_root)
+
+            self.assertEqual(result.path, managed_config.resolve())
+            self.assertEqual(result.config.language, "python")
 
 
 if __name__ == "__main__":

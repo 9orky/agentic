@@ -4,13 +4,15 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from .application import BootstrapProject as _BootstrapProject
+from .application import DescribeRuleSchemaDrift as _DescribeRuleSchemaDrift
 from .application import DescribeWorkspaceContract as _DescribeWorkspaceContract
+from .application import RuleSchemaValidationResult
 from .application import UpdateProject as _UpdateProject
 from .domain import WorkspaceContractSummary
 
 
 class BootstrapError(RuntimeError):
-    pass
+    """Raised when workspace-contract boundary operations fail."""
 
 
 @dataclass
@@ -24,9 +26,11 @@ class SyncResult:
 
 __all__ = [
     "BootstrapError",
+    "RuleSchemaValidationResult",
     "SyncResult",
     "WorkspaceContractSummary",
     "bootstrap_project",
+    "describe_rule_schema_drift",
     "describe_workspace_contract",
     "update_project",
 ]
@@ -43,6 +47,20 @@ def update_project(project_root: Path) -> SyncResult:
 def describe_workspace_contract(project_root: Path) -> WorkspaceContractSummary:
     try:
         return _DescribeWorkspaceContract().execute(project_root)
+    except NotADirectoryError as exc:
+        raise BootstrapError(str(exc)) from exc
+
+
+def describe_rule_schema_drift(
+    project_root: Path,
+    *,
+    include_local_mirror: bool = True,
+) -> RuleSchemaValidationResult:
+    try:
+        return _DescribeRuleSchemaDrift().execute(
+            project_root,
+            include_local_mirror=include_local_mirror,
+        )
     except NotADirectoryError as exc:
         raise BootstrapError(str(exc)) from exc
 

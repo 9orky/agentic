@@ -2,7 +2,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
 
-from agentic.features.workspace_contract.application import BootstrapProject, DescribeWorkspaceContract, UpdateProject
+from agentic.features.workspace_contract.application import BootstrapProject, DescribeRuleSchemaDrift, DescribeWorkspaceContract, UpdateProject
 
 
 class WorkspaceContractApplicationTests(unittest.TestCase):
@@ -67,6 +67,83 @@ class WorkspaceContractApplicationTests(unittest.TestCase):
             self.assertEqual(summary.override_paths, (override_path,))
             self.assertEqual(summary.project_specific_paths,
                              (project_specific_path,))
+
+
+class RuleSchemaValidationApplicationTests(unittest.TestCase):
+    def test_reports_no_drift_for_packaged_rules_and_bootstrapped_local_mirror(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            project_root = Path(temp_dir)
+
+            BootstrapProject().execute(project_root)
+
+            result = DescribeRuleSchemaDrift().execute(project_root)
+
+            self.assertFalse(result.has_findings)
+            self.assertIn(Path("AGENT.md"), result.packaged_documents)
+            self.assertIn(Path("feature") / "layers" /
+                          "APPLICATION.md", result.local_documents)
+
+    def test_reports_anchor_drift_in_local_mirror(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            project_root = Path(temp_dir)
+
+            BootstrapProject().execute(project_root)
+            local_application_doc = (
+                project_root
+                / "agentic"
+                / "rules"
+                / "feature"
+                / "layers"
+                / "APPLICATION.md"
+            )
+            local_application_doc.write_text(
+                local_application_doc.read_text(encoding="utf-8").replace(
+                    "### Required Anchors",
+                    "### Required Anchor Set",
+                ),
+                encoding="utf-8",
+            )
+
+            result = DescribeRuleSchemaDrift().execute(project_root)
+
+            self.assertTrue(result.has_findings)
+            self.assertEqual(result.findings[0].scope, "local")
+            self.assertEqual(result.findings[0].document_path, Path(
+                "feature") / "layers" / "APPLICATION.md")
+            self.assertEqual(result.findings[0].code, "anchor-profile-drift")
+            self.assertIsNone(result.findings[0].section_heading)
+
+    def test_reports_missing_managed_document_in_local_mirror(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            project_root = Path(temp_dir)
+
+            BootstrapProject().execute(project_root)
+            missing_local_doc = project_root / "agentic" / \
+                "rules" / "planning" / "PLANNING.md"
+            missing_local_doc.unlink()
+
+            result = DescribeRuleSchemaDrift().execute(project_root)
+
+            self.assertTrue(result.has_findings)
+            self.assertEqual(result.findings[0].scope, "local")
+            self.assertEqual(result.findings[0].document_path, Path(
+                "planning") / "PLANNING.md")
+            self.assertEqual(result.findings[0].code, "missing-local-document")
+            self.assertIsNone(result.findings[0].section_heading)
+
+    def test_can_exclude_local_mirror_validation(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            project_root = Path(temp_dir)
+
+            BootstrapProject().execute(project_root)
+            local_agent_doc = project_root / "agentic" / "rules" / "AGENT.md"
+            local_agent_doc.write_text("broken\n", encoding="utf-8")
+
+            result = DescribeRuleSchemaDrift().execute(
+                project_root, include_local_mirror=False)
+
+            self.assertFalse(result.has_findings)
+            self.assertEqual(result.local_documents, ())
 
 
 if __name__ == "__main__":

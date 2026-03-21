@@ -19,7 +19,8 @@ class LoadConfigQuery:
             project_root, explicit_config_path)
         if config_path is None:
             raise ArchitectureCheckConfigError(
-                "Could not find a configuration file. Expected agentic/agentic.yaml or agentic.yml."
+                "Could not find a configuration file. "
+                f"Looked for an explicit path, {self._config_loader.config_search_description()}."
             )
 
         raw_text = self._config_loader.read_text(config_path)
