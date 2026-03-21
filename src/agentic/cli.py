@@ -3,15 +3,13 @@ from __future__ import annotations
 import click
 
 from .features.architecture_check.cli import architecture_check_cli
-from .features.configuration.cli import configuration_cli
-from .features.llm_handoff.cli import llm_handoff_cli
 from .features.workspace_contract.cli import workspace_contract_cli
 
 
 @click.group(name="agentic", invoke_without_command=True)
 @click.pass_context
 def agentic_cli(ctx: click.Context) -> int | None:
-    """Bootstrap a project's agentic surface, hand it to an LLM, validate architecture, and refresh shared rules."""
+    """Bootstrap a project's agentic surface, validate architecture, and refresh shared rules."""
     if ctx.invoked_subcommand is not None:
         return None
 
@@ -29,9 +27,7 @@ def help_command(ctx: click.Context) -> int:
 
 
 workspace_contract_cli(agentic_cli)
-configuration_cli(agentic_cli)
 architecture_check_cli(agentic_cli)
-llm_handoff_cli(agentic_cli)
 
 
 def main(argv: list[str] | None = None) -> int:

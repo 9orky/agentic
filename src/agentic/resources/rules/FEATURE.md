@@ -44,36 +44,29 @@ Forbidden examples:
 5. `domain -> application`
 6. `domain -> infrastructure`
 
-## Default Ownership
+Layer-to-layer imports must go through the target layer shim only.
 
-### `domain/`
+1. A layer may import another layer only through that layer's export seam.
+2. No layer may deep-import internal files from another layer.
+3. Under the shared default, the layer shim is the target layer's `__init__.py` or the owning anchor shim when the target layer exposes multiple anchors.
+4. If a needed symbol is not available through the target layer shim, add or adjust the shim instead of bypassing it with a deep import.
+5. Direct imports within the same owning layer are allowed because they do not cross a layer boundary.
+6. Cross-feature imports still go only through the target feature boundary's public seam.
 
-- business rules and core domain concepts
-- entities, value objects, policies, invariants, and pure transforms
-- business-owned abstractions
-- no outward dependencies
+## Layer Layout Constraints
 
-### `infrastructure/`
+Detailed instructions and constraints are available in [Feature Layout Constriants]('FEATURE_LAYOUT.md') document.
 
-- external systems, runtime integrations, persistence, filesystem, network, subprocess, framework, and serialization details
-- implementations of abstractions owned by `domain` or `application`
-- technical-boundary translation
-- may depend on `domain`, but not on `application` or `ui`
+When that document defines a minimum layout, treat it as the required baseline anchors for a layer, not as a maximum internal file count. Additional internal modularity is allowed when complexity requires it, but it must stay inside the owning layer and preserve ownership and dependency direction.
 
-### `application/`
+Under the shared default, feature internals are class-based across all layers: free functions are forbidden in feature code, behavior should live on classes, and one class per file is the default iron rule unless a repo-local override explicitly replaces it.
 
-- use cases, orchestration, workflow coordination, and feature-to-feature adaptation
-- translation needed to execute a use case
-- application-owned abstractions for outward capabilities
-- may depend on `domain` and `infrastructure`, but not on `ui`
+Under the shared default, a required anchor may be implemented as either a file or a same-named package. If keeping the anchor as a file would force multiple classes into one file or create loose classes directly under `domain/`, the package form is required.
 
-### `ui/`
+The same anchor-form rule applies to the other layers as well: if a named infrastructure, application, or ui anchor needs multiple owned modules, keep the anchor name and switch it to package form rather than creating loose peer helpers outside that anchor.
 
-- the outermost delivery layer
-- command handlers, controllers, route handlers, presenters, renderers, and request or response mapping
-- input collection, output formatting, and user-facing interaction concerns
-- thin coordination only; business rules and workflow logic do not live here
-- may depend only on `application`
+Under the shared default, `application/` is stricter than a generic bucket: it is always organized behind `commands`, `queries`, and optional `services` or `adapters` anchors only. Do not place loose application-owned files directly under `application/` outside those anchors.
+
 
 ## Default Placement Rules
 
@@ -96,6 +89,7 @@ A repo-local replacement must define equally clear placement rules for its own p
 4. Under the shared default, `domain` must not depend on another feature, including another feature's public types or errors.
 5. Do not export helpers, mappers, validators, or intermediate models from the feature boundary.
 6. Do not let cross-feature pressure collapse the enclosure or move foreign logic into the wrong owner.
+7. The same no-deep-import rule applies across internal layers and across features: always go through the owning shim or public seam.
 
 ## Acceptance Check
 
@@ -108,3 +102,8 @@ A repo-local replacement must define equally clear placement rules for its own p
 7. The implemented shape follows the governing feature rules as a constraint.
 8. The enclosure allows internal growth without spreading ownership, seams, or coordination outside it.
 9. The enclosure produces deterministic ownership, routing, and change placement.
+10. Under the shared default domain rules, every domain class maps to exactly one anchor: `entity`, `value_object`, `service`, or `repository` when present.
+11. Under the shared default, named layer anchors keep deterministic placement by staying either as a file or as a same-named package; owned internals do not spill into loose sibling files.
+12. Layer-to-layer imports go only through the target layer shim; no deep cross-layer imports remain.
+13. Feature internals follow the class-only rule consistently across touched layers unless a documented override replaces it.
+14. Under the shared default, `application/` contains only `commands`, `queries`, and optional `services` or `adapters` anchors plus its shim; no loose application-owned files remain at the layer root.

@@ -6,6 +6,7 @@ from pathlib import Path
 CORE_RULE_DOCUMENTS = (
     "AGENT.md",
     "FEATURE.md",
+    "FEATURE_LAYOUT.md",
     "MODULE.md",
     "PLANNING.md",
     "REFACTORING.md",

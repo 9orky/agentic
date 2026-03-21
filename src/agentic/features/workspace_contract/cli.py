@@ -18,7 +18,7 @@ def _print_bootstrap_message(result) -> None:
         click.echo(
             f"Preserved {len(result.preserved_files)} existing file(s).")
     click.echo("Safe to rerun: plain 'agentic' preserves existing local files.")
-    click.echo("Next step: run 'agentic llm' and give that output to your LLM.")
+    click.echo("Next step: review agentic/agentic.yaml and run 'agentic check'.")
 
 
 def _print_update_message(result) -> None:
@@ -31,8 +31,7 @@ def _print_update_message(result) -> None:
     if result.preserved_files:
         click.echo(
             f"Preserved {len(result.preserved_files)} existing file(s).")
-    click.echo(
-        "Next step: run 'agentic llm update' for refreshed rule facts, then run 'agentic check'.")
+    click.echo("Next step: review refreshed rules and run 'agentic check'.")
 
 
 @click.command(name="init")

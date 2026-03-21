@@ -1,0 +1,2 @@
+class CheckerError(RuntimeError):
+    pass

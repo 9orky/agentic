@@ -1,0 +1,2 @@
+class ArchitectureCheckConfigError(RuntimeError):
+    pass

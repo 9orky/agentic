@@ -43,14 +43,3 @@ If current code structure conflicts with `agentic/` guidance:
 1. treat the codebase as behavioral reference, not architectural authority
 2. update `src/agentic/resources/` first if the issue reveals a reusable shared rule
 3. then update the bootstrap or handoff behavior so target projects receive the right shared contract
-
-## Current Repo-Specific Direction
-
-1. The approved direction is feature-first clean architecture.
-2. The canonical implementation lives in `src/agentic/`.
-3. Do not keep completed migration scaffolding or parallel package roots once promotion is complete.
-4. Backward compatibility is not a governing constraint unless the user explicitly reintroduces it.
-5. Each feature owns its commands in a local `cli.py`.
-6. The master `src/agentic/cli.py` binds feature-owned command sets and should not absorb feature logic.
-7. Each feature owns its own internal `app/` layer, and the feature-local `cli.py` consumes that layer.
-8. Keep feature public APIs minimal: expose only the primary feature seam and the minimum command-binding seam needed by the master CLI.

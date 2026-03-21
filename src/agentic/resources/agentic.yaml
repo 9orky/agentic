@@ -6,7 +6,7 @@
 # by repo-relative file path. Each entry contains imports, classes, and
 # functions.
 
-language: python
+language: ""
 
 exclusions:
   - tests/**
@@ -22,11 +22,3 @@ rules:
       disallow:
         - src/infra
         - src/ui
-
-    # Example for scalable feature isolation:
-    # - source: src/features/*
-    #   disallow:
-    #     - src/features/*
-    #   allow_same_match: true
-    #   allow:
-    #     - src/features/*

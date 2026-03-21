@@ -1,10 +1,10 @@
 # agentic
 
-`agentic` is a pipx-first CLI that bootstraps a project-local `agentic/` folder and uses that folder as the durable communication boundary between a user and the user's LLM.
+`agentic` is a pipx-first CLI that bootstraps a project-local `agentic/` folder and uses that folder as the durable rule and architecture contract for a project.
 
 The installed package gives you the command.
 
-The generated local `agentic/` folder gives your project a stable, repo-specific rule set, architecture contract, and handoff surface that humans and LLMs can share.
+The generated local `agentic/` folder gives your project a stable, repo-specific rule set and architecture contract.
 
 ## Install
 
@@ -41,45 +41,30 @@ If the current directory does not already contain an `agentic/` folder, the comm
 
 It is safe to rerun. Existing local files are preserved instead of overwritten.
 
-After bootstrap, the command prints the next step:
+After bootstrap, review `agentic/agentic.yaml`, adjust boundaries or exclusions as needed, and run:
 
 ```bash
-agentic llm
+agentic check
 ```
-
-That command prints the handoff prompt for the user's LLM. The intent is:
-
-1. the LLM reruns `agentic llm` anchors to recover current collaboration, rule, config, and architecture facts,
-2. scans the repository for task-specific code facts,
-3. asks the user to define missing architecture and rule decisions,
-4. uses `agentic check` for architecture validation and `agentic update` for shared-rule refresh,
-5. writes stable local rule updates into `agentic/rules/overrides/` or `agentic/rules/project-specific/`,
-6. and treats the local `agentic/` folder as the project's durable collaboration surface.
 
 ## Deterministic Usage Checklist
 
 Use this checklist from first bootstrap through steady-state use:
 
 1. Bootstrap the local collaboration surface with `agentic` if `agentic/` does not exist yet or is missing expected shared files.
-2. Start each new LLM session with `agentic llm`.
-3. At the beginning of each request, rerun the relevant fact anchors:
-  - `agentic llm bootstrap`
-  - `agentic llm rules`
-  - `agentic llm config`
-  - `agentic llm architecture`
-4. Treat those anchors as the source of current `agentic` facts instead of trusting stale prompt text, old chat context, or internal package layout.
-5. If rules or architecture are still underspecified, run a first-configuration interview with the user before making boundary or ownership decisions.
-6. Record durable decisions only in the local contract:
+2. Review the generated rules and config before changing code against them.
+3. If rules or architecture are still underspecified, run a first-configuration interview with the user before making boundary or ownership decisions.
+4. Record durable decisions only in the local contract:
   - `agentic/agentic.yaml` for config, exclusions, and boundaries
   - `agentic/rules/overrides/` for repo-local replacements of shared rules
   - `agentic/rules/project-specific/` for new repo-local rules
-7. After meaningful rule, config, or code changes, rerun the relevant anchors and run `agentic check`.
-8. Use `agentic update` only to refresh packaged shared docs, then rerun anchors to recover fresh facts.
-9. Keep `agentic/` readable for future sessions: no scratchpads, temporary logs, or disposable notes.
+5. After meaningful rule, config, or code changes, rerun `agentic check`.
+6. Use `agentic update` only to refresh packaged shared docs, then rerun `agentic check`.
+7. Keep `agentic/` readable for future sessions: no scratchpads, temporary logs, or disposable notes.
 
 ## Communication Model
 
-The local `agentic/` folder is the shared contract between the user and the user's LLM.
+The local `agentic/` folder is the shared contract for architecture rules and workspace conventions.
 
 In practice that means:
 
@@ -87,8 +72,7 @@ In practice that means:
 2. `agentic/rules/overrides/` records repo-local updates to those core docs,
 3. `agentic/rules/project-specific/` records new repo-local rules future runs must inherit,
 4. `agentic/agentic.yaml` records the user-editable architecture agreement,
-5. language-specific extractors build one common architecture map shape so checks and LLM reasoning operate on the same structure,
-6. the `agentic llm` anchor commands are the stable way to recover current collaboration, rule, config, and architecture facts.
+5. language-specific extractors build one common architecture map shape so checks operate on the same structure.
 
 `agentic/` is not a scratchpad. It is the durable surface that future sessions should be able to read without hidden context.
 
@@ -178,9 +162,8 @@ Use `agentic help` or `agentic --help` to discover the command surface in a targ
 The stable top-level workflow is:
 
 1. `agentic` bootstraps or refreshes the local collaboration surface safely.
-2. `agentic llm` prints the default downstream handoff contract.
-3. `agentic check` validates the configured architecture boundaries.
-4. `agentic update` refreshes packaged shared rules.
+2. `agentic check` validates the configured architecture boundaries.
+3. `agentic update` refreshes packaged shared rules.
 
 Bootstrap the local folder:
 
@@ -199,22 +182,6 @@ Refresh shared docs in an existing project:
 ```bash
 agentic update
 agentic update --project-root /path/to/project
-```
-
-Print the LLM handoff prompt:
-
-```bash
-agentic llm
-```
-
-Re-query current agentic facts through the implemented anchors:
-
-```bash
-agentic llm bootstrap
-agentic llm rules
-agentic llm config
-agentic llm architecture
-agentic llm update
 ```
 
 Print the command summary:
@@ -247,9 +214,9 @@ Current architecture extraction support:
 
 If you run TypeScript or PHP checks, the corresponding runtime must be available on `PATH`.
 
-## LLM Contract
+## Working Contract
 
-The generated `agentic/` folder is meant to become a long-lived collaboration boundary for LLM work.
+The generated `agentic/` folder is meant to become a long-lived architecture boundary for a project.
 
 The expected operating model is:
 
@@ -257,18 +224,15 @@ The expected operating model is:
 2. local updates to those core docs go under `agentic/rules/overrides/`,
 3. new repo-specific rules go under `agentic/rules/project-specific/`,
 4. the architecture config in `agentic/agentic.yaml` defines technical boundaries,
-5. `agentic llm` owns the LLM-facing command family and the anchors under it are the stable fact-recovery surface,
-6. future LLM sessions begin with `agentic llm` and rerun the relevant anchors instead of trusting stale prompt text,
-7. first configuration is an interactive conversation with the user about boundaries, exclusions, ownership, and update habits,
-8. `agentic check` is the architecture validation boundary and `agentic update` is the shared-rule refresh boundary.
+5. first configuration is an interactive conversation with the user about boundaries, exclusions, ownership, and update habits,
+6. `agentic check` is the architecture validation boundary and `agentic update` is the shared-rule refresh boundary.
 
 Operationally, the safest default is:
 
 1. `agentic` ensures the local collaboration surface exists.
-2. `agentic llm` and its anchors recover the current contract at the start of each request.
-3. the user and LLM close missing decisions through a first-configuration interview.
-4. durable decisions are written back into `agentic/`.
-5. `agentic check` validates the result.
+2. the user closes missing decisions through a first-configuration interview.
+3. durable decisions are written back into `agentic/`.
+4. `agentic check` validates the result.
 
 When a repo-specific clarification is needed, record it in the smallest applicable extension folder.
 
@@ -289,6 +253,4 @@ The canonical implementation lives in `src/agentic/`.
 Its feature boundaries are:
 
 1. `src/agentic/features/workspace_contract/`
-2. `src/agentic/features/configuration/`
-3. `src/agentic/features/architecture_check/`
-4. `src/agentic/features/llm_handoff/`
+2. `src/agentic/features/architecture_check/`
