@@ -85,17 +85,17 @@ These violations are heavy because they break the navigation model itself. They 
 
 ## Local Agentic Bootstrap
 
-When a project needs a local bootstrap instruction that points the agent toward the `agentic/` folder, keep that instruction minimal.
+When a project needs a local bootstrap instruction that points the agent toward the `agentic/` folder, keep that instruction minimal and manage it at one default location.
 
-Before writing it:
-
-1. clean the current project-level `agentic` instructions
-2. clean any cached copies of those old instructions
-3. define one default location for the bootstrap instruction instead of scattering multiple variants across the project
-
-The default location for that bootstrap instruction is:
+The workspace-contract behavior uses this default location:
 
 - `.github/copilot-instructions.md`
+
+The deterministic behavior is:
+
+1. `agentic init` creates the file when it is missing
+2. `agentic update` restores the file to the packaged default text
+3. the file must contain only the minimal pointer below rather than inline rule detail
 
 Place exactly this markdown text in that file:
 

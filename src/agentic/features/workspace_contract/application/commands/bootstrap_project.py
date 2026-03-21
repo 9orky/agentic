@@ -29,8 +29,10 @@ class BootstrapProject:
         )
 
     def _sync_project(self, project_root: Path, *, overwrite_existing_shared_docs: bool) -> tuple[Path, bool, tuple[Path, ...], tuple[Path, ...], tuple[Path, ...]]:
-        target_dir, created_dir = self._workspace_writer.ensure_target_directory(project_root, layout=self._policy.layout)
-        self._workspace_writer.ensure_local_extension_directories(project_root, layout=self._policy.layout)
+        target_dir, created_dir = self._workspace_writer.ensure_target_directory(
+            project_root, layout=self._policy.layout)
+        self._workspace_writer.ensure_local_extension_directories(
+            project_root, layout=self._policy.layout)
 
         shared_rule_paths = self._packaged_rules_reader.iter_shared_rule_paths()
         existing_shared_rule_paths = self._workspace_reader.existing_shared_rule_paths(
@@ -50,10 +52,13 @@ class BootstrapProject:
         preserved_files: list[Path] = []
 
         for change in planned_changes:
-            destination_path = change.destination_path(project_root, self._policy.layout)
-            document_text = self._packaged_rules_reader.read_document_text(change.shared_rule_path)
+            destination_path = change.destination_path(
+                project_root, self._policy.layout)
+            document_text = self._packaged_rules_reader.read_document_text(
+                change.shared_rule_path)
             if change.action == change.action.CREATE:
-                self._workspace_writer.write_text(destination_path, document_text)
+                self._workspace_writer.write_text(
+                    destination_path, document_text)
                 created_files.append(destination_path)
                 continue
 
@@ -72,8 +77,24 @@ class BootstrapProject:
         if self._workspace_reader.path_exists(config_path):
             preserved_files.append(config_path)
         else:
-            self._workspace_writer.write_text(config_path, self._packaged_rules_reader.default_config_text())
+            self._workspace_writer.write_text(
+                config_path, self._packaged_rules_reader.default_config_text())
             created_files.append(config_path)
+
+        bootstrap_instruction_path = self._policy.layout.bootstrap_instruction_path(
+            project_root)
+        bootstrap_instruction_text = self._packaged_rules_reader.default_bootstrap_instruction_text()
+        if self._workspace_reader.path_exists(bootstrap_instruction_path):
+            if overwrite_existing_shared_docs and self._workspace_reader.read_text(bootstrap_instruction_path) != bootstrap_instruction_text:
+                self._workspace_writer.write_text(
+                    bootstrap_instruction_path, bootstrap_instruction_text)
+                updated_files.append(bootstrap_instruction_path)
+            else:
+                preserved_files.append(bootstrap_instruction_path)
+        else:
+            self._workspace_writer.write_text(
+                bootstrap_instruction_path, bootstrap_instruction_text)
+            created_files.append(bootstrap_instruction_path)
 
         return (
             target_dir,

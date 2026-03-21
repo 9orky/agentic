@@ -49,6 +49,7 @@ class WorkspaceContractUiTests(unittest.TestCase):
             self.assertIn("Created agentic.", rendered)
             self.assertIn("Created ", rendered)
             self.assertIn("agentic/agentic.yaml", rendered)
+            self.assertIn(".github/copilot-instructions.md", rendered)
             self.assertIn("agentic check", rendered)
 
     def test_cli_update_renders_updated_shared_files(self) -> None:

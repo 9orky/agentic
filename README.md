@@ -48,3 +48,13 @@ Use the feature guide below to obtain the architecture-check configuration model
 - [src/agentic/features/architecture_check/README.md](src/agentic/features/architecture_check/README.md)
 
 That guide is the place for checker details. This README stays focused on what agentic is and how its rule system is organized.
+
+## Project Idea
+
+`agentic` is not just a tool surface. It is a system for deterministic cooperation with LLM coding agents.
+
+It gives the agent a predictable way to discover only the context it needs, in the order it needs it, so the next action is constrained by shared rules instead of guesswork.
+
+It gives the human a faster way to inspect whether the agent is following the intended path, because the reasoning surface is externalized into a visible project contract rather than hidden inside the model.
+
+The goal is simple: make collaboration with coding agents more inspectable, more repeatable, and therefore more trustworthy.

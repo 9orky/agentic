@@ -19,6 +19,9 @@ class PackagedRulesReader:
     def default_config_text(self) -> str:
         return files("agentic").joinpath("resources", "agentic.yaml").read_text(encoding="utf-8")
 
+    def default_bootstrap_instruction_text(self) -> str:
+        return files("agentic").joinpath("resources", "copilot-instructions.md").read_text(encoding="utf-8")
+
     def _iter_shared_rule_paths(self, directory, relative_path: Path) -> Iterable[SharedRulePath]:
         for child in sorted(directory.iterdir(), key=lambda item: item.name):
             child_relative_path = relative_path / child.name

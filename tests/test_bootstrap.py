@@ -41,6 +41,8 @@ class BootstrapProjectTests(unittest.TestCase):
             self.assertTrue(result.created_dir)
             self.assertTrue(
                 (project_root / "agentic" / "agentic.yaml").exists())
+            self.assertTrue(
+                (project_root / ".github" / "copilot-instructions.md").exists())
             for relative_path in _expected_shared_rule_paths():
                 self.assertTrue(
                     (project_root / "agentic" / relative_path).exists())
@@ -50,6 +52,12 @@ class BootstrapProjectTests(unittest.TestCase):
                             "rules" / "project-specific").is_dir())
             self.assertFalse((project_root / "agentic" / "guide").exists())
             self.assertFalse((project_root / "agentic" / "reference").exists())
+            self.assertEqual(
+                (project_root / ".github" /
+                 "copilot-instructions.md").read_text(encoding="utf-8"),
+                files("agentic").joinpath("resources",
+                                          "copilot-instructions.md").read_text(encoding="utf-8"),
+            )
 
     def test_bootstrap_preserves_existing_files(self) -> None:
         with TemporaryDirectory() as temp_dir:
@@ -73,6 +81,8 @@ class BootstrapProjectTests(unittest.TestCase):
 
             shared_doc_path = project_root / "agentic" / "rules" / "AGENT.md"
             config_path = project_root / "agentic" / "agentic.yaml"
+            bootstrap_instruction_path = project_root / \
+                ".github" / "copilot-instructions.md"
             project_specific_path = project_root / "agentic" / \
                 "rules" / "project-specific" / "LOCAL.md"
             override_path = project_root / "agentic" / \
@@ -83,15 +93,22 @@ class BootstrapProjectTests(unittest.TestCase):
             shared_doc_path.write_text(
                 "locally modified shared doc\n", encoding="utf-8")
             config_path.write_text("language: php\n", encoding="utf-8")
+            bootstrap_instruction_path.write_text("junk\n", encoding="utf-8")
 
             result = update_project(project_root)
 
             self.assertIn(shared_doc_path, result.updated_files)
+            self.assertIn(bootstrap_instruction_path, result.updated_files)
             self.assertIn(config_path, result.preserved_files)
             self.assertEqual(shared_doc_path.read_text(
                 encoding="utf-8"),
                 files("agentic").joinpath("resources", "rules",
                                           "AGENT.md").read_text(encoding="utf-8"),
+            )
+            self.assertEqual(
+                bootstrap_instruction_path.read_text(encoding="utf-8"),
+                files("agentic").joinpath("resources",
+                                          "copilot-instructions.md").read_text(encoding="utf-8"),
             )
             self.assertEqual(config_path.read_text(
                 encoding="utf-8"), "language: php\n")

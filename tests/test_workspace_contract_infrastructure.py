@@ -29,6 +29,23 @@ class PackagedRulesReaderTests(unittest.TestCase):
             SharedRulePath(Path("AGENT.md"))))
         self.assertIn("language:", reader.default_config_text())
 
+    def test_reads_managed_bootstrap_instruction_text(self) -> None:
+        reader = PackagedRulesReader()
+
+        self.assertEqual(
+            reader.default_bootstrap_instruction_text(),
+            "# agentic\n\nGo to the `agentic/` folder and explore it. You will find the project guidance there.\n",
+        )
+
+    def test_resources_guide_embeds_exact_bootstrap_instruction_text(self) -> None:
+        reader = PackagedRulesReader()
+        resources_guide = Path(__file__).resolve(
+        ).parents[1] / "src" / "agentic" / "resources" / "README.md"
+        expected_block = f"```md\n{reader.default_bootstrap_instruction_text().rstrip()}\n```"
+
+        self.assertIn(expected_block,
+                      resources_guide.read_text(encoding="utf-8"))
+
 
 class WorkspaceFilesystemAdapterTests(unittest.TestCase):
     def test_writer_creates_target_and_local_extension_directories(self) -> None:
@@ -64,6 +81,10 @@ class WorkspaceFilesystemAdapterTests(unittest.TestCase):
             writer.write_text(agent_document, "agent rules\n")
             writer.write_text(layout.config_path(
                 project_root), "language: python\n")
+            writer.write_text(
+                layout.bootstrap_instruction_path(project_root),
+                "# agentic\n\nGo to agentic\n",
+            )
             override_path = layout.overrides_dir(project_root) / "TESTS.md"
             project_specific_path = layout.project_specific_dir(
                 project_root) / "LOCAL.md"
@@ -73,6 +94,8 @@ class WorkspaceFilesystemAdapterTests(unittest.TestCase):
             self.assertTrue(reader.agentic_dir_exists(
                 project_root, layout=layout))
             self.assertTrue(reader.config_exists(project_root, layout=layout))
+            self.assertTrue(reader.path_exists(
+                layout.bootstrap_instruction_path(project_root)))
             self.assertEqual(
                 reader.existing_shared_rule_paths(
                     project_root,

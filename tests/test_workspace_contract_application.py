@@ -16,6 +16,8 @@ class WorkspaceContractApplicationTests(unittest.TestCase):
             self.assertEqual(result["target_dir"], project_root / "agentic")
             self.assertIn(project_root / "agentic" /
                           "agentic.yaml", result["created_files"])
+            self.assertIn(project_root / ".github" /
+                          "copilot-instructions.md", result["created_files"])
             self.assertIn(project_root / "agentic" / "rules" /
                           "AGENT.md", result["created_files"])
             self.assertEqual(result["updated_files"], ())
@@ -27,12 +29,16 @@ class WorkspaceContractApplicationTests(unittest.TestCase):
             BootstrapProject().execute(project_root)
             shared_doc_path = project_root / "agentic" / "rules" / "AGENT.md"
             config_path = project_root / "agentic" / "agentic.yaml"
+            bootstrap_instruction_path = project_root / \
+                ".github" / "copilot-instructions.md"
             shared_doc_path.write_text("locally modified\n", encoding="utf-8")
             config_path.write_text("language: php\n", encoding="utf-8")
+            bootstrap_instruction_path.write_text("junk\n", encoding="utf-8")
 
             result = UpdateProject().execute(project_root)
 
             self.assertIn(shared_doc_path, result["updated_files"])
+            self.assertIn(bootstrap_instruction_path, result["updated_files"])
             self.assertIn(config_path, result["preserved_files"])
             self.assertNotIn(shared_doc_path, result["preserved_files"])
 

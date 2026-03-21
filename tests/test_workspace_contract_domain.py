@@ -39,6 +39,10 @@ class WorkspaceContractLayoutTests(unittest.TestCase):
         self.assertEqual(layout.config_path(project_root),
                          project_root / "agentic" / "agentic.yaml")
         self.assertEqual(
+            layout.bootstrap_instruction_path(project_root),
+            project_root / ".github" / "copilot-instructions.md",
+        )
+        self.assertEqual(
             layout.shared_rule_destination(project_root, shared_rule_path),
             project_root / "agentic" / "rules" / "AGENT.md",
         )
