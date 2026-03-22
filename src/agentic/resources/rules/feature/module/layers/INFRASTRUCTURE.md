@@ -4,11 +4,11 @@ Document Class: leaf
 
 ## Purpose
 
-`infrastructure` owns persistence, integrations, serialization, and concrete adapters.
+Within the owning module, `infrastructure` owns persistence, integrations, serialization, and concrete adapters.
 
 ## Applies When
 
-Read this file when the task affects persistence, subprocesses, filesystem, network, external services, or concrete adapter implementations.
+Read this file when the task affects persistence, storage adapters, boundary translation, execution-environment integrations, external capability adapters, or concrete adapter implementations inside the current module.
 
 ## Ownership
 
@@ -16,8 +16,8 @@ Read this file when the task affects persistence, subprocesses, filesystem, netw
 
 1. repository implementations
 2. persistence mappings
-3. external clients and runtime integrations
-4. serialization and technical-boundary translation
+3. external capability adapters and execution-environment integrations
+4. representation mapping and boundary translation
 5. concrete implementations of abstractions owned by `domain` or `application`
 
 `infrastructure` may depend on `domain`, but not on `application` or `ui`.
@@ -36,7 +36,7 @@ Read this file when the task affects persistence, subprocesses, filesystem, netw
 ### Placement Rules
 
 1. Put concrete adapters here, not in `application`.
-2. Keep external-system types and mappings here.
+2. Keep boundary representations and mappings here.
 3. Do not move workflow or business rules into infrastructure to simplify wiring.
 
 ## Acceptance Check

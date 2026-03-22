@@ -4,11 +4,11 @@ Document Class: leaf
 
 ## Purpose
 
-`domain` owns business concepts, invariants, and domain-owned abstractions.
+Within the owning module, `domain` owns business concepts, invariants, and domain-owned abstractions.
 
 ## Applies When
 
-Read this file when the task affects business concepts, invariants, or domain-owned abstractions.
+Read this file when the task affects business concepts, invariants, or domain-owned abstractions inside the current module.
 
 ## Ownership
 

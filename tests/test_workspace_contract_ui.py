@@ -8,7 +8,7 @@ import click
 
 from agentic.features.workspace_contract import BootstrapError, RuleSchemaValidationResult, SyncResult, bootstrap_project, describe_rule_schema_drift, describe_workspace_contract, update_project
 from agentic.features.workspace_contract.cli import workspace_contract_cli
-from agentic.features.workspace_contract.ui.views import RuleSchemaDriftView, SyncSummaryView
+from agentic.features.workspace_contract.contract.ui.views import RuleSchemaDriftView, SyncSummaryView
 
 
 class WorkspaceContractBoundaryTests(unittest.TestCase):
@@ -103,6 +103,7 @@ class WorkspaceContractUiTests(unittest.TestCase):
                 / "agentic"
                 / "rules"
                 / "feature"
+                / "module"
                 / "layers"
                 / "APPLICATION.md"
             )
@@ -122,7 +123,8 @@ class WorkspaceContractUiTests(unittest.TestCase):
             self.assertEqual(exit_code, 1)
             rendered = output.getvalue()
             self.assertIn("Rule schema drift detected.", rendered)
-            self.assertIn("[local] feature/layers/APPLICATION.md", rendered)
+            self.assertIn(
+                "[local] feature/module/layers/APPLICATION.md", rendered)
             self.assertIn("anchor-profile-drift", rendered)
 
     def test_sync_summary_view_renders_summary_counts(self) -> None:

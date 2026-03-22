@@ -48,14 +48,14 @@ This file governs target-design refactoring, fresh-slice decisions, feature encl
 2. Do not add helper exports or public shims to preserve accidental callers.
 3. Do not collapse responsibilities into the public boundary as a shortcut.
 4. Do not blur ownership or spread feature growth beyond the enclosure.
-5. Do not duplicate a packaged resource tree, rules tree, or filesystem contract as a second hardcoded manifest when the source-of-truth tree can be enumerated directly.
+5. Do not duplicate a packaged resource tree, rules tree, or workspace contract as a second hardcoded manifest when the source-of-truth tree can be enumerated directly.
 6. Do not treat the legacy feature folder as architectural authority during a fresh-slice refactor.
 7. Do not skip the `<feature_name>_refactor` folder when the refactor is being executed as a fresh start.
 8. Do not keep both legacy and refactored feature folders active after the verified swap.
 
 ## If Ambiguous, Go To
 
-If the task raises placement or ownership ambiguity, use [../feature/FEATURE.md](../feature/FEATURE.md) to obtain the next valid feature links and then follow only the layer document that resolves that ambiguity.
+If the task raises placement or ownership ambiguity, use [../feature/FEATURE.md](../feature/FEATURE.md) to obtain the next valid feature links, then use [../feature/module/MODULE.md](../feature/module/MODULE.md) to resolve module ownership before following the single layer document that resolves the remaining ambiguity.
 
 ## Acceptance Check
 

@@ -10,7 +10,7 @@ from agentic.cli import main
 
 
 class ArchitectureReportingTests(unittest.TestCase):
-    @patch("agentic.features.architecture_check.infrastructure.extractor_runtime.subprocess.run")
+    @patch("agentic.features.architecture_check.checker.infrastructure.extractor_runtime.subprocess.run")
     def test_check_command_groups_flow_violations_in_text_output(self, mock_run: Mock) -> None:
         with TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)
@@ -71,7 +71,7 @@ class ArchitectureReportingTests(unittest.TestCase):
             self.assertIn(
                 "src/features/order/api.py -> src/modules/payment/service.py -> src/adapters/stripe/client.py -> [src/modules/user/service.py]  no-reentry", rendered)
 
-    @patch("agentic.features.architecture_check.infrastructure.extractor_runtime.subprocess.run")
+    @patch("agentic.features.architecture_check.checker.infrastructure.extractor_runtime.subprocess.run")
     def test_check_command_supports_json_output(self, mock_run: Mock) -> None:
         with TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)
@@ -116,7 +116,7 @@ class ArchitectureReportingTests(unittest.TestCase):
             self.assertEqual(payload["violations"][0]["path"], [
                              "src/domain/logic.py", "src/infra/database.py"])
 
-    @patch("agentic.features.architecture_check.infrastructure.extractor_runtime.subprocess.run")
+    @patch("agentic.features.architecture_check.checker.infrastructure.extractor_runtime.subprocess.run")
     def test_check_command_writes_dot_for_violating_paths(self, mock_run: Mock) -> None:
         with TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)

@@ -24,6 +24,7 @@ Guidelines:
 5. keep the same discovery path stable over time unless the old path has become noisy, leaky, or ambiguous
 6. when adding a new rule split, update the parent router so the agent can discover it through normal navigation rather than by coincidence
 7. if a task needs another rule set, link to that rule set instead of restating its detailed rules locally
+8. keep shared rule docs tech-stack agnostic; do not name specific languages, frameworks, runtimes, package managers, or delivery/execution technologies in packaged rule docs, and place stable stack-specific guidance only in repo-local overrides or project-specific docs
 
 The goal is not only clean documentation. The goal is reliable agent routing: the agent should be able to identify the current governing rule set, the next valid document, and the stopping point for loaded detail without guesswork.
 
@@ -69,6 +70,7 @@ The risks below are standing guidance and should stay visible whenever the packa
 3. router bloat makes AGENT.md or a bootstrap file drift back into a rules dump
 4. abstraction leaks happen when one rule set embeds another rule set's detailed logic instead of linking to it
 5. duplicated manifests of the packaged rules tree create drift; when code needs the tree shape, enumerate the packaged source-of-truth tree directly instead of copying file lists into multiple places
+6. tech-specific wording in shared rules makes the default contract less reusable and pushes package behavior toward one stack instead of a general architecture model
 
 Treat these risks as active maintenance pressure. The correct structure is not fixed permanently. It should be refined whenever the navigation model becomes noisy, leaky, or harder to supervise.
 

@@ -3,8 +3,8 @@ from tempfile import TemporaryDirectory
 import unittest
 
 from agentic.features.architecture_check import load_config
-from agentic.features.architecture_check.application.queries.load_config import LoadConfigQuery
-from agentic.features.architecture_check.infrastructure import ConfigLoader
+from agentic.features.architecture_check.checker.application.queries.load_config import LoadConfigQuery
+from agentic.features.architecture_check.checker.infrastructure import ConfigLoader
 from agentic.project_layout import AgenticProjectLayout
 
 

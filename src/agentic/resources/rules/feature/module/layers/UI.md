@@ -4,18 +4,18 @@ Document Class: leaf
 
 ## Purpose
 
-`ui` owns delivery entrypoints, request and response mapping, and presentation shaping.
+Within the owning module, `ui` owns delivery entrypoints, request and response mapping, and presentation shaping.
 
 ## Applies When
 
-Read this file when the task affects command binding, controllers, presenters, request parsing, or response formatting.
+Read this file when the task affects input binding, delivery coordinators, presenters, input shaping, or output shaping inside the current module.
 
 ## Ownership
 
 `ui` owns:
 
-1. CLI or endpoint entrypoints
-2. request and response mapping
+1. delivery entrypoints
+2. input and output mapping
 3. presentation shaping and view models
 4. delivery-specific helper logic
 
@@ -27,7 +27,7 @@ Read this file when the task affects command binding, controllers, presenters, r
 
 Use these anchors as the minimum delivery surface:
 
-1. `cli`
+1. one entrypoint anchor
 2. `views`
 3. `services`
 

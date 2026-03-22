@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import click
 
-from .ui import ArchitectureCheckCli
+from .checker.ui import ArchitectureCheckCli
 
 
 def architecture_check_cli(

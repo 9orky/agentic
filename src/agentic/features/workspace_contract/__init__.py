@@ -3,12 +3,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from .application import BootstrapProject as _BootstrapProject
-from .application import DescribeRuleSchemaDrift as _DescribeRuleSchemaDrift
-from .application import DescribeWorkspaceContract as _DescribeWorkspaceContract
-from .application import RuleSchemaValidationResult
-from .application import UpdateProject as _UpdateProject
-from .domain import WorkspaceContractSummary
+from .contract.application import BootstrapProject as _BootstrapProject
+from .contract.application import DescribeRuleSchemaDrift as _DescribeRuleSchemaDrift
+from .contract.application import DescribeWorkspaceContract as _DescribeWorkspaceContract
+from .contract.application import RuleSchemaValidationResult
+from .contract.application import UpdateProject as _UpdateProject
+from .contract.domain import WorkspaceContractSummary
 
 
 class BootstrapError(RuntimeError):

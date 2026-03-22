@@ -89,7 +89,7 @@ After the final step:
 
 ### Layer Routing
 
-When a step needs layer-specific constraints, read only the matching file under `rules/feature/layers/`.
+When a step needs layer-specific constraints, read only the matching file under `rules/feature/module/layers/`.
 
 ## Acceptance Check
 

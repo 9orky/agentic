@@ -2,7 +2,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
 
-from agentic.features.workspace_contract.application import BootstrapProject, DescribeRuleSchemaDrift, DescribeWorkspaceContract, UpdateProject
+from agentic.features.workspace_contract.contract.application import BootstrapProject, DescribeRuleSchemaDrift, DescribeWorkspaceContract, UpdateProject
 
 
 class WorkspaceContractApplicationTests(unittest.TestCase):
@@ -80,7 +80,7 @@ class RuleSchemaValidationApplicationTests(unittest.TestCase):
 
             self.assertFalse(result.has_findings)
             self.assertIn(Path("AGENT.md"), result.packaged_documents)
-            self.assertIn(Path("feature") / "layers" /
+            self.assertIn(Path("feature") / "module" / "layers" /
                           "APPLICATION.md", result.local_documents)
 
     def test_reports_anchor_drift_in_local_mirror(self) -> None:
@@ -93,6 +93,7 @@ class RuleSchemaValidationApplicationTests(unittest.TestCase):
                 / "agentic"
                 / "rules"
                 / "feature"
+                / "module"
                 / "layers"
                 / "APPLICATION.md"
             )
@@ -109,7 +110,7 @@ class RuleSchemaValidationApplicationTests(unittest.TestCase):
             self.assertTrue(result.has_findings)
             self.assertEqual(result.findings[0].scope, "local")
             self.assertEqual(result.findings[0].document_path, Path(
-                "feature") / "layers" / "APPLICATION.md")
+                "feature") / "module" / "layers" / "APPLICATION.md")
             self.assertEqual(result.findings[0].code, "anchor-profile-drift")
             self.assertIsNone(result.findings[0].section_heading)
 

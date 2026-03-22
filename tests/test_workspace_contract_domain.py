@@ -1,7 +1,7 @@
 from pathlib import Path
 import unittest
 
-from agentic.features.workspace_contract.domain import RuleDocumentClass, RuleDocumentSchema, RuleSchemaPolicy, SharedRulePath, SyncAction, SyncPolicy, WorkspaceContractLayout
+from agentic.features.workspace_contract.contract.domain import RuleDocumentClass, RuleDocumentSchema, RuleSchemaPolicy, SharedRulePath, SyncAction, SyncPolicy, WorkspaceContractLayout
 
 
 class SharedRulePathTests(unittest.TestCase):

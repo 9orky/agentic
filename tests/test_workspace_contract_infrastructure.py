@@ -1,12 +1,61 @@
+import re
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
 
-from agentic.features.workspace_contract.domain import RuleDocumentClass, SharedRulePath, WorkspaceContractLayout
-from agentic.features.workspace_contract.infrastructure import PackagedRulesReader, RuleMarkdownParser, RuleTreeReader, WorkspaceReader, WorkspaceWriter
+from agentic.features.workspace_contract.contract.domain import RuleDocumentClass, SharedRulePath, WorkspaceContractLayout
+from agentic.features.workspace_contract.contract.infrastructure import PackagedRulesReader, RuleMarkdownParser, RuleTreeReader, WorkspaceReader, WorkspaceWriter
 
 
 class PackagedRulesReaderTests(unittest.TestCase):
+    _forbidden_rule_stack_terms = {
+        r"\bpython\b": "python",
+        r"\btypescript\b": "typescript",
+        r"\bjavascript\b": "javascript",
+        r"\bphp\b": "php",
+        r"\bjava\b": "java",
+        r"\bruby\b": "ruby",
+        r"\brust\b": "rust",
+        r"\bkotlin\b": "kotlin",
+        r"\bswift\b": "swift",
+        r"\bscala\b": "scala",
+        r"\belixir\b": "elixir",
+        r"\bclojure\b": "clojure",
+        r"\bdjango\b": "django",
+        r"\bflask\b": "flask",
+        r"\bfastapi\b": "fastapi",
+        r"\breact\b": "react",
+        r"\bvue\b": "vue",
+        r"\bangular\b": "angular",
+        r"\bsvelte\b": "svelte",
+        r"\bnext\.js\b": "next.js",
+        r"\bnuxt\b": "nuxt",
+        r"\bnestjs\b": "nestjs",
+        r"\blaravel\b": "laravel",
+        r"\bsymfony\b": "symfony",
+        r"\brails\b": "rails",
+        r"\basp\.net\b": "asp.net",
+        r"\bdotnet\b": "dotnet",
+        r"\bnpm\b": "npm",
+        r"\bpnpm\b": "pnpm",
+        r"\byarn\b": "yarn",
+        r"\bpip\b": "pip",
+        r"\bpoetry\b": "poetry",
+        r"\bcomposer\b": "composer",
+        r"\bmaven\b": "maven",
+        r"\bgradle\b": "gradle",
+        r"\bclick\b": "click",
+        r"\bdocker\b": "docker",
+        r"\bkubernetes\b": "kubernetes",
+        r"\bterraform\b": "terraform",
+        r"\bansible\b": "ansible",
+        r"\bsubprocess(?:es)?\b": "subprocess",
+        r"\bfilesystem\b": "filesystem",
+        r"\bnetwork\b": "network",
+        r"\bcli\b": "cli",
+        r"\bendpoint(?:s)?\b": "endpoint",
+    }
+
     def test_iter_shared_rule_paths_reads_packaged_rules_tree(self) -> None:
         reader = PackagedRulesReader()
 
@@ -61,6 +110,19 @@ class PackagedRulesReaderTests(unittest.TestCase):
 
         self.assertIn(expected_block,
                       resources_guide.read_text(encoding="utf-8"))
+
+    def test_packaged_rule_docs_remain_tech_stack_agnostic(self) -> None:
+        reader = PackagedRulesReader()
+        findings: list[str] = []
+
+        for document_path in reader.iter_rule_document_paths():
+            document_text = reader.read_rule_document_text(
+                document_path).lower()
+            for pattern, label in self._forbidden_rule_stack_terms.items():
+                if re.search(pattern, document_text) is not None:
+                    findings.append(f"{document_path.as_posix()}: {label}")
+
+        self.assertEqual(findings, [])
 
 
 class WorkspaceFilesystemAdapterTests(unittest.TestCase):
@@ -176,7 +238,8 @@ class RuleTreeReaderTests(unittest.TestCase):
         document_paths = reader.iter_packaged_rule_documents()
 
         self.assertIn(Path("AGENT.md"), document_paths)
-        self.assertIn(Path("feature") / "layers" / "DOMAIN.md", document_paths)
+        self.assertIn(Path("feature") / "module" /
+                      "layers" / "DOMAIN.md", document_paths)
         self.assertEqual(document_paths, tuple(
             sorted(document_paths, key=lambda path: path.as_posix())))
 
@@ -282,7 +345,7 @@ Document Class: navigational
 
 1. The model is valid.
 """,
-            source_path=Path("feature/layers/DOMAIN.md"),
+            source_path=Path("feature/module/layers/DOMAIN.md"),
         )
 
         self.assertIsNone(document.declared_document_class)

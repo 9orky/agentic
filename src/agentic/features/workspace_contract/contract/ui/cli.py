@@ -4,7 +4,7 @@ from pathlib import Path
 
 import click
 
-from .. import BootstrapError
+from ... import BootstrapError
 from ..application import BootstrapProject, DescribeRuleSchemaDrift, UpdateProject
 from .views import RuleSchemaDriftView, SyncSummaryView
 

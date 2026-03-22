@@ -8,7 +8,7 @@ from agentic.features.architecture_check import CheckerError, run_architecture_c
 
 
 class CheckerTests(unittest.TestCase):
-    @patch("agentic.features.architecture_check.infrastructure.extractor_runtime.subprocess.run")
+    @patch("agentic.features.architecture_check.checker.infrastructure.extractor_runtime.subprocess.run")
     def test_rejects_non_json_extractor_output_through_public_seam(self, mock_run: Mock) -> None:
         with TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)
@@ -25,7 +25,7 @@ class CheckerTests(unittest.TestCase):
 
             self.assertIn("valid JSON", str(context.exception))
 
-    @patch("agentic.features.architecture_check.infrastructure.extractor_runtime.subprocess.run")
+    @patch("agentic.features.architecture_check.checker.infrastructure.extractor_runtime.subprocess.run")
     def test_rejects_invalid_extractor_contract_through_public_seam(self, mock_run: Mock) -> None:
         with TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)

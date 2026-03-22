@@ -26,7 +26,7 @@ Use this file to route planning work.
 4. After approval, split the accepted plan into executable step files named `PLAN_STEP_0X.md`.
 5. Keep every `PLAN_STEP_0X.md` file at the same directory level as its owning `PLAN.md`.
 6. Do not place step files in nested planning subdirectories.
-7. Follow feature-layer links only when the planning document indicates that more ownership or placement detail is needed.
+7. Follow feature-module and module-layer links only when the planning document indicates that more ownership or placement detail is needed.
 
 ## Exit Condition
 

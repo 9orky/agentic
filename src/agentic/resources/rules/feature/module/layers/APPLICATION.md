@@ -4,11 +4,11 @@ Document Class: leaf
 
 ## Purpose
 
-`application` owns use cases, workflow orchestration, and feature-to-feature coordination.
+Within the owning module, `application` owns use cases, workflow orchestration, and feature-to-feature coordination.
 
 ## Applies When
 
-Read this file when the task affects use cases, workflow orchestration, or feature-to-feature coordination.
+Read this file when the task affects use cases, workflow orchestration, or feature-to-feature coordination inside the current module.
 
 ## Ownership
 
