@@ -1,16 +1,33 @@
 # Infrastructure Layer Rules
 
-Document Class: leaf
+Document Class: navigational
 
 ## Purpose
 
-Within the owning module, `infrastructure` owns persistence, integrations, serialization, and concrete adapters.
+Within the owning module, `infrastructure` routes concrete adapter work to the correct infrastructure rule set while keeping persistence, integrations, and shim design distinct from application and UI concerns.
 
-## Applies When
+## Use This When
 
-Read this file when the task affects persistence, storage adapters, boundary translation, execution-environment integrations, external capability adapters, or concrete adapter implementations inside the current module.
+1. Use this file when module ownership is already clear and the task belongs in `infrastructure`.
+2. Use this file when the task affects persistence, boundary translation, external capability adapters, execution-environment integrations, or infrastructure shims.
+3. Follow a child document when the task needs structure-specific or shim-specific rules.
 
-## Ownership
+## Available Options
+
+| Document | Information You Can Obtain |
+| --- | --- |
+| [infrastructure/STRUCTURE.md](infrastructure/STRUCTURE.md) | the anchor and placement rules for repositories, concrete adapters, mappings, and inward-only dependencies |
+| [infrastructure/SHIMS.md](infrastructure/SHIMS.md) | the rules for infrastructure layer shims and anchor shims, including when they should expose factory functions instead of concrete wiring internals |
+
+## Navigation Rule
+
+1. Stay in this file until it is clear whether the question is about infrastructure placement or infrastructure shim design.
+2. Follow [infrastructure/STRUCTURE.md](infrastructure/STRUCTURE.md) when deciding where repository implementations, adapters, mappings, or translation logic belong.
+3. Follow [infrastructure/SHIMS.md](infrastructure/SHIMS.md) when deciding what `infrastructure/__init__.py` or an anchor shim should export.
+4. Keep workflow ownership in `application` even when infrastructure makes the concrete adapters available.
+5. If the task is actually business modeling or delivery shaping, return to the owning module router and choose the correct sibling layer document.
+
+## Local Context
 
 `infrastructure` owns:
 
@@ -22,41 +39,9 @@ Read this file when the task affects persistence, storage adapters, boundary tra
 
 `infrastructure` may depend on `domain`, but not on `application` or `ui`.
 
-## Core Rules
+Cross-layer consumers may import infrastructure symbols only through `infrastructure/__init__.py` or the owning anchor shim.
 
-### Anchor Contract
+## Exit Condition
 
-Under the shared default, `infrastructure/` is anchor-based.
-
-Use these root forms:
-
-1. `repository` when infrastructure implements domain-owned repository contracts
-2. one named adapter anchor per external boundary, storage mode, runtime capability, or translation concern
-3. one standalone adapter file at the layer root only when it owns a single concrete concern and does not need private substructure yet
-
-Do not create generic buckets such as `helpers`, `utils`, `common`, or `misc` under `infrastructure`.
-
-### Layout Constraints
-
-1. Use `repository` as the anchor when infrastructure implements repository contracts.
-2. If repository implementation needs multiple files, use `repository/` rather than loose sibling files.
-3. If a standalone adapter grows private helpers or multiple concrete implementations, convert it to a same-named package.
-4. Keep boundary translation and representation mapping behind the owning adapter anchor rather than as loose cross-cutting files.
-5. Cross-layer consumers may import infrastructure symbols only through `infrastructure/__init__.py` or the owning anchor shim.
-
-## Constraints
-
-### Placement Rules
-
-1. Put concrete adapters here, not in `application`.
-2. Keep boundary representations and mappings here.
-3. Do not move workflow or business rules into infrastructure to simplify wiring.
-4. Do not import application internals from infrastructure; if an application-facing seam is needed, expose it from `application` and let application choose the adapter through its own boundary.
-
-## Acceptance Check
-
-1. Concrete adapters live in infrastructure, not in other layers.
-2. Infrastructure depends only inward on domain.
-3. Repository implementations stay behind the repository anchor when that anchor exists.
-4. Root-level infrastructure files each own one concrete concern; larger concerns move behind a named anchor.
-5. No cross-layer deep imports remain.
+1. The next infrastructure rule is clear: [infrastructure/STRUCTURE.md](infrastructure/STRUCTURE.md), [infrastructure/SHIMS.md](infrastructure/SHIMS.md), or continued work inside the current file's local context.
+2. The task still fits `infrastructure` rather than `application`, `domain`, or `ui`.

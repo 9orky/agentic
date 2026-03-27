@@ -148,19 +148,20 @@ class WorkspaceContractUiTests(unittest.TestCase):
         with TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)
             bootstrap_project(project_root)
-            local_application_doc = (
+            local_command_doc = (
                 project_root
                 / "agentic"
                 / "rules"
                 / "feature"
                 / "module"
                 / "layers"
-                / "APPLICATION.md"
+                / "application"
+                / "COMMANDS.md"
             )
-            local_application_doc.write_text(
-                local_application_doc.read_text(encoding="utf-8").replace(
-                    "### Required Anchors",
-                    "### Required Anchor Set",
+            local_command_doc.write_text(
+                local_command_doc.read_text(encoding="utf-8").replace(
+                    "### Naming",
+                    "### Command Naming",
                 ),
                 encoding="utf-8",
             )
@@ -174,7 +175,7 @@ class WorkspaceContractUiTests(unittest.TestCase):
             rendered = output.getvalue()
             self.assertIn("Rule schema drift detected.", rendered)
             self.assertIn(
-                "[local] feature/module/layers/APPLICATION.md", rendered)
+                "[local] feature/module/layers/application/COMMANDS.md", rendered)
             self.assertIn("anchor-profile-drift", rendered)
 
     def test_sync_summary_view_renders_summary_counts(self) -> None:

@@ -247,19 +247,20 @@ class RuleSchemaValidationApplicationTests(unittest.TestCase):
             project_root = Path(temp_dir)
 
             build_default_bootstrap_project().execute(project_root)
-            local_application_doc = (
+            local_command_doc = (
                 project_root
                 / "agentic"
                 / "rules"
                 / "feature"
                 / "module"
                 / "layers"
-                / "APPLICATION.md"
+                / "application"
+                / "COMMANDS.md"
             )
-            local_application_doc.write_text(
-                local_application_doc.read_text(encoding="utf-8").replace(
-                    "### Required Anchors",
-                    "### Required Anchor Set",
+            local_command_doc.write_text(
+                local_command_doc.read_text(encoding="utf-8").replace(
+                    "### Naming",
+                    "### Command Naming",
                 ),
                 encoding="utf-8",
             )
@@ -268,8 +269,11 @@ class RuleSchemaValidationApplicationTests(unittest.TestCase):
 
             self.assertTrue(result.has_findings)
             self.assertEqual(result.findings[0].scope, "local")
-            self.assertEqual(result.findings[0].document_path, Path(
-                "feature") / "module" / "layers" / "APPLICATION.md")
+            self.assertEqual(
+                result.findings[0].document_path,
+                Path("feature") / "module" / "layers" /
+                "application" / "COMMANDS.md",
+            )
             self.assertEqual(result.findings[0].code, "anchor-profile-drift")
             self.assertIsNone(result.findings[0].section_heading)
 

@@ -135,4 +135,5 @@ def build_default_architecture_report_builder() -> ArchitectureReportBuilder:
     )
 
 
-__all__ = ["ArchitectureReportBuilder", "build_default_architecture_report_builder"]
+__all__ = ["ArchitectureReportBuilder",
+           "build_default_architecture_report_builder"]

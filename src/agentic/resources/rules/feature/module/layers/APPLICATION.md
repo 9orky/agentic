@@ -1,30 +1,33 @@
 # Application Layer Rules
 
-Document Class: leaf
+Document Class: navigational
 
 ## Purpose
 
-Within the owning module, `application` owns use cases, workflow orchestration, and feature-to-feature coordination.
+Within the owning module, `application` routes use-case work to the correct application seam and keeps orchestration distinct from domain, infrastructure, and UI concerns.
 
-## Applies When
+## Use This When
 
-Read this file when the task affects use cases, workflow orchestration, or feature-to-feature coordination inside the current module.
+1. Use this file when module ownership is already clear and the task belongs in `application`.
+2. Use this file when the task affects commands, queries, workflow orchestration, transaction boundaries, or feature-to-feature adaptation.
+3. Follow a child document when the task needs command-specific or query-specific rules.
 
-## Ownership
+## Available Options
 
-`application` owns:
+| Document | Information You Can Obtain |
+| --- | --- |
+| [application/COMMANDS.md](application/COMMANDS.md) | the write-side command rules for naming, state change, port-agnostic invocation, and command-local DTO placement |
+| [application/QUERIES.md](application/QUERIES.md) | the read-side query rules for naming, returned DTOs, port-agnostic invocation, and no-rendering data contracts |
 
-1. commands and write-side use cases
-2. queries and read-side use cases
-3. workflow coordination and transaction boundaries
-4. application-owned abstractions for outward capabilities
-5. feature-to-feature adaptation
+## Navigation Rule
 
-`application` may depend on `domain` and `infrastructure`, but not on `ui`.
+1. Stay in this file until it is clear whether the use case is a command, a query, reusable application orchestration, or feature-to-feature adaptation.
+2. Follow [application/COMMANDS.md](application/COMMANDS.md) when the use case changes system state.
+3. Follow [application/QUERIES.md](application/QUERIES.md) when the use case reads data without changing system state.
+4. Keep reusable orchestration behind `services` and feature-to-feature adaptation behind `adapters` rather than creating extra root anchors.
+5. If the work is actually business modeling, concrete integration, or delivery parsing or rendering, return to the owning module router and choose the correct sibling layer document.
 
-## Core Rules
-
-### Required Anchors
+## Local Context
 
 Under the shared default, `application/` is organized only behind these anchors:
 
@@ -33,27 +36,13 @@ Under the shared default, `application/` is organized only behind these anchors:
 3. `services` when reusable orchestration is needed
 4. `adapters` when feature-to-feature adaptation is needed
 
-Do not leave loose application-owned files directly under `application/` outside those anchors.
+Commands and queries are the primary use-case seams.
 
-### Layout Constraints
+`application` may depend on `domain` and `infrastructure`, but not on `ui`.
 
-1. `commands` and `queries` are required anchors.
-2. If multiple handlers are needed, use package form for that anchor.
-3. Reusable orchestration grows behind `services.py` or `services/`.
-4. Cross-feature adaptation grows behind `adapters/`.
-5. Cross-layer consumers may import application symbols only through `application/__init__.py` or the owning anchor shim.
+Cross-layer consumers may import application symbols only through `application/__init__.py` or the owning anchor shim.
 
-## Constraints
+## Exit Condition
 
-### Placement Rules
-
-1. Keep business concepts in `domain`, not `application`.
-2. Keep technical adapters in `infrastructure`, not `application`.
-3. Keep user-facing parsing and rendering in `ui`, not `application`.
-
-## Acceptance Check
-
-1. Every touched application file belongs to one of the allowed anchors.
-2. Commands and queries remain the primary use-case seams.
-3. Cross-feature adaptation stays in `application`.
-4. No loose root files appear under `application/`.
+1. The next application rule is clear: [application/COMMANDS.md](application/COMMANDS.md), [application/QUERIES.md](application/QUERIES.md), or continued work inside the current file's local context for `services` or `adapters` placement.
+2. The task still fits `application` rather than `domain`, `infrastructure`, or `ui`.

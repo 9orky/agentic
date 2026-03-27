@@ -113,6 +113,14 @@ class PackagedRulesReaderTests(unittest.TestCase):
         self.assertIn("ddd/DDD.md", rendered_paths)
         self.assertIn("ddd/STRATEGIC.md", rendered_paths)
         self.assertIn("ddd/TACTICAL.md", rendered_paths)
+        self.assertIn(
+            "feature/module/layers/application/COMMANDS.md", rendered_paths)
+        self.assertIn(
+            "feature/module/layers/application/QUERIES.md", rendered_paths)
+        self.assertIn(
+            "feature/module/layers/infrastructure/SHIMS.md", rendered_paths)
+        self.assertIn(
+            "feature/module/layers/infrastructure/STRUCTURE.md", rendered_paths)
         self.assertIn("planning/PLANNING.md", rendered_paths)
         self.assertIn("refactoring/REFACTORING.md", rendered_paths)
         self.assertEqual(rendered_paths, tuple(sorted(rendered_paths)))
@@ -135,6 +143,14 @@ class PackagedRulesReaderTests(unittest.TestCase):
 
         self.assertIn(Path("AGENT.md"), document_paths)
         self.assertIn(Path("ddd") / "DDD.md", document_paths)
+        self.assertIn(Path("feature") / "module" / "layers" /
+                      "application" / "COMMANDS.md", document_paths)
+        self.assertIn(Path("feature") / "module" / "layers" /
+                      "application" / "QUERIES.md", document_paths)
+        self.assertIn(Path("feature") / "module" / "layers" /
+                      "infrastructure" / "SHIMS.md", document_paths)
+        self.assertIn(Path("feature") / "module" / "layers" /
+                      "infrastructure" / "STRUCTURE.md", document_paths)
         self.assertIn(Path("planning") / "PLANNING.md", document_paths)
         self.assertFalse(any(path.is_absolute() for path in document_paths))
 
