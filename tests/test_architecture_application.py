@@ -78,7 +78,7 @@ class ArchitectureCheckApplicationPackageTests(unittest.TestCase):
         )
         self.assertEqual(
             tuple(inspect.signature(LoadConfigQuery).parameters),
-            ("config_loader",),
+            ("config_load_service",),
         )
         self.assertEqual(
             tuple(inspect.signature(BuildArchitectureReportQuery).parameters),
@@ -97,7 +97,7 @@ class ArchitectureCheckApplicationPackageTests(unittest.TestCase):
         )
         self.assertIs(
             inspect.signature(
-                LoadConfigQuery).parameters["config_loader"].default,
+                LoadConfigQuery).parameters["config_load_service"].default,
             inspect._empty,
         )
         self.assertIs(
@@ -122,7 +122,7 @@ class ArchitectureCheckApplicationPackageTests(unittest.TestCase):
                 "architecture_check_service.py",
                 "architecture_report_builder",
                 "architecture_summary_service.py",
-                "runtime_registry.py",
+                "config_load_service.py",
             },
         )
 
@@ -149,7 +149,6 @@ class ArchitectureCheckApplicationPackageTests(unittest.TestCase):
                 "architecture_evaluator.py",
                 "dependency_graph_builder.py",
                 "service.py",
-                "violation_group.py",
                 "violation_renderer.py",
             },
         )
@@ -157,6 +156,7 @@ class ArchitectureCheckApplicationPackageTests(unittest.TestCase):
     def test_service_constructors_require_non_nullable_collaborators(self) -> None:
         from agentic.features.architecture_check.checker.application.services.architecture_check_service import ArchitectureCheckService
         from agentic.features.architecture_check.checker.application.services.architecture_summary_service import ArchitectureSummaryService
+        from agentic.features.architecture_check.checker.application.services.config_load_service import ConfigLoadService
         from agentic.features.architecture_check.checker.application.services.architecture_report_builder import ArchitectureReportBuilder
         from agentic.features.architecture_check.checker.application.services.architecture_report_builder.architecture_evaluator import ArchitectureEvaluator
 
@@ -169,9 +169,13 @@ class ArchitectureCheckApplicationPackageTests(unittest.TestCase):
             ("report_builder", "violation_renderer"),
         )
         self.assertEqual(
+            tuple(inspect.signature(ConfigLoadService).parameters),
+            ("config_loader",),
+        )
+        self.assertEqual(
             tuple(inspect.signature(ArchitectureReportBuilder).parameters),
             (
-                "load_config_query",
+                "config_load_service",
                 "extractor_runtime_factory",
                 "extractor_spec_registry",
                 "dependency_graph_builder",
@@ -187,6 +191,7 @@ class ArchitectureCheckApplicationPackageTests(unittest.TestCase):
         for cls in (
             ArchitectureCheckService,
             ArchitectureSummaryService,
+            ConfigLoadService,
             ArchitectureReportBuilder,
             ArchitectureEvaluator,
         ):
@@ -291,27 +296,33 @@ class ArchitectureCheckApplicationDelegationTests(unittest.TestCase):
             def __init__(self) -> None:
                 self.build_calls: list[tuple[Path,
                                              str | None, object | None]] = []
-                self.dot_calls: list[object] = []
-                self.group_calls: list[object] = []
 
-            def build(
+            def build_artifacts(
                 self,
                 project_root: Path,
                 explicit_config_path: str | None = None,
                 *,
                 extractor_runtime: object | None = None,
-            ) -> str:
+            ) -> object:
                 self.build_calls.append(
                     (project_root, explicit_config_path, extractor_runtime))
-                return "report"
 
-            def build_dot_report(self, report: object) -> str:
-                self.dot_calls.append(report)
-                return "digraph {}"
+                class ReportStub:
+                    check_error = None
+                    violations = ("violation",)
+                    files_found = 5
+                    files_excluded = 1
+                    files_checked = 4
 
-            def build_violation_groups(self, report: object) -> tuple[str, ...]:
-                self.group_calls.append(report)
-                return (ViolationGroup(title="Group", entries=("entry",)),)
+                    def to_json_dict(self) -> dict[str, object]:
+                        return {"ok": True}
+
+                class ArtifactsStub:
+                    report = ReportStub()
+                    dot_report = "digraph {}"
+                    violation_groups = (("Group", ("entry",)),)
+
+                return ArtifactsStub()
 
         project_root = Path("/tmp/example-project")
         report_builder = ReportBuilderStub()
@@ -321,19 +332,17 @@ class ArchitectureCheckApplicationDelegationTests(unittest.TestCase):
 
         report = query.execute(project_root, "custom.yaml",
                                extractor_runtime=runtime)
-        dot_report = query.build_dot_report(report)
-        groups = query.build_violation_groups(report)
 
-        self.assertEqual(report, "report")
-        self.assertEqual(dot_report, "digraph {}")
-        self.assertEqual(groups, (ViolationGroup(
+        self.assertEqual(report.dot_report, "digraph {}")
+        self.assertEqual(report.violation_groups, (ViolationGroup(
             title="Group", entries=("entry",)),))
+        self.assertEqual(report.violations, ("violation",))
+        self.assertEqual(report.files_found, 5)
+        self.assertEqual(report.to_json_dict(), {"ok": True})
         self.assertEqual(
             report_builder.build_calls,
             [(project_root, "custom.yaml", runtime)],
         )
-        self.assertEqual(report_builder.dot_calls, ["report"])
-        self.assertEqual(report_builder.group_calls, ["report"])
 
 
 if __name__ == "__main__":

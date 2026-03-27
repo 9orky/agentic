@@ -4,6 +4,7 @@ import unittest
 
 from agentic.features.architecture_check import load_config
 from agentic.features.architecture_check.checker.application.queries.load_config import LoadConfigQuery
+from agentic.features.architecture_check.checker.application.services.config_load_service import ConfigLoadService
 from agentic.features.architecture_check.checker.infrastructure import ConfigLoader
 from agentic.project_layout import AgenticProjectLayout
 
@@ -76,7 +77,9 @@ class ArchitectureConfigTests(unittest.TestCase):
             )
 
             result = LoadConfigQuery(
-                config_loader=ConfigLoader(layout=custom_layout)
+                config_load_service=ConfigLoadService(
+                    config_loader=ConfigLoader(layout=custom_layout)
+                )
             ).load(project_root)
 
             self.assertEqual(result.path, managed_config.resolve())

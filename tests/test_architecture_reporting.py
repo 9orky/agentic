@@ -19,12 +19,16 @@ class ArchitectureCheckInfrastructurePackageTests(unittest.TestCase):
             [
                 "ConfigLoader",
                 "ExtractorRuntime",
-                "ExtractorSpec",
+                "ExtractorRuntimeFactory",
                 "ExtractorSpecRegistry",
                 "SubprocessExtractorRuntime",
                 "ViolationDotRenderer",
             ],
         )
+
+    def test_infrastructure_package_does_not_reexport_anchor_internal_spec_type(self) -> None:
+        self.assertFalse(
+            hasattr(architecture_check_infrastructure, "ExtractorSpec"))
 
     def test_extractor_registry_anchor_exports_expected_public_seam(self) -> None:
         self.assertEqual(
@@ -50,7 +54,16 @@ class ArchitectureCheckInfrastructurePackageTests(unittest.TestCase):
         self.assertEqual(
             entries,
             {"__init__.py", "config_loader.py", "dot_renderer.py",
+                "extractor_runtime_factory.py",
                 "extractor_registry", "extractor_runtime"},
+        )
+
+    def test_infrastructure_runtime_factory_creates_subprocess_runtime(self) -> None:
+        runtime = architecture_check_infrastructure.ExtractorRuntimeFactory().create()
+
+        self.assertIsInstance(
+            runtime,
+            architecture_check_infrastructure.SubprocessExtractorRuntime,
         )
 
 

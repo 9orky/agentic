@@ -1,5 +1,6 @@
 import agentic.features.workspace_contract.contract.application.commands as workspace_contract_application_commands
 import agentic.features.workspace_contract.contract.application.queries as workspace_contract_application_queries
+import agentic.features.workspace_contract.contract.application.services as workspace_contract_application_services
 import agentic.features.workspace_contract.contract.application as workspace_contract_application
 import inspect
 from pathlib import Path
@@ -20,17 +21,11 @@ class WorkspaceContractApplicationTests(unittest.TestCase):
                 "DescribeRuleSchemaDrift",
                 "DescribeWorkspaceContract",
                 "RuleSchemaValidationResult",
-                "RuleSchemaValidationService",
                 "UpdateProject",
-                "WorkspaceContractSummaryService",
-                "WorkspaceContractSyncService",
                 "build_default_bootstrap_project",
                 "build_default_describe_rule_schema_drift",
                 "build_default_describe_workspace_contract",
-                "build_default_rule_schema_validation_service",
                 "build_default_update_project",
-                "build_default_workspace_contract_summary_service",
-                "build_default_workspace_contract_sync_service",
             ],
         )
 
@@ -55,6 +50,9 @@ class WorkspaceContractApplicationTests(unittest.TestCase):
                 "build_default_describe_workspace_contract",
             ],
         )
+
+    def test_services_anchor_exports_no_cross_layer_surface(self) -> None:
+        self.assertEqual(workspace_contract_application_services.__all__, [])
 
     def test_application_directory_matches_allowed_anchor_shape(self) -> None:
         application_dir = Path(

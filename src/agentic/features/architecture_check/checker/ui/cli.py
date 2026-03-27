@@ -6,7 +6,8 @@ from typing import cast
 import click
 
 from ..application import CheckerError
-from ..application import BuildArchitectureReportQuery, build_default_architecture_report_query
+from ..application import BuildArchitectureReportQuery
+from ..application import build_default_architecture_report_query
 from .services import CheckSummaryPresenter
 from .views import GroupedViolationView, JsonReportView
 
@@ -70,10 +71,8 @@ class ArchitectureCheckCli:
             return 1
 
         if dot_path is not None:
-            dot_text = self._build_architecture_report_query.build_dot_report(
-                report)
             Path(dot_path).expanduser().resolve().write_text(
-                dot_text, encoding="utf-8")
+                report.dot_report, encoding="utf-8")
 
         if output_format == "json":
             click.echo(self._json_report_view.render(report.to_json_dict()))
@@ -91,8 +90,7 @@ class ArchitectureCheckCli:
             click.echo("\n=== Architectural Violations Detected ===")
             click.echo(
                 self._grouped_violation_view.render(
-                    self._build_architecture_report_query.build_violation_groups(
-                        report)
+                    report.violation_groups
                 )
             )
             if dot_path is not None:
