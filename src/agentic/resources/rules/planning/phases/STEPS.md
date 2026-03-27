@@ -25,9 +25,10 @@ Do not place step files in nested planning subdirectories.
 5. State which domain concepts are created, changed, moved, or intentionally left unchanged.
 6. If introducing a repository, name the owner of the abstraction and the owner of the concrete adapter separately.
 7. Do not mix unfinished work from multiple layers inside one step.
-8. Each step file must show the target files tree for that step clearly enough that the intended file names and owned responsibilities are visible before implementation starts.
-9. After completing a step, check the code against both the approved high-level plan and the active step file, then update the step file if the verified implementation differs in a still-approved way.
-10. After the last step, run one final alignment check across the code, the high-level plan, and the full step set.
+8. Each step file must surface the planned blast radius immediately after the goal so a human architect can review structure and violation risk before reading the rest of the execution contract.
+9. The planned blast radius must include one implementation tree plus the architectural checks needed to review SSOT, DRY, YAGNI, SOLID, ownership, and dependency direction risk quickly.
+10. After completing a step, check the code against both the approved high-level plan and the active step file, then update the step file if the verified implementation differs in a still-approved way.
+11. After the last step, run one final alignment check across the code, the high-level plan, and the full step set.
 
 ### Sequencing Model
 
@@ -47,29 +48,46 @@ If a higher layer reveals a missing lower-layer concept, amend the plan and retu
 Each step file must include:
 
 1. `Goal`
-2. `Inputs`
-3. `Outputs`
-4. `Scope`
-5. `Out of Scope`
-6. `Constraints`
+2. `Planned Blast Radius`
+3. `Inputs`
+4. `Outputs`
+5. `Scope`
+6. `Out of Scope`
 7. `Domain Model Impact`
 8. `Owning Layer`
-9. `Layer Ownership`
-10. `Dependency Direction`
-11. `Execution Order`
-12. `Allowed Adaptations`
-13. `Stop And Ask If`
-14. `Implementation Notes`
-15. `Detailed Implementation Tree`
-16. `Decision Log`
-17. `Verification`
-18. `Completion Criteria`
-19. `Handoff Notes`
-20. `Files Tree`
+9. `Execution Plan`
+10. `Verification`
+11. `Completion Criteria`
+12. `Handoff Notes`
 
-`Files Tree` must be the final section.
+`Planned Blast Radius` must be the second section, directly under `Goal`.
 
-`Files Tree` is the target files tree for the step. It must show the planned file names and owning responsibilities so the intended implementation shape is reviewable before coding.
+`Planned Blast Radius` must use labeled blocks instead of additional section headers for these items:
+
+1. `Implementation Tree`
+2. `Constraints`
+3. `Layer Ownership`
+4. `Dependency Direction`
+5. `Architectural Risk Check`
+6. `Decision Log`
+
+`Implementation Tree` is the only file-tree block in the step file. It must combine the target files tree with the implementation details needed to review the planned file names, owned responsibilities, and intended classes or functions before coding begins.
+
+`Architectural Risk Check` must contain concrete bullets for:
+
+1. `SSOT`
+2. `DRY`
+3. `YAGNI`
+4. `SOLID`
+
+Each bullet must state the expected risk, constraint, or explicit non-goal for that principle in the current step.
+
+`Execution Plan` must use labeled blocks instead of additional section headers for these items:
+
+1. `Execution Order`
+2. `Allowed Adaptations`
+3. `Stop And Ask If`
+4. `Implementation Notes`
 
 ### Step Lifecycle
 
@@ -94,6 +112,7 @@ When a step needs layer-specific constraints, read only the matching file under 
 ## Acceptance Check
 
 1. Each step is narrow, end to end, verifiable, and owned by exactly one layer.
-2. Each step file contains the required sections, with `Files Tree` last.
+2. Each step file contains the required sections, with `Planned Blast Radius` second.
 3. The implementation order respects the approved plan and layer ownership.
 4. Step execution includes verification against both the active step file and the approved high-level plan.
+5. The planned blast radius lets a human reviewer inspect SSOT, DRY, YAGNI, and SOLID risk before reading the rest of the step.

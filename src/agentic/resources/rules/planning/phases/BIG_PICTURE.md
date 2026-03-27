@@ -20,25 +20,61 @@ Keep the high-level plan at the boundary and contract level before file-level ex
 
 Keep the high-level plan at the boundary and contract level.
 
-Include:
+Each high-level plan must include these sections:
 
-1. objective
-2. scope
-3. business capability, bounded context, and subdomain being changed
-4. extracted domain concepts for the change
-5. identity, invariants, and lifecycle expectations for each material concept
-6. owning enclosure, public boundary, and public seam
-7. affected features and the owning part of each touched responsibility
-8. explicit layer placement for each material concept and why it belongs there
-9. application orchestration required to execute the change
-10. infrastructure responsibilities required to persist, integrate, or translate external concerns
-11. UI responsibilities required to collect input or present output without absorbing business rules
-12. intended dependency direction across touched parts
-13. assumptions
-14. major phases or steps
-15. expected inputs and outputs for each phase
-16. acceptance criteria
-17. known risks or open questions
+1. `Goal`
+2. `Planned Blast Radius`
+3. `Strategic Model`
+4. `Execution Shape`
+5. `Acceptance`
+6. `Open Questions`
+
+`Planned Blast Radius` must be the second section, directly under `Goal`.
+
+`Planned Blast Radius` must use labeled blocks instead of additional section headers for these items:
+
+1. `Scope`
+2. `Owning Enclosure, Public Boundary, And Public Seam`
+3. `Affected Features`
+4. `Layer Placement`
+5. `Dependency Direction`
+6. `Architectural Risk Check`
+7. `Decision Log`
+
+`Architectural Risk Check` must contain concrete bullets for:
+
+1. `SSOT`
+2. `DRY`
+3. `YAGNI`
+4. `SOLID`
+
+Each bullet must state the expected risk, constraint, or explicit non-goal for that principle in the current plan.
+
+`Strategic Model` must use labeled blocks instead of additional section headers for these items:
+
+1. `Business Capability, Bounded Context, And Subdomain`
+2. `Extracted Domain Concepts`
+
+For each material concept, state:
+
+1. classification
+2. identity
+3. invariants
+4. lifecycle
+5. owning layer
+
+`Execution Shape` must use labeled blocks instead of additional section headers for these items:
+
+1. `Application Orchestration`
+2. `Infrastructure Responsibilities`
+3. `UI Responsibilities`
+4. `Assumptions`
+5. `Major Phases Or Steps`
+6. `Phase Inputs And Outputs`
+
+`Acceptance` must contain `Acceptance Criteria`.
+
+`Open Questions` must contain `Known Risks Or Open Questions`.
 
 ### Strategic Domain Modeling
 
@@ -56,6 +92,10 @@ Before locking the plan:
 
 Do not leave placement implicit. If a touched responsibility cannot be placed clearly in the governing feature anatomy, the plan is not ready.
 
+### Review Rule
+
+The blast-radius section must let a human architect inspect structural risk before reading the rest of the plan.
+
 ### Handoff To Step Planning
 
 After the high-level plan is accepted:
@@ -69,6 +109,8 @@ After the high-level plan is accepted:
 ## Acceptance Check
 
 1. The high-level plan stays at the boundary and contract level.
-2. Material concepts are classified and placed deterministically.
-3. Step files are not created before the high-level plan is accepted.
-4. The plan names assumptions, phases, acceptance criteria, and open questions explicitly.
+2. The plan contains the required sections, with `Planned Blast Radius` second.
+3. Material concepts are classified and placed deterministically.
+4. The blast-radius section lets a human reviewer inspect SSOT, DRY, YAGNI, and SOLID risk before reading the rest of the plan.
+5. Step files are not created before the high-level plan is accepted.
+6. The plan names phases, acceptance criteria, and open questions explicitly.
