@@ -47,6 +47,10 @@ rules:
 
 The checker normalizes paths to `/` separators.
 
+Files that cannot be decoded, traversed, or parsed by the selected extractor fail the check explicitly. They are not silently ignored.
+
+Note: this guarantee is only as strong as the extractor's analysis model. For example, the Python extractor parses ASTs, while the current TypeScript extractor is text-driven and therefore fails closed on traversal and read errors but does not perform syntax parsing.
+
 Patterns support:
 
 - `*` for one path segment capture

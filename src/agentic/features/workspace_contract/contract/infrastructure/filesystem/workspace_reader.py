@@ -7,33 +7,45 @@ from ...domain import SharedRulePath, WorkspaceContractLayout
 
 
 class WorkspaceReader:
-    def __init__(self, *, layout: WorkspaceContractLayout) -> None:
+    def __init__(self, *, layout: WorkspaceContractLayout = WorkspaceContractLayout()) -> None:
         self._layout = layout
+
+    def _resolve_layout(self, layout: WorkspaceContractLayout | None) -> WorkspaceContractLayout:
+        return layout or self._layout
 
     def agentic_dir_exists(
         self,
         project_root: Path,
+        *,
+        layout: WorkspaceContractLayout | None = None,
     ) -> bool:
-        return self._layout.target_dir(project_root).is_dir()
+        resolved_layout = self._resolve_layout(layout)
+        return resolved_layout.target_dir(project_root).is_dir()
 
     def config_exists(
         self,
         project_root: Path,
+        *,
+        layout: WorkspaceContractLayout | None = None,
     ) -> bool:
-        return self._layout.config_path(project_root).exists()
+        resolved_layout = self._resolve_layout(layout)
+        return resolved_layout.config_path(project_root).exists()
 
     def existing_shared_rule_paths(
         self,
         project_root: Path,
         shared_rule_paths: Iterable[SharedRulePath],
+        *,
+        layout: WorkspaceContractLayout | None = None,
     ) -> tuple[Path, ...]:
+        resolved_layout = self._resolve_layout(layout)
         return tuple(
             sorted(
                 (
-                    self._layout.shared_rule_destination(
+                    resolved_layout.shared_rule_destination(
                         project_root, shared_rule_path)
                     for shared_rule_path in shared_rule_paths
-                    if self._layout.shared_rule_destination(project_root, shared_rule_path).exists()
+                    if resolved_layout.shared_rule_destination(project_root, shared_rule_path).exists()
                 ),
                 key=lambda path: path.as_posix(),
             )
@@ -42,14 +54,17 @@ class WorkspaceReader:
     def existing_rule_document_paths(
         self,
         project_root: Path,
+        *,
+        layout: WorkspaceContractLayout | None = None,
     ) -> tuple[Path, ...]:
-        rules_dir = self._layout.rules_dir(project_root)
+        resolved_layout = self._resolve_layout(layout)
+        rules_dir = resolved_layout.rules_dir(project_root)
         if not rules_dir.is_dir():
             return ()
 
         ignored_directories = {
-            self._layout.overrides_dir_name,
-            self._layout.project_specific_dir_name,
+            resolved_layout.overrides_dir_name,
+            resolved_layout.project_specific_dir_name,
         }
 
         return tuple(
@@ -74,14 +89,20 @@ class WorkspaceReader:
     def list_override_paths(
         self,
         project_root: Path,
+        *,
+        layout: WorkspaceContractLayout | None = None,
     ) -> tuple[Path, ...]:
-        return self._list_files(self._layout.overrides_dir(project_root))
+        resolved_layout = self._resolve_layout(layout)
+        return self._list_files(resolved_layout.overrides_dir(project_root))
 
     def list_project_specific_paths(
         self,
         project_root: Path,
+        *,
+        layout: WorkspaceContractLayout | None = None,
     ) -> tuple[Path, ...]:
-        return self._list_files(self._layout.project_specific_dir(project_root))
+        resolved_layout = self._resolve_layout(layout)
+        return self._list_files(resolved_layout.project_specific_dir(project_root))
 
     def _list_files(self, directory: Path) -> tuple[Path, ...]:
         if not directory.is_dir():

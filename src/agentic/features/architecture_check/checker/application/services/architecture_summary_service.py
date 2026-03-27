@@ -1,12 +1,26 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from pathlib import Path
 
 from ...domain import ArchitectureCheckConfigError, CheckerError
 from ...infrastructure import ExtractorRuntime
-from ..queries import ArchitectureSummary
 from .architecture_report_builder import ArchitectureReportBuilder, ViolationRenderer
 from .architecture_report_builder import build_default_architecture_report_builder
+
+
+@dataclass(frozen=True)
+class ArchitectureSummary:
+    project_root: Path
+    config_path: Path
+    config_format: str
+    language: str
+    runtime_command: str
+    files_found: int = 0
+    files_excluded: int = 0
+    files_checked: int = 0
+    violations: tuple[str, ...] = ()
+    check_error: str | None = None
 
 
 class ArchitectureSummaryService:
@@ -59,4 +73,4 @@ def build_default_architecture_summary_service() -> ArchitectureSummaryService:
     )
 
 
-__all__ = ["ArchitectureSummaryService"]
+__all__ = ["ArchitectureSummary", "ArchitectureSummaryService"]

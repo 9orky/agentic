@@ -8,7 +8,7 @@ from typing import Any, cast
 import unittest
 
 from agentic.features.architecture_check.checker.application.commands.run_architecture_check import CheckResult, RunArchitectureCheckCommand
-from agentic.features.architecture_check.checker.application.queries import ArchitectureSummary, BuildArchitectureReportQuery, DescribeArchitectureQuery, LoadConfigQuery, ViolationGroup
+from agentic.features.architecture_check.checker.application.queries import ArchitectureSummary, BuildArchitectureReportQuery, DescribeArchitectureQuery, DescribeFileImportHotspotsQuery, FileImportHotspotEntry, FileImportHotspotsResult, LoadConfigQuery, ViolationGroup
 
 
 class ArchitectureCheckApplicationPackageTests(unittest.TestCase):
@@ -34,6 +34,54 @@ class ArchitectureCheckApplicationPackageTests(unittest.TestCase):
         self.assertFalse(
             hasattr(architecture_check_application, "build_violation_groups"))
 
+    def test_application_keeps_shim_only_query_symbols_out_of_public_exports(self) -> None:
+        self.assertNotIn(
+            "DescribeFileImportHotspotsQuery",
+            architecture_check_application.__all__,
+        )
+        self.assertNotIn(
+            "FileImportHotspotEntry",
+            architecture_check_application.__all__,
+        )
+        self.assertNotIn(
+            "FileImportHotspotsResult",
+            architecture_check_application.__all__,
+        )
+        self.assertNotIn(
+            "ViolationGroup",
+            architecture_check_application.__all__,
+        )
+        self.assertNotIn(
+            "build_default_architecture_report_query",
+            architecture_check_application.__all__,
+        )
+        self.assertNotIn(
+            "build_default_describe_file_import_hotspots_query",
+            architecture_check_application.__all__,
+        )
+
+        self.assertTrue(
+            hasattr(architecture_check_application,
+                    "DescribeFileImportHotspotsQuery")
+        )
+        self.assertTrue(
+            hasattr(architecture_check_application, "FileImportHotspotEntry")
+        )
+        self.assertTrue(
+            hasattr(architecture_check_application, "FileImportHotspotsResult")
+        )
+        self.assertTrue(
+            hasattr(architecture_check_application, "ViolationGroup")
+        )
+        self.assertTrue(
+            hasattr(architecture_check_application,
+                    "build_default_architecture_report_query")
+        )
+        self.assertTrue(
+            hasattr(architecture_check_application,
+                    "build_default_describe_file_import_hotspots_query")
+        )
+
     def test_commands_package_exports_only_public_seam(self) -> None:
         self.assertEqual(
             architecture_check_application_commands.__all__,
@@ -47,9 +95,13 @@ class ArchitectureCheckApplicationPackageTests(unittest.TestCase):
                 "ArchitectureSummary",
                 "BuildArchitectureReportQuery",
                 "DescribeArchitectureQuery",
+                "DescribeFileImportHotspotsQuery",
+                "FileImportHotspotEntry",
+                "FileImportHotspotsResult",
                 "LoadConfigQuery",
                 "ViolationGroup",
                 "build_default_architecture_report_query",
+                "build_default_describe_file_import_hotspots_query",
                 "describe_architecture",
                 "load_config",
             ],
@@ -77,6 +129,10 @@ class ArchitectureCheckApplicationPackageTests(unittest.TestCase):
             ("summary_service",),
         )
         self.assertEqual(
+            tuple(inspect.signature(DescribeFileImportHotspotsQuery).parameters),
+            ("file_import_hotspots_service",),
+        )
+        self.assertEqual(
             tuple(inspect.signature(LoadConfigQuery).parameters),
             ("config_load_service",),
         )
@@ -93,6 +149,12 @@ class ArchitectureCheckApplicationPackageTests(unittest.TestCase):
         self.assertIs(
             inspect.signature(
                 DescribeArchitectureQuery).parameters["summary_service"].default,
+            inspect._empty,
+        )
+        self.assertIs(
+            inspect.signature(
+                DescribeFileImportHotspotsQuery
+            ).parameters["file_import_hotspots_service"].default,
             inspect._empty,
         )
         self.assertIs(
@@ -123,6 +185,7 @@ class ArchitectureCheckApplicationPackageTests(unittest.TestCase):
                 "architecture_report_builder",
                 "architecture_summary_service.py",
                 "config_load_service.py",
+                "file_import_hotspots_service.py",
             },
         )
 
@@ -157,12 +220,22 @@ class ArchitectureCheckApplicationPackageTests(unittest.TestCase):
         from agentic.features.architecture_check.checker.application.services.architecture_check_service import ArchitectureCheckService
         from agentic.features.architecture_check.checker.application.services.architecture_summary_service import ArchitectureSummaryService
         from agentic.features.architecture_check.checker.application.services.config_load_service import ConfigLoadService
+        from agentic.features.architecture_check.checker.application.services.file_import_hotspots_service import FileImportHotspotsService
         from agentic.features.architecture_check.checker.application.services.architecture_report_builder import ArchitectureReportBuilder
         from agentic.features.architecture_check.checker.application.services.architecture_report_builder.architecture_evaluator import ArchitectureEvaluator
 
         self.assertEqual(
             tuple(inspect.signature(ArchitectureCheckService).parameters),
             ("summary_service", "extractor_runtime_factory"),
+        )
+        self.assertEqual(
+            tuple(inspect.signature(FileImportHotspotsService).parameters),
+            (
+                "config_load_service",
+                "extractor_runtime_factory",
+                "extractor_spec_registry",
+                "dependency_graph_builder",
+            ),
         )
         self.assertEqual(
             tuple(inspect.signature(ArchitectureSummaryService).parameters),
@@ -190,6 +263,7 @@ class ArchitectureCheckApplicationPackageTests(unittest.TestCase):
 
         for cls in (
             ArchitectureCheckService,
+            FileImportHotspotsService,
             ArchitectureSummaryService,
             ConfigLoadService,
             ArchitectureReportBuilder,
@@ -230,7 +304,7 @@ class ArchitectureCheckApplicationDelegationTests(unittest.TestCase):
             violations=("violation",),
         )
         check_service = CheckServiceStub(summary)
-        runtime = object()
+        runtime = cast(Any, object())
 
         result = RunArchitectureCheckCommand(
             check_service=cast(Any, check_service)
@@ -279,7 +353,7 @@ class ArchitectureCheckApplicationDelegationTests(unittest.TestCase):
             runtime_command="python",
         )
         summary_service = SummaryServiceStub(summary)
-        runtime = object()
+        runtime = cast(Any, object())
 
         result = DescribeArchitectureQuery(
             summary_service=cast(Any, summary_service)
@@ -326,7 +400,7 @@ class ArchitectureCheckApplicationDelegationTests(unittest.TestCase):
 
         project_root = Path("/tmp/example-project")
         report_builder = ReportBuilderStub()
-        runtime = object()
+        runtime = cast(Any, object())
         query = BuildArchitectureReportQuery(
             report_builder=cast(Any, report_builder))
 
@@ -343,6 +417,286 @@ class ArchitectureCheckApplicationDelegationTests(unittest.TestCase):
             report_builder.build_calls,
             [(project_root, "custom.yaml", runtime)],
         )
+
+    def test_file_import_hotspots_query_delegates_to_service(self) -> None:
+        class FileImportHotspotsServiceStub:
+            def __init__(self, result: FileImportHotspotsResult) -> None:
+                self.result = result
+                self.calls: list[tuple[Path, str | None,
+                                       str, bool, object | None]] = []
+
+            def describe(
+                self,
+                project_root: Path,
+                explicit_config_path: str | None = None,
+                *,
+                sort_by: str = "imported_by_count",
+                descending: bool = True,
+                extractor_runtime: object | None = None,
+            ) -> FileImportHotspotsResult:
+                self.calls.append(
+                    (project_root, explicit_config_path,
+                     sort_by, descending, extractor_runtime)
+                )
+                return self.result
+
+        project_root = Path("/tmp/example-project")
+        result = FileImportHotspotsResult(
+            entries=(
+                FileImportHotspotEntry(
+                    path="src/example.py",
+                    imports_count=1,
+                    imported_by_count=3,
+                ),
+            ),
+            sort_by="imported_by_count",
+            descending=True,
+        )
+        service = FileImportHotspotsServiceStub(result)
+        runtime = cast(Any, object())
+
+        query = DescribeFileImportHotspotsQuery(
+            file_import_hotspots_service=cast(Any, service)
+        )
+
+        described = query.describe(
+            project_root,
+            "custom.yaml",
+            sort_by="imports_count",
+            descending=False,
+            extractor_runtime=runtime,
+        )
+
+        self.assertIs(described, result)
+        self.assertEqual(
+            service.calls,
+            [(project_root, "custom.yaml", "imports_count", False, runtime)],
+        )
+
+    def test_file_import_hotspots_result_serializes_entries(self) -> None:
+        result = FileImportHotspotsResult(
+            entries=(
+                FileImportHotspotEntry(
+                    path="src/a.py",
+                    imports_count=2,
+                    imported_by_count=5,
+                ),
+            ),
+            sort_by="imported_by_count",
+            descending=True,
+        )
+
+        self.assertEqual(
+            result.to_json_dict(),
+            {
+                "entries": [
+                    {
+                        "path": "src/a.py",
+                        "imports_count": 2,
+                        "imported_by_count": 5,
+                    }
+                ],
+                "sort_by": "imported_by_count",
+                "descending": True,
+            },
+        )
+
+
+class FileImportHotspotsServiceTests(unittest.TestCase):
+    def test_service_counts_tracked_file_relationships_and_sorts_by_importers_desc_by_default(self) -> None:
+        from agentic.features.architecture_check.checker.application.services.architecture_report_builder.dependency_graph_builder import DependencyGraphBuilder
+        from agentic.features.architecture_check.checker.application.services.file_import_hotspots_service import FileImportHotspotsService
+        from agentic.features.architecture_check.checker.domain import ArchitectureCheckConfig, ConfigLoadResult, DependencyGraph, ExtractedFile, ExtractionResult, ExtractionSummary
+
+        class ConfigLoadServiceStub:
+            def __init__(self, result: ConfigLoadResult) -> None:
+                self.result = result
+                self.calls: list[tuple[Path, str | None]] = []
+
+            def load(self, project_root: Path, explicit_config_path: str | None = None) -> ConfigLoadResult:
+                self.calls.append((project_root, explicit_config_path))
+                return self.result
+
+        class RuntimeStub:
+            def __init__(self, extraction_result: ExtractionResult) -> None:
+                self.extraction_result = extraction_result
+                self.calls: list[tuple[object, Path, list[str]]] = []
+
+            def run(self, spec: object, project_root: Path, exclusions: list[str]) -> ExtractionResult:
+                self.calls.append((spec, project_root, exclusions))
+                return self.extraction_result
+
+        class RuntimeFactoryStub:
+            def __init__(self, runtime: RuntimeStub) -> None:
+                self.runtime = runtime
+                self.create_calls = 0
+
+            def create(self) -> RuntimeStub:
+                self.create_calls += 1
+                return self.runtime
+
+        class ExtractorSpecRegistryStub:
+            def __init__(self, spec: object) -> None:
+                self.spec = spec
+                self.calls: list[str] = []
+
+            def get(self, language: str) -> object:
+                self.calls.append(language)
+                return self.spec
+
+        project_root = Path("/tmp/example-project")
+        config = ArchitectureCheckConfig(
+            language="python", exclusions=["tests/**"])
+        load_result = ConfigLoadResult(
+            path=project_root / "agentic" / "agentic.yaml",
+            config=config,
+            source_format="yaml",
+        )
+        extraction_result = ExtractionResult(
+            files={
+                "src/a.py": ExtractedFile(imports=["src/b.py", "src/b.py", "src/c.py", "requests"], classes=[], functions=[]),
+                "src/b.py": ExtractedFile(imports=[], classes=[], functions=[]),
+                "src/c.py": ExtractedFile(imports=[], classes=[], functions=[]),
+                "src/d.py": ExtractedFile(imports=["src/b.py"], classes=[], functions=[]),
+            },
+            summary=ExtractionSummary(
+                files_found=4, files_excluded=0, files_checked=4),
+        )
+        runtime = RuntimeStub(extraction_result)
+        runtime_factory = RuntimeFactoryStub(runtime)
+        spec = object()
+        registry = ExtractorSpecRegistryStub(spec)
+        graph_builder = DependencyGraphBuilder()
+        service = FileImportHotspotsService(
+            config_load_service=cast(Any, ConfigLoadServiceStub(load_result)),
+            extractor_runtime_factory=cast(Any, runtime_factory),
+            extractor_spec_registry=cast(Any, registry),
+            dependency_graph_builder=graph_builder,
+        )
+
+        result = service.describe(project_root, "custom.yaml")
+
+        self.assertEqual(runtime_factory.create_calls, 1)
+        self.assertEqual(registry.calls, ["python"])
+        self.assertEqual(runtime.calls, [(spec, project_root, ["tests/**"])])
+        self.assertEqual(
+            result.entries,
+            (
+                FileImportHotspotEntry(
+                    path="src/b.py", imports_count=0, imported_by_count=2),
+                FileImportHotspotEntry(
+                    path="src/c.py", imports_count=0, imported_by_count=1),
+                FileImportHotspotEntry(
+                    path="src/a.py", imports_count=2, imported_by_count=0),
+                FileImportHotspotEntry(
+                    path="src/d.py", imports_count=1, imported_by_count=0),
+            ),
+        )
+
+        graph = DependencyGraph()
+        graph.add_edge("src/a.py", "src/b.py")
+        graph.add_edge("src/a.py", "src/b.py")
+        graph.add_edge("src/a.py", "src/c.py")
+        graph.add_edge("src/a.py", "requests")
+        graph.add_edge("src/d.py", "src/b.py")
+
+        built_graph = graph_builder.build(extraction_result.files)
+        self.assertEqual(tuple(built_graph.edges), tuple(graph.edges))
+
+    def test_service_supports_import_count_sort_and_uses_explicit_runtime(self) -> None:
+        from agentic.features.architecture_check.checker.application.services.file_import_hotspots_service import FileImportHotspotsService
+        from agentic.features.architecture_check.checker.domain import ArchitectureCheckConfig, ConfigLoadResult, DependencyGraph, ExtractedFile, ExtractionResult, ExtractionSummary
+
+        class ConfigLoadServiceStub:
+            def __init__(self, result: ConfigLoadResult) -> None:
+                self.result = result
+
+            def load(self, project_root: Path, explicit_config_path: str | None = None) -> ConfigLoadResult:
+                return self.result
+
+        class RuntimeStub:
+            def __init__(self, extraction_result: ExtractionResult) -> None:
+                self.extraction_result = extraction_result
+                self.calls: list[tuple[object, Path, list[str]]] = []
+
+            def run(self, spec: object, project_root: Path, exclusions: list[str]) -> ExtractionResult:
+                self.calls.append((spec, project_root, exclusions))
+                return self.extraction_result
+
+        class RuntimeFactoryStub:
+            def __init__(self) -> None:
+                self.create_calls = 0
+
+            def create(self) -> object:
+                self.create_calls += 1
+                return object()
+
+        class ExtractorSpecRegistryStub:
+            def __init__(self, spec: object) -> None:
+                self.spec = spec
+
+            def get(self, language: str) -> object:
+                return self.spec
+
+        class DependencyGraphBuilderStub:
+            def __init__(self, graph: DependencyGraph) -> None:
+                self.graph = graph
+
+            def build(self, architecture_map: dict[str, object]) -> DependencyGraph:
+                return self.graph
+
+        project_root = Path("/tmp/example-project")
+        load_result = ConfigLoadResult(
+            path=project_root / "agentic" / "agentic.yaml",
+            config=ArchitectureCheckConfig(language="python", exclusions=[]),
+            source_format="yaml",
+        )
+        extraction_result = ExtractionResult(
+            files={
+                "src/a.py": ExtractedFile(imports=[], classes=[], functions=[]),
+                "src/b.py": ExtractedFile(imports=[], classes=[], functions=[]),
+                "src/c.py": ExtractedFile(imports=[], classes=[], functions=[]),
+            },
+            summary=ExtractionSummary(
+                files_found=3, files_excluded=0, files_checked=3),
+        )
+        graph = DependencyGraph()
+        graph.add_edge("src/a.py", "src/b.py")
+        graph.add_edge("src/a.py", "src/c.py")
+        graph.add_edge("src/b.py", "src/c.py")
+        graph.add_edge("src/a.py", "urllib")
+        runtime = RuntimeStub(extraction_result)
+        runtime_factory = RuntimeFactoryStub()
+        spec = object()
+        service = FileImportHotspotsService(
+            config_load_service=cast(Any, ConfigLoadServiceStub(load_result)),
+            extractor_runtime_factory=cast(Any, runtime_factory),
+            extractor_spec_registry=cast(Any, ExtractorSpecRegistryStub(spec)),
+            dependency_graph_builder=cast(
+                Any, DependencyGraphBuilderStub(graph)),
+        )
+
+        result = service.describe(
+            project_root,
+            sort_by="imports_count",
+            extractor_runtime=cast(Any, runtime),
+        )
+
+        self.assertEqual(runtime_factory.create_calls, 0)
+        self.assertEqual(runtime.calls, [(spec, project_root, [])])
+        self.assertEqual(
+            result.entries,
+            (
+                FileImportHotspotEntry(
+                    path="src/a.py", imports_count=2, imported_by_count=0),
+                FileImportHotspotEntry(
+                    path="src/b.py", imports_count=1, imported_by_count=1),
+                FileImportHotspotEntry(
+                    path="src/c.py", imports_count=0, imported_by_count=2),
+            ),
+        )
+        self.assertEqual(result.sort_by, "imports_count")
+        self.assertTrue(result.descending)
 
 
 if __name__ == "__main__":

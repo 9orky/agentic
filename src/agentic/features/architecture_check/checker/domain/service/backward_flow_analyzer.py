@@ -7,6 +7,7 @@ from ..value_object import FlowAnalyzerConfig, FlowViolation
 class BackwardFlowAnalyzer:
     def analyze(self, graph: DependencyGraph, tags: dict[str, set[str]], config: FlowAnalyzerConfig) -> list[FlowViolation]:
         violations: list[FlowViolation] = []
+        seen: set[tuple[str, int | None]] = set()
 
         for start_node in self._root_nodes(graph):
             self._walk(
@@ -17,7 +18,7 @@ class BackwardFlowAnalyzer:
                 [self._layer_index(
                     tags.get(start_node, set()), config.layers)],
                 [start_node],
-                set(),
+                seen,
                 violations,
             )
 
@@ -39,8 +40,7 @@ class BackwardFlowAnalyzer:
         if state_key in seen:
             return
 
-        branch_seen = set(seen)
-        branch_seen.add(state_key)
+        seen.add(state_key)
 
         for edge in graph.outgoing(node_id):
             next_id = edge.to_id
@@ -67,7 +67,7 @@ class BackwardFlowAnalyzer:
                 next_id,
                 layer_stack + [resolved_next_layer],
                 path + [next_id],
-                branch_seen,
+                seen,
                 violations,
             )
 

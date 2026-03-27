@@ -5,11 +5,9 @@ from typing import cast
 
 import click
 
-from ..application import CheckerError
-from ..application import BuildArchitectureReportQuery
-from ..application import build_default_architecture_report_query
+from ..application import BuildArchitectureReportQuery, CheckerError, DescribeFileImportHotspotsQuery, FileImportHotspotsSortBy, build_default_architecture_report_query, build_default_describe_file_import_hotspots_query
 from .services import CheckSummaryPresenter
-from .views import GroupedViolationView, JsonReportView
+from .views import FileImportHotspotsView, GroupedViolationView, JsonReportView
 
 
 class ArchitectureCheckCli:
@@ -17,17 +15,22 @@ class ArchitectureCheckCli:
         self,
         *,
         build_architecture_report_query: BuildArchitectureReportQuery,
+        describe_file_import_hotspots_query: DescribeFileImportHotspotsQuery,
         grouped_violation_view: GroupedViolationView,
+        file_import_hotspots_view: FileImportHotspotsView,
         json_report_view: JsonReportView,
         check_summary_presenter: CheckSummaryPresenter,
     ) -> None:
         self._build_architecture_report_query = build_architecture_report_query
+        self._describe_file_import_hotspots_query = describe_file_import_hotspots_query
         self._grouped_violation_view = grouped_violation_view
+        self._file_import_hotspots_view = file_import_hotspots_view
         self._json_report_view = json_report_view
         self._check_summary_presenter = check_summary_presenter
 
     def register(self, app: click.Group) -> None:
         app.add_command(self.build_check_command())
+        app.add_command(self.build_hotspots_command())
 
     def build_check_command(self) -> click.Command:
         return click.Command(
@@ -48,6 +51,41 @@ class ArchitectureCheckCli:
 
     def _invoke_check_command(self, project_root: str, config: str | None, output_format: str, dot_path: str | None) -> int:
         return self.run_check(project_root, config, output_format, dot_path)
+
+    def build_hotspots_command(self) -> click.Command:
+        return click.Command(
+            name="hotspots",
+            help="Show file import hotspot counts using the dependency graph.",
+            callback=self._invoke_hotspots_command,
+            params=cast(list[click.Parameter], [
+                click.Option(["--project-root"], default=".",
+                             show_default=True, help="Project root to analyze"),
+                click.Option(["--config"], default=None,
+                             help="Optional config path"),
+                click.Option(["--sort-by"], type=click.Choice(
+                    ["imported_by_count", "imports_count"]), default="imported_by_count", show_default=True, help="Metric to sort by"),
+                click.Option(["--descending/--ascending"], default=True,
+                             show_default=True, help="Sort order"),
+                click.Option(["--output", "output_format"], type=click.Choice(
+                    ["text", "json"]), default="text", show_default=True, help="Output format"),
+            ]),
+        )
+
+    def _invoke_hotspots_command(
+        self,
+        project_root: str,
+        config: str | None,
+        sort_by: str,
+        descending: bool,
+        output_format: str,
+    ) -> int:
+        return self.run_hotspots(
+            project_root,
+            config,
+            sort_by,
+            descending,
+            output_format,
+        )
 
     def run_check(self, project_root: str, config: str | None, output_format: str, dot_path: str | None) -> int:
         try:
@@ -104,11 +142,42 @@ class ArchitectureCheckCli:
         click.echo("Architecture Check Passed! No violations found.")
         return 0
 
+    def run_hotspots(
+        self,
+        project_root: str,
+        config: str | None,
+        sort_by: str,
+        descending: bool,
+        output_format: str,
+    ) -> int:
+        try:
+            result = self._describe_file_import_hotspots_query.describe(
+                Path(project_root).expanduser().resolve(),
+                config,
+                sort_by=cast(FileImportHotspotsSortBy, sort_by),
+                descending=descending,
+            )
+        except CheckerError as exc:
+            if output_format == "json":
+                click.echo(f'{{"error": {exc.args[0]!r}}}')
+                return 1
+            click.echo(f"Error: {exc}")
+            return 1
+
+        if output_format == "json":
+            click.echo(self._json_report_view.render(result.to_json_dict()))
+            return 0
+
+        click.echo(self._file_import_hotspots_view.render(result))
+        return 0
+
 
 def build_default_architecture_check_cli() -> ArchitectureCheckCli:
     return ArchitectureCheckCli(
         build_architecture_report_query=build_default_architecture_report_query(),
+        describe_file_import_hotspots_query=build_default_describe_file_import_hotspots_query(),
         grouped_violation_view=GroupedViolationView(),
+        file_import_hotspots_view=FileImportHotspotsView(),
         json_report_view=JsonReportView(),
         check_summary_presenter=CheckSummaryPresenter(),
     )

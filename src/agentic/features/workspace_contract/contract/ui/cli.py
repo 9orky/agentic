@@ -5,11 +5,7 @@ from pathlib import Path
 import click
 
 from ... import BootstrapError
-from ..application import (
-    build_default_bootstrap_project,
-    build_default_describe_rule_schema_drift,
-    build_default_update_project,
-)
+from ..application import build_default_bootstrap_project, build_default_describe_rule_schema_drift, build_default_update_project
 from .views import build_default_rule_schema_drift_view, build_default_sync_summary_view
 
 __all__ = ["workspace_contract_cli"]

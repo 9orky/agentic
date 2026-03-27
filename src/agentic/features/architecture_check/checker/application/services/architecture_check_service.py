@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from ...infrastructure import ExtractorRuntime, ExtractorRuntimeFactory
-from ..queries import ArchitectureSummary
+from .architecture_summary_service import ArchitectureSummary
 from .architecture_summary_service import ArchitectureSummaryService
 from .architecture_summary_service import build_default_architecture_summary_service
 

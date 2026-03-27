@@ -7,6 +7,7 @@ from ..value_object import FlowAnalyzerConfig, FlowViolation
 class NoReentryAnalyzer:
     def analyze(self, graph: DependencyGraph, tags: dict[str, set[str]], config: FlowAnalyzerConfig) -> list[FlowViolation]:
         violations: list[FlowViolation] = []
+        seen: set[tuple[str, str]] = set()
 
         for start_node in self._root_nodes(graph):
             self._walk(
@@ -17,7 +18,7 @@ class NoReentryAnalyzer:
                 self._module_state_for_start(
                     start_node, tags, config.module_tag),
                 [start_node],
-                set(),
+                seen,
                 violations,
             )
 
@@ -38,8 +39,7 @@ class NoReentryAnalyzer:
         if state_key in seen:
             return
 
-        branch_seen = set(seen)
-        branch_seen.add(state_key)
+        seen.add(state_key)
 
         for edge in graph.outgoing(node_id):
             next_id = edge.to_id
@@ -71,7 +71,7 @@ class NoReentryAnalyzer:
                 next_id,
                 next_state,
                 path + [next_id],
-                branch_seen,
+                seen,
                 violations,
             )
 

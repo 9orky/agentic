@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
+from ...domain import CheckerError
 from ...infrastructure import ExtractorRuntime
 from ..services.architecture_report_builder import ArchitectureCheckReport, ArchitectureReportBuilder
 from ..services.architecture_report_builder.service import build_default_architecture_report_builder
@@ -80,4 +81,4 @@ def build_default_architecture_report_query() -> BuildArchitectureReportQuery:
     )
 
 
-__all__ = ["BuildArchitectureReportQuery", "ViolationGroup"]
+__all__ = ["BuildArchitectureReportQuery", "CheckerError", "ViolationGroup"]

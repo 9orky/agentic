@@ -40,6 +40,7 @@ function compileScopePattern(pattern) {
 const exclusionPatterns = exclusions.map(compileScopePattern);
 let filesFound = 0;
 let filesExcluded = 0;
+const extractionFailures = [];
 
 function isSourceFile(fullPath) {
     return fullPath.endsWith('.ts') || fullPath.endsWith('.tsx') || fullPath.endsWith('.js') || fullPath.endsWith('.jsx');
@@ -55,6 +56,7 @@ function countSourceFiles(dirPath) {
     try {
         files = fs.readdirSync(dirPath);
     } catch (e) {
+        extractionFailures.push(`${path.relative(targetDir, dirPath).split(path.sep).join('/') || '.'}: ${e.name}: ${e.message}`);
         return 0;
     }
 
@@ -66,6 +68,7 @@ function countSourceFiles(dirPath) {
         try {
             stat = fs.statSync(fullPath);
         } catch (e) {
+            extractionFailures.push(`${path.relative(targetDir, fullPath).split(path.sep).join('/')}: ${e.name}: ${e.message}`);
             return;
         }
 
@@ -87,6 +90,7 @@ function getAllFiles(dirPath, arrayOfFiles) {
     try {
         files = fs.readdirSync(dirPath);
     } catch (e) {
+        extractionFailures.push(`${path.relative(targetDir, dirPath).split(path.sep).join('/') || '.'}: ${e.name}: ${e.message}`);
         return arrayOfFiles;
     }
 
@@ -99,6 +103,7 @@ function getAllFiles(dirPath, arrayOfFiles) {
         try {
             stat = fs.statSync(fullPath);
         } catch (e) {
+            extractionFailures.push(`${path.relative(targetDir, fullPath).split(path.sep).join('/')}: ${e.name}: ${e.message}`);
             return;
         }
 
@@ -137,6 +142,7 @@ getAllFiles(targetDir).forEach(file => {
     try {
         content = fs.readFileSync(file, 'utf8');
     } catch (e) {
+        extractionFailures.push(`${path.relative(targetDir, file).split(path.sep).join('/')}: ${e.name}: ${e.message}`);
         return;
     }
 
@@ -189,6 +195,11 @@ getAllFiles(targetDir).forEach(file => {
     const relPath = path.relative(targetDir, file).split(path.sep).join('/');
     result[relPath] = { imports, classes, functions };
 });
+
+if (extractionFailures.length > 0) {
+    console.error(`Extractor failed to analyze TypeScript files:\n${extractionFailures.join('\n')}`);
+    process.exit(1);
+}
 
 console.log(JSON.stringify({
     files: result,

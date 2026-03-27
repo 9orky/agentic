@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from ...domain import WorkspaceContractLayout
 from ..resources import PackagedRulesReader
 from .workspace_reader import WorkspaceReader
 
@@ -10,8 +11,10 @@ class RuleTreeReader:
     def __init__(
         self,
         *,
-        packaged_rules_reader: PackagedRulesReader,
-        workspace_reader: WorkspaceReader,
+        packaged_rules_reader: PackagedRulesReader = PackagedRulesReader(),
+        workspace_reader: WorkspaceReader = WorkspaceReader(
+            layout=WorkspaceContractLayout()
+        ),
     ) -> None:
         self.packaged_rules_reader = packaged_rules_reader
         self.workspace_reader = workspace_reader

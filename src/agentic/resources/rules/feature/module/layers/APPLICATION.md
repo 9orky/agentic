@@ -38,9 +38,11 @@ Under the shared default, `application/` is organized only behind these anchors:
 
 Commands and queries are the primary use-case seams.
 
+`services` and `adapters` are internal application implementation anchors unless an explicit anchor shim is intentionally exposed.
+
 `application` may depend on `domain` and `infrastructure`, but not on `ui`.
 
-Cross-layer consumers may import application symbols only through `application/__init__.py` or the owning anchor shim.
+Cross-layer consumers may import application symbols only through `application/__init__.py` or an explicitly approved application anchor shim.
 
 ## Exit Condition
 

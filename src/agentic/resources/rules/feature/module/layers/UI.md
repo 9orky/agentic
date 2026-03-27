@@ -46,13 +46,15 @@ Do not leave loose UI-owned helper files at the layer root outside those anchors
 ### Placement Rules
 
 1. Keep business rules and workflows out of `ui`.
-2. Import application only through its layer shim or the owning application anchor shim.
-3. Keep request parsing, argument binding, and response shaping in `ui`, not in `application`.
-4. Keep delivery helpers behind the owning UI anchor instead of as loose files.
+2. Import application only through the application layer shim or an explicitly approved application anchor shim.
+3. Do not deep-import files inside another layer just to reach a concrete query, service, DTO, or helper.
+4. Keep request parsing, argument binding, and response shaping in `ui`, not in `application`.
+5. Keep delivery helpers behind the owning UI anchor instead of as loose files.
 
 ## Acceptance Check
 
 1. `ui` depends only on application seams.
-2. Delivery logic stays in `ui` and business logic stays out.
-3. The delivery entrypoint, `views`, and `services` remain the only root UI anchors under the shared default.
-4. No loose helper files spill outside the owning anchor.
+2. No cross-layer import from `ui` reaches deeper than the target application layer shim or approved anchor shim.
+3. Delivery logic stays in `ui` and business logic stays out.
+4. The delivery entrypoint, `views`, and `services` remain the only root UI anchors under the shared default.
+5. No loose helper files spill outside the owning anchor.

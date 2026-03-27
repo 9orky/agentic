@@ -60,8 +60,8 @@ def count_python_files(directory: Path) -> int:
     return total
 
 
-def extract(directory: Path, exclusions: list[str]) -> dict[str, dict[str, list[str]]]:
-    result: dict[str, dict[str, list[str]]] = {}
+def collect_python_files(directory: Path, exclusions: list[str]) -> tuple[list[Path], int, int]:
+    included_paths: list[Path] = []
     files_found = 0
     files_excluded = 0
     compiled_exclusions = [compile_scope_pattern(
@@ -90,36 +90,179 @@ def extract(directory: Path, exclusions: list[str]) -> dict[str, dict[str, list[
             if any(pattern.match(relative_path) for pattern in compiled_exclusions):
                 files_excluded += 1
                 continue
+            included_paths.append(path)
 
-            try:
-                content = path.read_text(encoding="utf-8")
-                tree = ast.parse(content, filename=str(path))
-            except (OSError, SyntaxError, UnicodeDecodeError):
-                continue
+    return included_paths, files_found, files_excluded
 
-            imports: list[str] = []
-            classes: list[str] = []
-            functions: list[str] = []
 
-            for node in ast.walk(tree):
-                if isinstance(node, ast.Import):
-                    imports.extend(alias.name for alias in node.names)
-                elif isinstance(node, ast.ImportFrom):
-                    if node.level > 0:
-                        imports.extend(build_relative_import(
-                            path, directory, node.level, node.module, [alias.name for alias in node.names]))
-                    elif node.module:
-                        imports.append(node.module)
-                elif isinstance(node, ast.ClassDef):
-                    classes.append(node.name)
-                elif isinstance(node, ast.FunctionDef):
-                    functions.append(node.name)
+def build_module_candidates(relative_path: str) -> list[str]:
+    path = Path(relative_path)
+    base_parts = list(path.parts)
+    if not base_parts:
+        return []
 
-            result[relative_path] = {
-                "imports": imports,
-                "classes": classes,
-                "functions": functions,
-            }
+    if path.name == "__init__.py":
+        base_parts = base_parts[:-1]
+    else:
+        base_parts = [*base_parts[:-1], path.stem]
+
+    candidates: list[str] = []
+    if base_parts:
+        candidates.append(".".join(base_parts))
+        if base_parts[0] == "src" and len(base_parts) > 1:
+            candidates.append(".".join(base_parts[1:]))
+
+    seen: set[str] = set()
+    normalized: list[str] = []
+    for candidate in candidates:
+        if candidate and candidate not in seen:
+            seen.add(candidate)
+            normalized.append(candidate)
+    return normalized
+
+
+def preferred_module_name(relative_path: str) -> str:
+    candidates = build_module_candidates(relative_path)
+    for candidate in candidates:
+        if not candidate.startswith("src."):
+            return candidate
+    return candidates[0] if candidates else ""
+
+
+def build_module_index(paths: list[Path], directory: Path) -> dict[str, str]:
+    module_index: dict[str, str] = {}
+    for path in paths:
+        relative_path = path.relative_to(directory).as_posix()
+        for candidate in build_module_candidates(relative_path):
+            module_index.setdefault(candidate, relative_path)
+    return module_index
+
+
+def resolve_relative_module_name(relative_path: str, level: int, module: str | None) -> str:
+    current_module = preferred_module_name(relative_path)
+    if not current_module:
+        return module or ""
+
+    if Path(relative_path).name == "__init__.py":
+        package_parts = current_module.split(".")
+    else:
+        package_parts = current_module.split(".")[:-1]
+
+    if level > 1:
+        trim = level - 1
+        package_parts = package_parts[:-
+                                      trim] if trim <= len(package_parts) else []
+
+    if module:
+        package_parts.extend(part for part in module.split(".") if part)
+
+    return ".".join(part for part in package_parts if part)
+
+
+def resolve_import_targets(module_index: dict[str, str], module_name: str, imported_names: list[str]) -> list[str]:
+    targets: list[str] = []
+
+    if not imported_names:
+        resolved_module = module_index.get(module_name, module_name)
+        return [resolved_module] if resolved_module else []
+
+    for imported_name in imported_names:
+        if imported_name == "*":
+            resolved_module = module_index.get(module_name, module_name)
+            if resolved_module:
+                targets.append(resolved_module)
+            continue
+
+        candidate_submodule = f"{module_name}.{imported_name}" if module_name else imported_name
+        if candidate_submodule in module_index:
+            targets.append(module_index[candidate_submodule])
+            continue
+        if module_name in module_index:
+            targets.append(module_index[module_name])
+            continue
+        if module_name:
+            targets.append(module_name)
+            continue
+        if candidate_submodule:
+            targets.append(candidate_submodule)
+
+    seen: set[str] = set()
+    normalized: list[str] = []
+    for target in targets:
+        if target and target not in seen:
+            seen.add(target)
+            normalized.append(target)
+    return normalized
+
+
+def extract(directory: Path, exclusions: list[str]) -> dict[str, object]:
+    result: dict[str, dict[str, list[str]]] = {}
+    included_paths, files_found, files_excluded = collect_python_files(
+        directory, exclusions)
+    module_index = build_module_index(included_paths, directory)
+    extraction_failures: list[str] = []
+
+    for path in included_paths:
+        relative_path = path.relative_to(directory).as_posix()
+
+        try:
+            content = path.read_text(encoding="utf-8")
+            tree = ast.parse(content, filename=str(path))
+        except (OSError, SyntaxError, UnicodeDecodeError) as exc:
+            message = str(exc).strip()
+            detail = f": {message}" if message else ""
+            extraction_failures.append(
+                f"{relative_path}: {exc.__class__.__name__}{detail}"
+            )
+            continue
+
+        imports: list[str] = []
+        classes: list[str] = []
+        functions: list[str] = []
+
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    imports.append(module_index.get(alias.name, alias.name))
+            elif isinstance(node, ast.ImportFrom):
+                imported_names = [alias.name for alias in node.names]
+                if node.level > 0:
+                    relative_module = resolve_relative_module_name(
+                        relative_path,
+                        node.level,
+                        node.module,
+                    )
+                    imports.extend(
+                        resolve_import_targets(
+                            module_index,
+                            relative_module,
+                            imported_names,
+                        )
+                    )
+                elif node.module:
+                    imports.extend(
+                        resolve_import_targets(
+                            module_index,
+                            node.module,
+                            imported_names,
+                        )
+                    )
+            elif isinstance(node, ast.ClassDef):
+                classes.append(node.name)
+            elif isinstance(node, ast.FunctionDef):
+                functions.append(node.name)
+
+        result[relative_path] = {
+            "imports": imports,
+            "classes": classes,
+            "functions": functions,
+        }
+
+    if extraction_failures:
+        raise RuntimeError(
+            "Extractor failed to analyze Python files:\n"
+            + "\n".join(extraction_failures)
+        )
 
     return {
         "files": result,
@@ -137,7 +280,11 @@ def main() -> int:
     exclusions = json.loads(sys.argv[2]) if len(sys.argv) > 2 else []
     if not isinstance(exclusions, list):
         exclusions = []
-    print(json.dumps(extract(directory, exclusions)))
+    try:
+        print(json.dumps(extract(directory, exclusions)))
+    except RuntimeError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
     return 0
 
 

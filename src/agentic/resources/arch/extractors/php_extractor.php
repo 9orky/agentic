@@ -39,6 +39,28 @@ $compiledExclusions = array_map('compile_scope_pattern', $exclusions);
 $result = [];
 $filesFound = 0;
 $filesExcluded = 0;
+$extractionFailures = [];
+
+function relative_path(string $targetDir, string $path): string {
+    $relative = str_replace('\\', '/', ltrim(substr($path, strlen($targetDir)), '/\\'));
+    return $relative === '' ? '.' : $relative;
+}
+
+function lint_php_file(string $path): ?string {
+    $command = escapeshellarg(PHP_BINARY) . ' -l ' . escapeshellarg($path) . ' 2>&1';
+    $output = [];
+    $status = 0;
+    exec($command, $output, $status);
+    if ($status === 0) {
+        return null;
+    }
+
+    $message = trim(implode("\n", $output));
+    if ($message === '') {
+        $message = 'syntax validation failed';
+    }
+    return $message;
+}
 
 if (!is_dir($targetDir)) {
     echo json_encode($result);
@@ -65,9 +87,22 @@ foreach (new RecursiveIteratorIterator($ite) as $file) {
         }
 
         $content = @file_get_contents($path);
-        if ($content === false) continue;
+        if ($content === false) {
+            $extractionFailures[] = relative_path($targetDir, $path) . ': file_get_contents failed';
+            continue;
+        }
+
+        $lintError = lint_php_file($path);
+        if ($lintError !== null) {
+            $extractionFailures[] = relative_path($targetDir, $path) . ': ParseError: ' . $lintError;
+            continue;
+        }
 
         $tokens = @token_get_all($content);
+        if (!is_array($tokens)) {
+            $extractionFailures[] = relative_path($targetDir, $path) . ': token_get_all failed';
+            continue;
+        }
         $imports = [];
         $classes = [];
         $functions = [];
@@ -117,6 +152,11 @@ foreach (new RecursiveIteratorIterator($ite) as $file) {
             'functions' => $functions
         ];
     }
+}
+
+if (!empty($extractionFailures)) {
+    fwrite(STDERR, "Extractor failed to analyze PHP files:\n" . implode("\n", $extractionFailures) . "\n");
+    exit(1);
 }
 
 echo json_encode([
