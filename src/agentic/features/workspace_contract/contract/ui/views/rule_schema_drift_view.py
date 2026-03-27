@@ -7,8 +7,8 @@ from ..services import ProjectPathPresenter
 
 
 class RuleSchemaDriftView:
-    def __init__(self, *, path_presenter: ProjectPathPresenter | None = None) -> None:
-        self._path_presenter = path_presenter or ProjectPathPresenter()
+    def __init__(self, *, path_presenter: ProjectPathPresenter) -> None:
+        self._path_presenter = path_presenter
 
     def render(
         self,
@@ -43,3 +43,7 @@ class RuleSchemaDriftView:
             f"{self._path_presenter.present(finding.document_path, project_root=project_root)}: "
             f"{finding.code} - {finding.message}"
         )
+
+
+def build_default_rule_schema_drift_view() -> RuleSchemaDriftView:
+    return RuleSchemaDriftView(path_presenter=ProjectPathPresenter())

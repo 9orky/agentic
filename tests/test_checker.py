@@ -1,10 +1,105 @@
 import json
+import agentic.features.architecture_check.checker.domain as architecture_check_domain
+import agentic.features.architecture_check.checker.domain.entity as architecture_check_domain_entity
+import agentic.features.architecture_check.checker.domain.service as architecture_check_domain_service
+import agentic.features.architecture_check.checker.domain.value_object as architecture_check_domain_value_object
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import Mock, patch
 import unittest
 
 from agentic.features.architecture_check import CheckerError, run_architecture_check
+
+
+class ArchitectureCheckDomainPackageTests(unittest.TestCase):
+    def test_domain_package_exports_expected_public_seam(self) -> None:
+        self.assertEqual(
+            architecture_check_domain.__all__,
+            [
+                "ArchitectureCheckConfig",
+                "ArchitectureCheckConfigError",
+                "ArchitecturePolicyEvaluator",
+                "BackwardFlowAnalyzer",
+                "BoundaryRule",
+                "CheckerError",
+                "ConfigLoadResult",
+                "ConfigTagRule",
+                "CycleDetector",
+                "DependencyGraph",
+                "DependencyRule",
+                "Edge",
+                "EdgeRuleViolation",
+                "ExtractedFile",
+                "ExtractionResult",
+                "ExtractionSummary",
+                "ExtractorContractError",
+                "FlowAnalyzerConfig",
+                "FlowRuleSet",
+                "FlowViolation",
+                "NoCyclesAnalyzer",
+                "NoReentryAnalyzer",
+                "Node",
+                "NodeSelector",
+                "PatternMatch",
+                "RuleSet",
+                "TagRule",
+            ],
+        )
+
+    def test_domain_entity_anchor_exports_expected_public_seam(self) -> None:
+        self.assertEqual(
+            architecture_check_domain_entity.__all__,
+            ["DependencyGraph", "Edge", "Node"],
+        )
+
+    def test_domain_service_anchor_exports_expected_public_seam(self) -> None:
+        self.assertEqual(
+            architecture_check_domain_service.__all__,
+            [
+                "ArchitecturePolicyEvaluator",
+                "BackwardFlowAnalyzer",
+                "CycleDetector",
+                "NoCyclesAnalyzer",
+                "NoReentryAnalyzer",
+            ],
+        )
+
+    def test_domain_value_object_anchor_exports_expected_public_seam(self) -> None:
+        self.assertEqual(
+            architecture_check_domain_value_object.__all__,
+            [
+                "ArchitectureCheckConfig",
+                "ArchitectureCheckConfigError",
+                "BoundaryRule",
+                "CheckerError",
+                "ConfigLoadResult",
+                "ConfigTagRule",
+                "DependencyRule",
+                "EdgeRuleViolation",
+                "ExtractedFile",
+                "ExtractionResult",
+                "ExtractionSummary",
+                "ExtractorContractError",
+                "FlowAnalyzerConfig",
+                "FlowRuleSet",
+                "FlowViolation",
+                "NodeSelector",
+                "PatternMatch",
+                "RuleSet",
+                "TagRule",
+            ],
+        )
+
+    def test_domain_directory_matches_allowed_anchor_shape(self) -> None:
+        domain_dir = Path(architecture_check_domain.__file__).resolve().parent
+        entries = {
+            path.name
+            for path in domain_dir.iterdir()
+            if path.name != "__pycache__"
+        }
+
+        self.assertEqual(
+            entries, {"__init__.py", "entity", "service", "value_object"})
 
 
 class CheckerTests(unittest.TestCase):

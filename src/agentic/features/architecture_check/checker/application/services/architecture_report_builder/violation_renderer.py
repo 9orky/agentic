@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ...domain.value_object import EdgeRuleViolation, FlowViolation
+from ....domain.value_object import EdgeRuleViolation, FlowViolation
 
 
 class ViolationRenderer:
@@ -25,8 +25,4 @@ class ViolationRenderer:
         return self.render(violation)
 
 
-_VIOLATION_RENDERER = ViolationRenderer()
-render_violation = _VIOLATION_RENDERER.render
-format_violation = _VIOLATION_RENDERER.format
-
-__all__ = ["ViolationRenderer", "format_violation", "render_violation"]
+__all__ = ["ViolationRenderer"]

@@ -1,3 +1,7 @@
+import agentic.features.workspace_contract as workspace_contract_boundary
+import agentic.features.workspace_contract.contract.ui as workspace_contract_ui
+import agentic.features.workspace_contract.contract.ui.services as workspace_contract_ui_services
+import agentic.features.workspace_contract.contract.ui.views as workspace_contract_ui_views
 from contextlib import redirect_stdout
 from io import StringIO
 from pathlib import Path
@@ -8,10 +12,26 @@ import click
 
 from agentic.features.workspace_contract import BootstrapError, RuleSchemaValidationResult, SyncResult, bootstrap_project, describe_rule_schema_drift, describe_workspace_contract, update_project
 from agentic.features.workspace_contract.cli import workspace_contract_cli
-from agentic.features.workspace_contract.contract.ui.views import RuleSchemaDriftView, SyncSummaryView
+from agentic.features.workspace_contract.contract.ui.services import ProjectPathPresenter
+from agentic.features.workspace_contract.contract.ui.views import RuleSchemaDriftView, SyncSummaryView, build_default_rule_schema_drift_view, build_default_sync_summary_view
 
 
 class WorkspaceContractBoundaryTests(unittest.TestCase):
+    def test_feature_boundary_exports_expected_public_seam(self) -> None:
+        self.assertEqual(
+            workspace_contract_boundary.__all__,
+            [
+                "BootstrapError",
+                "RuleSchemaValidationResult",
+                "SyncResult",
+                "WorkspaceContractSummary",
+                "bootstrap_project",
+                "describe_rule_schema_drift",
+                "describe_workspace_contract",
+                "update_project",
+            ],
+        )
+
     def test_feature_boundary_preserves_sync_contract_shape(self) -> None:
         with TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)
@@ -36,6 +56,36 @@ class WorkspaceContractBoundaryTests(unittest.TestCase):
 
 
 class WorkspaceContractUiTests(unittest.TestCase):
+    def test_ui_package_exports_expected_public_seam(self) -> None:
+        self.assertEqual(workspace_contract_ui.__all__,
+                         ["workspace_contract_cli"])
+
+    def test_ui_service_and_view_packages_export_expected_public_seams(self) -> None:
+        self.assertEqual(
+            workspace_contract_ui_services.__all__,
+            ["ProjectPathPresenter"],
+        )
+        self.assertEqual(
+            workspace_contract_ui_views.__all__,
+            [
+                "RuleSchemaDriftView",
+                "SyncSummaryView",
+                "build_default_rule_schema_drift_view",
+                "build_default_sync_summary_view",
+            ],
+        )
+
+    def test_ui_directory_matches_allowed_anchor_shape(self) -> None:
+        ui_dir = Path(workspace_contract_ui.__file__).resolve().parent
+        entries = {
+            path.name
+            for path in ui_dir.iterdir()
+            if path.name != "__pycache__"
+        }
+
+        self.assertEqual(
+            entries, {"__init__.py", "cli.py", "services", "views"})
+
     def test_cli_init_renders_created_files_and_next_step(self) -> None:
         app = click.Group()
         workspace_contract_cli(app)
@@ -133,7 +183,7 @@ class WorkspaceContractUiTests(unittest.TestCase):
             bootstrap_project(project_root)
             summary = describe_workspace_contract(project_root)
 
-            rendered_lines = SyncSummaryView().render_workspace_contract_summary(
+            rendered_lines = build_default_sync_summary_view().render_workspace_contract_summary(
                 summary, project_root=project_root)
 
             self.assertIn("Workspace contract at agentic.", rendered_lines)
@@ -143,7 +193,7 @@ class WorkspaceContractUiTests(unittest.TestCase):
                             for line in rendered_lines))
 
     def test_rule_schema_drift_view_renders_success_summary(self) -> None:
-        rendered_lines = RuleSchemaDriftView().render(
+        rendered_lines = build_default_rule_schema_drift_view().render(
             RuleSchemaValidationResult(
                 packaged_documents=(Path("AGENT.md"),),
                 local_documents=(Path("AGENT.md"),),
@@ -160,6 +210,22 @@ class WorkspaceContractUiTests(unittest.TestCase):
                 "Local rule documents checked: 1.",
             ),
         )
+
+    def test_views_require_explicit_path_presenter(self) -> None:
+        self.assertEqual(
+            tuple(__import__("inspect").signature(SyncSummaryView).parameters),
+            ("path_presenter",),
+        )
+        self.assertEqual(
+            tuple(__import__("inspect").signature(
+                RuleSchemaDriftView).parameters),
+            ("path_presenter",),
+        )
+        presenter = ProjectPathPresenter()
+        self.assertIsInstance(SyncSummaryView(
+            path_presenter=presenter), SyncSummaryView)
+        self.assertIsInstance(RuleSchemaDriftView(
+            path_presenter=presenter), RuleSchemaDriftView)
 
 
 if __name__ == "__main__":

@@ -15,6 +15,7 @@ Use this file after a high-level plan is accepted and the work is being split in
 Executable step files must be named `PLAN_STEP_0X.md` in the order they are intended to run.
 Executable step files must live at the same directory level as their owning `PLAN.md`.
 Do not place step files in nested planning subdirectories.
+When a colocated `DDD.md` artifact exists, keep step execution aligned with it.
 
 ## Core Rules
 
@@ -27,8 +28,9 @@ Do not place step files in nested planning subdirectories.
 7. Do not mix unfinished work from multiple layers inside one step.
 8. Each step file must surface the planned blast radius immediately after the goal so a human architect can review structure and violation risk before reading the rest of the execution contract.
 9. The planned blast radius must include one implementation tree plus the architectural checks needed to review SSOT, DRY, YAGNI, SOLID, ownership, and dependency direction risk quickly.
-10. After completing a step, check the code against both the approved high-level plan and the active step file, then update the step file if the verified implementation differs in a still-approved way.
-11. After the last step, run one final alignment check across the code, the high-level plan, and the full step set.
+10. `Domain Model Impact` must name the affected concepts and state whether the colocated `DDD.md` artifact changes.
+11. After completing a step, check the code against the approved high-level plan, the active step file, and the colocated `DDD.md` artifact when one exists, then update the step file if the verified implementation differs in a still-approved way.
+12. After the last step, run one final alignment check across the code, the high-level plan, the full step set, and the colocated `DDD.md` artifact when one exists.
 
 ### Sequencing Model
 
@@ -95,12 +97,12 @@ For each approved step:
 
 1. implement the step through the owning layer
 2. verify the code against the active step file
-3. verify the code still aligns with the approved high-level plan
+3. verify the code still aligns with the approved high-level plan and the colocated `DDD.md` artifact when one exists
 4. update the step file if the verified implementation changed in a way that remains within approved scope
 
 After the final step:
 
-1. run a final alignment check across the codebase, the approved high-level plan, and all `PLAN_STEP_0X.md` files
+1. run a final alignment check across the codebase, the approved high-level plan, all `PLAN_STEP_0X.md` files, and the colocated `DDD.md` artifact when one exists
 2. resolve any drift or record the approved final state in the relevant plan files
 
 ## If Ambiguous, Go To
@@ -114,5 +116,5 @@ When a step needs layer-specific constraints, read only the matching file under 
 1. Each step is narrow, end to end, verifiable, and owned by exactly one layer.
 2. Each step file contains the required sections, with `Planned Blast Radius` second.
 3. The implementation order respects the approved plan and layer ownership.
-4. Step execution includes verification against both the active step file and the approved high-level plan.
+4. Step execution includes verification against the active step file, the approved high-level plan, and the colocated `DDD.md` artifact when one exists.
 5. The planned blast radius lets a human reviewer inspect SSOT, DRY, YAGNI, and SOLID risk before reading the rest of the step.

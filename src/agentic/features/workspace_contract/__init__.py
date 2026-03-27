@@ -3,11 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from .contract.application import BootstrapProject as _BootstrapProject
-from .contract.application import DescribeRuleSchemaDrift as _DescribeRuleSchemaDrift
-from .contract.application import DescribeWorkspaceContract as _DescribeWorkspaceContract
+from .contract.application import build_default_bootstrap_project
+from .contract.application import build_default_describe_rule_schema_drift
+from .contract.application import build_default_describe_workspace_contract
+from .contract.application import build_default_update_project
 from .contract.application import RuleSchemaValidationResult
-from .contract.application import UpdateProject as _UpdateProject
 from .contract.domain import WorkspaceContractSummary
 
 
@@ -37,16 +37,16 @@ __all__ = [
 
 
 def bootstrap_project(project_root: Path) -> SyncResult:
-    return _coerce_sync_result(_run_sync_command(_BootstrapProject(), project_root))
+    return _coerce_sync_result(_run_sync_command(build_default_bootstrap_project(), project_root))
 
 
 def update_project(project_root: Path) -> SyncResult:
-    return _coerce_sync_result(_run_sync_command(_UpdateProject(), project_root))
+    return _coerce_sync_result(_run_sync_command(build_default_update_project(), project_root))
 
 
 def describe_workspace_contract(project_root: Path) -> WorkspaceContractSummary:
     try:
-        return _DescribeWorkspaceContract().execute(project_root)
+        return build_default_describe_workspace_contract().execute(project_root)
     except NotADirectoryError as exc:
         raise BootstrapError(str(exc)) from exc
 
@@ -57,7 +57,7 @@ def describe_rule_schema_drift(
     include_local_mirror: bool = True,
 ) -> RuleSchemaValidationResult:
     try:
-        return _DescribeRuleSchemaDrift().execute(
+        return build_default_describe_rule_schema_drift().execute(
             project_root,
             include_local_mirror=include_local_mirror,
         )

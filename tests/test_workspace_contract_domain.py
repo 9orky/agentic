@@ -1,7 +1,62 @@
+import agentic.features.workspace_contract.contract.domain as workspace_contract_domain
+import agentic.features.workspace_contract.contract.domain.service as workspace_contract_domain_service
+import agentic.features.workspace_contract.contract.domain.value_object as workspace_contract_domain_value_object
 from pathlib import Path
 import unittest
 
 from agentic.features.workspace_contract.contract.domain import RuleDocumentClass, RuleDocumentSchema, RuleSchemaPolicy, SharedRulePath, SyncAction, SyncPolicy, WorkspaceContractLayout
+
+
+class WorkspaceContractDomainPackageTests(unittest.TestCase):
+    def test_domain_package_exports_expected_public_seam(self) -> None:
+        self.assertEqual(
+            workspace_contract_domain.__all__,
+            [
+                "RuleDocumentClass",
+                "RuleDocumentSchema",
+                "RuleSchemaPolicy",
+                "RuleSchemaViolation",
+                "RuleSectionRequirement",
+                "SharedRulePath",
+                "SyncAction",
+                "SyncChange",
+                "SyncPolicy",
+                "WorkspaceContractLayout",
+                "WorkspaceContractSummary",
+            ],
+        )
+
+    def test_domain_service_anchor_exports_expected_public_seam(self) -> None:
+        self.assertEqual(
+            workspace_contract_domain_service.__all__,
+            ["RuleSchemaPolicy", "SyncPolicy"],
+        )
+
+    def test_domain_value_object_anchor_exports_expected_public_seam(self) -> None:
+        self.assertEqual(
+            workspace_contract_domain_value_object.__all__,
+            [
+                "RuleDocumentClass",
+                "RuleDocumentSchema",
+                "RuleSchemaViolation",
+                "RuleSectionRequirement",
+                "SharedRulePath",
+                "SyncAction",
+                "SyncChange",
+                "WorkspaceContractLayout",
+                "WorkspaceContractSummary",
+            ],
+        )
+
+    def test_domain_directory_matches_allowed_anchor_shape(self) -> None:
+        domain_dir = Path(workspace_contract_domain.__file__).resolve().parent
+        entries = {
+            path.name
+            for path in domain_dir.iterdir()
+            if path.name != "__pycache__"
+        }
+
+        self.assertEqual(entries, {"__init__.py", "service", "value_object"})
 
 
 class SharedRulePathTests(unittest.TestCase):

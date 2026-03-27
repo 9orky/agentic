@@ -7,8 +7,8 @@ from ...infrastructure import ConfigLoader
 
 
 class LoadConfigQuery:
-    def __init__(self, config_loader: ConfigLoader | None = None) -> None:
-        self._config_loader = config_loader or ConfigLoader()
+    def __init__(self, *, config_loader: ConfigLoader) -> None:
+        self._config_loader = config_loader
 
     def load(
         self,
@@ -31,6 +31,10 @@ class LoadConfigQuery:
         return ConfigLoadResult(path=config_path, config=config, source_format=source_format)
 
 
-load_config = LoadConfigQuery().load
+def build_default_load_config_query() -> LoadConfigQuery:
+    return LoadConfigQuery(config_loader=ConfigLoader())
+
+
+load_config = build_default_load_config_query().load
 
 __all__ = ["LoadConfigQuery", "load_config"]

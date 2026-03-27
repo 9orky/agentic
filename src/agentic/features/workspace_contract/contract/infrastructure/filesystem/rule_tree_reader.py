@@ -1,17 +1,20 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from pathlib import Path
 
 from ..resources import PackagedRulesReader
 from .workspace_reader import WorkspaceReader
 
 
-@dataclass(frozen=True)
 class RuleTreeReader:
-    packaged_rules_reader: PackagedRulesReader = field(
-        default_factory=PackagedRulesReader)
-    workspace_reader: WorkspaceReader = field(default_factory=WorkspaceReader)
+    def __init__(
+        self,
+        *,
+        packaged_rules_reader: PackagedRulesReader,
+        workspace_reader: WorkspaceReader,
+    ) -> None:
+        self.packaged_rules_reader = packaged_rules_reader
+        self.workspace_reader = workspace_reader
 
     def iter_packaged_rule_documents(self) -> tuple[Path, ...]:
         return self.packaged_rules_reader.iter_rule_document_paths()

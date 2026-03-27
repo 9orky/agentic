@@ -15,7 +15,13 @@ class SyncReportBuilder:
         return {
             "target_dir": target_dir,
             "created_dir": created_dir,
-            "created_files": tuple(sorted(created_files, key=lambda path: path.as_posix())),
-            "updated_files": tuple(sorted(updated_files, key=lambda path: path.as_posix())),
-            "preserved_files": tuple(sorted(preserved_files, key=lambda path: path.as_posix())),
+            "created_files": tuple(
+                sorted(created_files, key=lambda path: path.as_posix())
+            ),
+            "updated_files": tuple(
+                sorted(updated_files, key=lambda path: path.as_posix())
+            ),
+            "preserved_files": tuple(
+                sorted(preserved_files, key=lambda path: path.as_posix())
+            ),
         }

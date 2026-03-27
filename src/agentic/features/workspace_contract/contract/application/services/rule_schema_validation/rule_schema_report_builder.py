@@ -27,8 +27,10 @@ class RuleSchemaReportBuilder:
         )
         return RuleSchemaValidationResult(
             packaged_documents=tuple(
-                sorted(packaged_documents, key=lambda path: path.as_posix())),
+                sorted(packaged_documents, key=lambda path: path.as_posix())
+            ),
             local_documents=tuple(
-                sorted(local_documents, key=lambda path: path.as_posix())),
+                sorted(local_documents, key=lambda path: path.as_posix())
+            ),
             findings=sorted_findings,
         )

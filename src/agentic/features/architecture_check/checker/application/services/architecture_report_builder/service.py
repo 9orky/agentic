@@ -2,32 +2,34 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ...domain.value_object import ArchitectureCheckConfigError, CheckerError, EdgeRuleViolation, FlowViolation
-from ...infrastructure import ExtractorRuntime, ExtractorSpecRegistry, ViolationDotRenderer
-from ..queries.load_config import LoadConfigQuery
+from ....domain.service import ArchitecturePolicyEvaluator
+from ....domain.value_object import ArchitectureCheckConfigError, CheckerError, EdgeRuleViolation, FlowViolation
+from ....infrastructure import ConfigLoader, ExtractorRuntime, ExtractorSpecRegistry, ViolationDotRenderer
+from ...queries.load_config import LoadConfigQuery
+from ..runtime_registry import ExtractorRuntimeFactory
 from .architecture_check_report import ArchitectureCheckReport
 from .architecture_evaluator import ArchitectureEvaluator
 from .dependency_graph_builder import DependencyGraphBuilder
-from .runtime_registry import ExtractorRuntimeFactory
 from .violation_group import ViolationGroup
 
 
 class ArchitectureReportBuilder:
     def __init__(
         self,
-        load_config_query: LoadConfigQuery | None = None,
-        extractor_runtime_factory: ExtractorRuntimeFactory | None = None,
-        extractor_spec_registry: ExtractorSpecRegistry | None = None,
-        dependency_graph_builder: DependencyGraphBuilder | None = None,
-        architecture_evaluator: ArchitectureEvaluator | None = None,
-        violation_dot_renderer: ViolationDotRenderer | None = None,
+        *,
+        load_config_query: LoadConfigQuery,
+        extractor_runtime_factory: ExtractorRuntimeFactory,
+        extractor_spec_registry: ExtractorSpecRegistry,
+        dependency_graph_builder: DependencyGraphBuilder,
+        architecture_evaluator: ArchitectureEvaluator,
+        violation_dot_renderer: ViolationDotRenderer,
     ) -> None:
-        self._load_config_query = load_config_query or LoadConfigQuery()
-        self._extractor_runtime_factory = extractor_runtime_factory or ExtractorRuntimeFactory()
-        self._extractor_spec_registry = extractor_spec_registry or ExtractorSpecRegistry()
-        self._dependency_graph_builder = dependency_graph_builder or DependencyGraphBuilder()
-        self._architecture_evaluator = architecture_evaluator or ArchitectureEvaluator()
-        self._violation_dot_renderer = violation_dot_renderer or ViolationDotRenderer()
+        self._load_config_query = load_config_query
+        self._extractor_runtime_factory = extractor_runtime_factory
+        self._extractor_spec_registry = extractor_spec_registry
+        self._dependency_graph_builder = dependency_graph_builder
+        self._architecture_evaluator = architecture_evaluator
+        self._violation_dot_renderer = violation_dot_renderer
 
     def build(
         self,
@@ -121,14 +123,17 @@ class ArchitectureReportBuilder:
         return f"{' -> '.join(path_parts)}  {violation.violation_type}"
 
 
-_ARCHITECTURE_REPORT_BUILDER = ArchitectureReportBuilder()
-build_architecture_report = _ARCHITECTURE_REPORT_BUILDER.build
-build_violation_groups = _ARCHITECTURE_REPORT_BUILDER.build_violation_groups
-build_dot_report = _ARCHITECTURE_REPORT_BUILDER.build_dot_report
+def build_default_architecture_report_builder() -> ArchitectureReportBuilder:
+    return ArchitectureReportBuilder(
+        load_config_query=LoadConfigQuery(config_loader=ConfigLoader()),
+        extractor_runtime_factory=ExtractorRuntimeFactory(),
+        extractor_spec_registry=ExtractorSpecRegistry(),
+        dependency_graph_builder=DependencyGraphBuilder(),
+        architecture_evaluator=ArchitectureEvaluator(
+            policy_evaluator=ArchitecturePolicyEvaluator(),
+        ),
+        violation_dot_renderer=ViolationDotRenderer(),
+    )
 
-__all__ = [
-    "ArchitectureReportBuilder",
-    "build_architecture_report",
-    "build_dot_report",
-    "build_violation_groups",
-]
+
+__all__ = ["ArchitectureReportBuilder"]

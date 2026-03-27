@@ -1,12 +1,25 @@
 from __future__ import annotations
 
 from pathlib import Path
+from ..services.workspace_contract_sync import (
+    WorkspaceContractSyncService,
+    build_default_workspace_contract_sync_service,
+)
 
-from .bootstrap_project import BootstrapProject
 
+class UpdateProject:
+    def __init__(
+        self,
+        *,
+        sync_service: WorkspaceContractSyncService,
+    ) -> None:
+        self._sync_service = sync_service
 
-class UpdateProject(BootstrapProject):
     def execute(self, project_root: Path) -> dict[str, object]:
-        return self._sync_report_builder.build_sync_result(
-            *self._sync_project(project_root, overwrite_existing_shared_docs=True)
-        )
+        return self._sync_service.update(project_root)
+
+
+def build_default_update_project() -> UpdateProject:
+    return UpdateProject(
+        sync_service=build_default_workspace_contract_sync_service(),
+    )

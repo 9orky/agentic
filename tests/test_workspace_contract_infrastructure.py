@@ -1,3 +1,6 @@
+import agentic.features.workspace_contract.contract.infrastructure as workspace_contract_infrastructure
+import agentic.features.workspace_contract.contract.infrastructure.filesystem as workspace_contract_infrastructure_filesystem
+import agentic.features.workspace_contract.contract.infrastructure.resources as workspace_contract_infrastructure_resources
 import re
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -5,6 +8,50 @@ import unittest
 
 from agentic.features.workspace_contract.contract.domain import RuleDocumentClass, SharedRulePath, WorkspaceContractLayout
 from agentic.features.workspace_contract.contract.infrastructure import PackagedRulesReader, RuleMarkdownParser, RuleTreeReader, WorkspaceReader, WorkspaceWriter
+
+
+class WorkspaceContractInfrastructurePackageTests(unittest.TestCase):
+    def test_infrastructure_package_exports_expected_public_seam(self) -> None:
+        self.assertEqual(
+            workspace_contract_infrastructure.__all__,
+            [
+                "PackagedRulesReader",
+                "RuleMarkdownDocument",
+                "RuleMarkdownParser",
+                "RuleTreeReader",
+                "WorkspaceReader",
+                "WorkspaceWriter",
+            ],
+        )
+
+    def test_filesystem_anchor_exports_expected_public_seam(self) -> None:
+        self.assertEqual(
+            workspace_contract_infrastructure_filesystem.__all__,
+            [
+                "RuleMarkdownDocument",
+                "RuleMarkdownParser",
+                "RuleTreeReader",
+                "WorkspaceReader",
+                "WorkspaceWriter",
+            ],
+        )
+
+    def test_resources_anchor_exports_expected_public_seam(self) -> None:
+        self.assertEqual(
+            workspace_contract_infrastructure_resources.__all__,
+            ["PackagedRulesReader"],
+        )
+
+    def test_infrastructure_directory_matches_allowed_anchor_shape(self) -> None:
+        infrastructure_dir = Path(
+            workspace_contract_infrastructure.__file__).resolve().parent
+        entries = {
+            path.name
+            for path in infrastructure_dir.iterdir()
+            if path.name != "__pycache__"
+        }
+
+        self.assertEqual(entries, {"__init__.py", "filesystem", "resources"})
 
 
 class PackagedRulesReaderTests(unittest.TestCase):
@@ -63,6 +110,9 @@ class PackagedRulesReaderTests(unittest.TestCase):
         rendered_paths = tuple(path.as_posix() for path in shared_rule_paths)
 
         self.assertIn("AGENT.md", rendered_paths)
+        self.assertIn("ddd/DDD.md", rendered_paths)
+        self.assertIn("ddd/STRATEGIC.md", rendered_paths)
+        self.assertIn("ddd/TACTICAL.md", rendered_paths)
         self.assertIn("planning/PLANNING.md", rendered_paths)
         self.assertIn("refactoring/REFACTORING.md", rendered_paths)
         self.assertEqual(rendered_paths, tuple(sorted(rendered_paths)))
@@ -84,6 +134,7 @@ class PackagedRulesReaderTests(unittest.TestCase):
         document_paths = reader.iter_rule_document_paths()
 
         self.assertIn(Path("AGENT.md"), document_paths)
+        self.assertIn(Path("ddd") / "DDD.md", document_paths)
         self.assertIn(Path("planning") / "PLANNING.md", document_paths)
         self.assertFalse(any(path.is_absolute() for path in document_paths))
 
@@ -238,6 +289,7 @@ class RuleTreeReaderTests(unittest.TestCase):
         document_paths = reader.iter_packaged_rule_documents()
 
         self.assertIn(Path("AGENT.md"), document_paths)
+        self.assertIn(Path("ddd") / "TACTICAL.md", document_paths)
         self.assertIn(Path("feature") / "module" /
                       "layers" / "DOMAIN.md", document_paths)
         self.assertEqual(document_paths, tuple(

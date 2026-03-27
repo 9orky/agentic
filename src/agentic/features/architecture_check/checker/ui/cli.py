@@ -6,7 +6,7 @@ from typing import cast
 import click
 
 from ..application import CheckerError
-from ..application import build_architecture_report, build_dot_report, build_violation_groups
+from ..application.queries import BuildArchitectureReportQuery, build_default_architecture_report_query
 from .services import CheckSummaryPresenter
 from .views import GroupedViolationView, JsonReportView
 
@@ -14,13 +14,16 @@ from .views import GroupedViolationView, JsonReportView
 class ArchitectureCheckCli:
     def __init__(
         self,
-        grouped_violation_view: GroupedViolationView | None = None,
-        json_report_view: JsonReportView | None = None,
-        check_summary_presenter: CheckSummaryPresenter | None = None,
+        *,
+        build_architecture_report_query: BuildArchitectureReportQuery,
+        grouped_violation_view: GroupedViolationView,
+        json_report_view: JsonReportView,
+        check_summary_presenter: CheckSummaryPresenter,
     ) -> None:
-        self._grouped_violation_view = grouped_violation_view or GroupedViolationView()
-        self._json_report_view = json_report_view or JsonReportView()
-        self._check_summary_presenter = check_summary_presenter or CheckSummaryPresenter()
+        self._build_architecture_report_query = build_architecture_report_query
+        self._grouped_violation_view = grouped_violation_view
+        self._json_report_view = json_report_view
+        self._check_summary_presenter = check_summary_presenter
 
     def register(self, app: click.Group) -> None:
         app.add_command(self.build_check_command())
@@ -47,7 +50,7 @@ class ArchitectureCheckCli:
 
     def run_check(self, project_root: str, config: str | None, output_format: str, dot_path: str | None) -> int:
         try:
-            report = build_architecture_report(
+            report = self._build_architecture_report_query.execute(
                 Path(project_root).expanduser().resolve(),
                 config,
             )
@@ -67,7 +70,8 @@ class ArchitectureCheckCli:
             return 1
 
         if dot_path is not None:
-            dot_text = build_dot_report(report)
+            dot_text = self._build_architecture_report_query.build_dot_report(
+                report)
             Path(dot_path).expanduser().resolve().write_text(
                 dot_text, encoding="utf-8")
 
@@ -87,7 +91,8 @@ class ArchitectureCheckCli:
             click.echo("\n=== Architectural Violations Detected ===")
             click.echo(
                 self._grouped_violation_view.render(
-                    build_violation_groups(report)
+                    self._build_architecture_report_query.build_violation_groups(
+                        report)
                 )
             )
             if dot_path is not None:
@@ -102,6 +107,15 @@ class ArchitectureCheckCli:
         return 0
 
 
-architecture_check_cli = ArchitectureCheckCli().register
+def build_default_architecture_check_cli() -> ArchitectureCheckCli:
+    return ArchitectureCheckCli(
+        build_architecture_report_query=build_default_architecture_report_query(),
+        grouped_violation_view=GroupedViolationView(),
+        json_report_view=JsonReportView(),
+        check_summary_presenter=CheckSummaryPresenter(),
+    )
+
+
+architecture_check_cli = build_default_architecture_check_cli().register
 
 __all__ = ["ArchitectureCheckCli", "architecture_check_cli"]

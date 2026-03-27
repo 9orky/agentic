@@ -13,6 +13,7 @@ The first planning response is the big-picture plan. Do not create step files un
 ## Scope
 
 Keep the high-level plan at the boundary and contract level before file-level execution planning begins.
+If the work materially changes business language, bounded contexts, context relationships, or domain structure, create or update a project-local `DDD.md` at the same directory level as the owning `PLAN.md`.
 
 ## Core Rules
 
@@ -28,6 +29,8 @@ Each high-level plan must include these sections:
 4. `Execution Shape`
 5. `Acceptance`
 6. `Open Questions`
+
+When material domain work is in scope, the plan must also name the colocated `DDD.md` artifact that holds the strategic domain model.
 
 `Planned Blast Radius` must be the second section, directly under `Goal`.
 
@@ -80,11 +83,12 @@ For each material concept, state:
 
 Before locking the plan:
 
-1. name the bounded context or business slice being changed
-2. extract the candidate concepts implied by the request and current behavior
-3. classify each concept as an entity, value object, domain service, repository, policy, event, application coordinator, infrastructure adapter, or UI contract
-4. state the identity, invariants, lifecycle, and owning layer for each material concept
-5. stop and tighten the model if a concept cannot be classified or placed deterministically
+1. decide whether the work requires a colocated `DDD.md` artifact and create or update it when the strategic model changes materially
+2. name the bounded context or business slice being changed
+3. extract the candidate concepts implied by the request and current behavior
+4. classify each concept as an entity, value object, domain service, repository, policy, event, application coordinator, infrastructure adapter, or UI contract
+5. state the identity, invariants, lifecycle, and owning layer for each material concept
+6. stop and tighten the model if a concept cannot be classified or placed deterministically
 
 ## Constraints
 
@@ -103,14 +107,16 @@ After the high-level plan is accepted:
 1. split the approved plan into executable step files named `PLAN_STEP_0X.md`
 2. place every `PLAN_STEP_0X.md` file at the same directory level as the owning `PLAN.md`
 3. do not create nested planning subdirectories for step files
-4. keep the step sequence aligned with the approved phase order
-5. move file-level implementation detail, target file naming, and step verification into the step files rather than overloading the big-picture plan
+4. keep the colocated `DDD.md` aligned with the approved strategic model before step files are written
+5. keep the step sequence aligned with the approved phase order
+6. move file-level implementation detail, target file naming, and step verification into the step files rather than overloading the big-picture plan
 
 ## Acceptance Check
 
 1. The high-level plan stays at the boundary and contract level.
 2. The plan contains the required sections, with `Planned Blast Radius` second.
-3. Material concepts are classified and placed deterministically.
-4. The blast-radius section lets a human reviewer inspect SSOT, DRY, YAGNI, and SOLID risk before reading the rest of the plan.
-5. Step files are not created before the high-level plan is accepted.
-6. The plan names phases, acceptance criteria, and open questions explicitly.
+3. Material domain work names a colocated `DDD.md` artifact or explicitly states why the strategic model is unchanged.
+4. Material concepts are classified and placed deterministically.
+5. The blast-radius section lets a human reviewer inspect SSOT, DRY, YAGNI, and SOLID risk before reading the rest of the plan.
+6. Step files are not created before the high-level plan is accepted.
+7. The plan names phases, acceptance criteria, and open questions explicitly.

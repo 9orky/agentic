@@ -6,16 +6,17 @@ from ...domain import WorkspaceContractLayout
 
 
 class WorkspaceWriter:
+    def __init__(self, *, layout: WorkspaceContractLayout) -> None:
+        self._layout = layout
+
     def ensure_target_directory(
         self,
         project_root: Path,
-        *,
-        layout: WorkspaceContractLayout | None = None,
     ) -> tuple[Path, bool]:
-        active_layout = layout or WorkspaceContractLayout()
-        target_dir = active_layout.target_dir(project_root)
+        target_dir = self._layout.target_dir(project_root)
         if target_dir.exists() and not target_dir.is_dir():
-            raise NotADirectoryError(f"{target_dir} exists but is not a directory")
+            raise NotADirectoryError(
+                f"{target_dir} exists but is not a directory")
 
         created_dir = False
         if not target_dir.exists():
@@ -27,12 +28,9 @@ class WorkspaceWriter:
     def ensure_local_extension_directories(
         self,
         project_root: Path,
-        *,
-        layout: WorkspaceContractLayout | None = None,
     ) -> tuple[Path, Path]:
-        active_layout = layout or WorkspaceContractLayout()
-        overrides_dir = active_layout.overrides_dir(project_root)
-        project_specific_dir = active_layout.project_specific_dir(project_root)
+        overrides_dir = self._layout.overrides_dir(project_root)
+        project_specific_dir = self._layout.project_specific_dir(project_root)
         self.ensure_directory(overrides_dir)
         self.ensure_directory(project_specific_dir)
         return overrides_dir, project_specific_dir

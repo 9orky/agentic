@@ -1,4 +1,7 @@
 import json
+import agentic.features.architecture_check.checker.infrastructure as architecture_check_infrastructure
+import agentic.features.architecture_check.checker.infrastructure.extractor_registry as architecture_check_infrastructure_extractor_registry
+import agentic.features.architecture_check.checker.infrastructure.extractor_runtime as architecture_check_infrastructure_extractor_runtime
 from contextlib import redirect_stdout
 from io import StringIO
 from pathlib import Path
@@ -7,6 +10,48 @@ from unittest.mock import Mock, patch
 import unittest
 
 from agentic.cli import main
+
+
+class ArchitectureCheckInfrastructurePackageTests(unittest.TestCase):
+    def test_infrastructure_package_exports_expected_public_seam(self) -> None:
+        self.assertEqual(
+            architecture_check_infrastructure.__all__,
+            [
+                "ConfigLoader",
+                "ExtractorRuntime",
+                "ExtractorSpec",
+                "ExtractorSpecRegistry",
+                "SubprocessExtractorRuntime",
+                "ViolationDotRenderer",
+            ],
+        )
+
+    def test_extractor_registry_anchor_exports_expected_public_seam(self) -> None:
+        self.assertEqual(
+            architecture_check_infrastructure_extractor_registry.__all__,
+            ["ExtractorSpec", "ExtractorSpecRegistry"],
+        )
+
+    def test_extractor_runtime_anchor_exports_expected_public_seam(self) -> None:
+        self.assertEqual(
+            architecture_check_infrastructure_extractor_runtime.__all__,
+            ["ExtractorRuntime", "SubprocessExtractorRuntime"],
+        )
+
+    def test_infrastructure_directory_matches_allowed_anchor_shape(self) -> None:
+        infrastructure_dir = Path(
+            architecture_check_infrastructure.__file__).resolve().parent
+        entries = {
+            path.name
+            for path in infrastructure_dir.iterdir()
+            if path.name != "__pycache__"
+        }
+
+        self.assertEqual(
+            entries,
+            {"__init__.py", "config_loader.py", "dot_renderer.py",
+                "extractor_registry", "extractor_runtime"},
+        )
 
 
 class ArchitectureReportingTests(unittest.TestCase):

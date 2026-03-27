@@ -5,8 +5,8 @@ from pathlib import Path
 
 from ...domain.value_object import CheckerError
 from ...infrastructure import ExtractorRuntime
-from ..queries.describe_architecture import DescribeArchitectureQuery
-from ..services.runtime_registry import ExtractorRuntimeFactory
+from ..services.architecture_check_service import ArchitectureCheckService
+from ..services.architecture_check_service import build_default_architecture_check_service
 
 
 @dataclass(frozen=True)
@@ -23,11 +23,10 @@ class CheckResult:
 class RunArchitectureCheckCommand:
     def __init__(
         self,
-        describe_architecture_query: DescribeArchitectureQuery | None = None,
-        extractor_runtime_factory: ExtractorRuntimeFactory | None = None,
+        *,
+        check_service: ArchitectureCheckService,
     ) -> None:
-        self._describe_architecture_query = describe_architecture_query or DescribeArchitectureQuery()
-        self._extractor_runtime_factory = extractor_runtime_factory or ExtractorRuntimeFactory()
+        self._check_service = check_service
 
     def run(
         self,
@@ -36,12 +35,10 @@ class RunArchitectureCheckCommand:
         *,
         extractor_runtime: ExtractorRuntime | None = None,
     ) -> CheckResult:
-        runtime = extractor_runtime or self._extractor_runtime_factory.create()
-
-        summary = self._describe_architecture_query.describe(
+        summary = self._check_service.check(
             project_root,
             explicit_config_path,
-            extractor_runtime=runtime,
+            extractor_runtime=extractor_runtime,
         )
         if summary.check_error is not None:
             raise CheckerError(summary.check_error)
@@ -57,7 +54,13 @@ class RunArchitectureCheckCommand:
         )
 
 
-run_architecture_check = RunArchitectureCheckCommand().run
+def build_default_run_architecture_check_command() -> RunArchitectureCheckCommand:
+    return RunArchitectureCheckCommand(
+        check_service=build_default_architecture_check_service(),
+    )
+
+
+run_architecture_check = build_default_run_architecture_check_command().run
 
 __all__ = ["CheckResult", "RunArchitectureCheckCommand",
            "run_architecture_check"]

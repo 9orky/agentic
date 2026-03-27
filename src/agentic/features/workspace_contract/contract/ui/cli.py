@@ -5,8 +5,12 @@ from pathlib import Path
 import click
 
 from ... import BootstrapError
-from ..application import BootstrapProject, DescribeRuleSchemaDrift, UpdateProject
-from .views import RuleSchemaDriftView, SyncSummaryView
+from ..application import (
+    build_default_bootstrap_project,
+    build_default_describe_rule_schema_drift,
+    build_default_update_project,
+)
+from .views import build_default_rule_schema_drift_view, build_default_sync_summary_view
 
 __all__ = ["workspace_contract_cli"]
 
@@ -16,7 +20,7 @@ __all__ = ["workspace_contract_cli"]
 def _init_command(project_root: str) -> int:
     try:
         resolved_project_root = Path(project_root).expanduser().resolve()
-        result = BootstrapProject().execute(resolved_project_root)
+        result = build_default_bootstrap_project().execute(resolved_project_root)
     except BootstrapError as exc:
         click.echo(f"Error: {exc}")
         return 1
@@ -24,7 +28,7 @@ def _init_command(project_root: str) -> int:
         click.echo(f"Error: {exc}")
         return 1
 
-    for line in SyncSummaryView().render_bootstrap_result(result, project_root=resolved_project_root):
+    for line in build_default_sync_summary_view().render_bootstrap_result(result, project_root=resolved_project_root):
         click.echo(line)
     return 0
 
@@ -34,7 +38,7 @@ def _init_command(project_root: str) -> int:
 def _update_command(project_root: str) -> int:
     try:
         resolved_project_root = Path(project_root).expanduser().resolve()
-        result = UpdateProject().execute(resolved_project_root)
+        result = build_default_update_project().execute(resolved_project_root)
     except BootstrapError as exc:
         click.echo(f"Error: {exc}")
         return 1
@@ -42,7 +46,7 @@ def _update_command(project_root: str) -> int:
         click.echo(f"Error: {exc}")
         return 1
 
-    for line in SyncSummaryView().render_update_result(result, project_root=resolved_project_root):
+    for line in build_default_sync_summary_view().render_update_result(result, project_root=resolved_project_root):
         click.echo(line)
     return 0
 
@@ -58,7 +62,7 @@ def _update_command(project_root: str) -> int:
 def _check_rules_command(project_root: str, local_mirror: bool) -> int:
     try:
         resolved_project_root = Path(project_root).expanduser().resolve()
-        result = DescribeRuleSchemaDrift().execute(
+        result = build_default_describe_rule_schema_drift().execute(
             resolved_project_root,
             include_local_mirror=local_mirror,
         )
@@ -69,7 +73,7 @@ def _check_rules_command(project_root: str, local_mirror: bool) -> int:
         click.echo(f"Error: {exc}")
         return 1
 
-    for line in RuleSchemaDriftView().render(
+    for line in build_default_rule_schema_drift_view().render(
         result,
         project_root=resolved_project_root,
         include_local_mirror=local_mirror,

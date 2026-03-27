@@ -1,3 +1,3 @@
-from .cli import ArchitectureCheckCli
+from .cli import ArchitectureCheckCli, architecture_check_cli
 
-__all__ = ["ArchitectureCheckCli"]
+__all__ = ["ArchitectureCheckCli", "architecture_check_cli"]
