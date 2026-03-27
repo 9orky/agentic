@@ -5,7 +5,7 @@ from pathlib import Path
 import yaml
 from agentic.project_layout import AgenticProjectLayout
 
-from ..domain.value_object import ArchitectureCheckConfigError
+from ..domain import ArchitectureCheckConfigError
 
 
 class ConfigLoader:

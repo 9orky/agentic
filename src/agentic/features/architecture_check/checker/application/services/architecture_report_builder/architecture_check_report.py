@@ -4,7 +4,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-from ....domain.value_object import EdgeRuleViolation, FlowViolation
+from ....domain import EdgeRuleViolation, FlowViolation
 
 
 @dataclass(frozen=True)

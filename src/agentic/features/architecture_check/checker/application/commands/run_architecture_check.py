@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from ...domain.value_object import CheckerError
+from ...domain import CheckerError
 from ...infrastructure import ExtractorRuntime
 from ..services.architecture_check_service import ArchitectureCheckService
 from ..services.architecture_check_service import build_default_architecture_check_service

@@ -6,19 +6,21 @@
 # by repo-relative file path. Each entry contains imports, classes, and
 # functions.
 
-language: ""
-
-exclusions:
-  - tests/**
-  - node_modules/**
-  - dist/**
-  - build/**
-  - .venv/**
-  - agentic/**
+language: python
+exclusions: [.venv/**, agentic/**, tests/**]
 
 rules:
+  tags:
+    - { name: feature, match: &feature src/agentic/features/* }
+    - { name: domain, match: &domain src/agentic/features/*/*/domain }
+    - { name: infrastructure, match: &infrastructure src/agentic/features/*/*/infrastructure }
+    - { name: application, match: &application src/agentic/features/*/*/application }
+    - { name: ui, match: &ui src/agentic/features/*/*/ui }
   boundaries:
-    - source: src/domain
-      disallow:
-        - src/infra
-        - src/ui
+    - { source: src/agentic/cli.py, disallow: [*feature], allow: [src/agentic/features/*/cli] }
+    - { source: *feature, disallow: [*feature], allow_same_match: true, allow: [*feature] }
+    - { source: *domain, disallow: [*infrastructure, *application, *ui] }
+    - { source: *infrastructure, disallow: [src/agentic/features/*/*/domain/*/*, *application, *ui] }
+    - { source: *application, disallow: [src/agentic/features/*/*/domain/*/*, src/agentic/features/*/*/infrastructure/*/*, *ui] }
+    - { source: *ui, disallow: [src/agentic/features/*/*/application/*/*, *infrastructure, *domain] }
+  flow: { layers: [ui, application, infrastructure, domain], module_tag: feature, analyzers: [backward-flow, no-cycles] }

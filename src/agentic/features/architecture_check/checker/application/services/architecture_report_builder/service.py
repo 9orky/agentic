@@ -2,10 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ....domain.service import ArchitecturePolicyEvaluator
-from ....domain.value_object import ArchitectureCheckConfigError, CheckerError, EdgeRuleViolation, FlowViolation
+from ....domain import ArchitecturePolicyEvaluator, ArchitectureCheckConfigError, CheckerError, EdgeRuleViolation, FlowViolation
 from ....infrastructure import ConfigLoader, ExtractorRuntime, ExtractorSpecRegistry, ViolationDotRenderer
-from ...queries.load_config import LoadConfigQuery
+from ...queries import LoadConfigQuery
 from ..runtime_registry import ExtractorRuntimeFactory
 from .architecture_check_report import ArchitectureCheckReport
 from .architecture_evaluator import ArchitectureEvaluator
@@ -136,4 +135,4 @@ def build_default_architecture_report_builder() -> ArchitectureReportBuilder:
     )
 
 
-__all__ = ["ArchitectureReportBuilder"]
+__all__ = ["ArchitectureReportBuilder", "build_default_architecture_report_builder"]

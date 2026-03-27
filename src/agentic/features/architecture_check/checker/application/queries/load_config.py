@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ...domain.value_object import ArchitectureCheckConfig, ArchitectureCheckConfigError, ConfigLoadResult
+from ...domain import ArchitectureCheckConfig, ArchitectureCheckConfigError, ConfigLoadResult
 from ...infrastructure import ConfigLoader
 
 

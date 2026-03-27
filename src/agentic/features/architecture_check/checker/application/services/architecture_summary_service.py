@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ...domain.value_object import ArchitectureCheckConfigError, CheckerError
+from ...domain import ArchitectureCheckConfigError, CheckerError
 from ...infrastructure import ExtractorRuntime
-from ..queries.architecture_summary import ArchitectureSummary
+from ..queries import ArchitectureSummary
 from .architecture_report_builder import ArchitectureReportBuilder, ViolationRenderer
-from .architecture_report_builder.service import build_default_architecture_report_builder
+from .architecture_report_builder import build_default_architecture_report_builder
 
 
 class ArchitectureSummaryService:

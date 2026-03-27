@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Protocol
 
-from ...domain.value_object import ExtractionResult
+from ...domain import ExtractionResult
 from ..extractor_registry import ExtractorSpec
 
 

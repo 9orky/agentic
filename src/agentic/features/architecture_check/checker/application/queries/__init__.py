@@ -1,7 +1,7 @@
 from .architecture_summary import ArchitectureSummary
+from .load_config import LoadConfigQuery, load_config
 from .build_architecture_report import BuildArchitectureReportQuery, ViolationGroup, build_default_architecture_report_query
 from .describe_architecture import DescribeArchitectureQuery, describe_architecture
-from .load_config import LoadConfigQuery, load_config
 
 __all__ = [
     "ArchitectureSummary",

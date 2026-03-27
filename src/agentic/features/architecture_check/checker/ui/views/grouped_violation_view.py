@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ...application.queries import ViolationGroup
+from ...application import ViolationGroup
 
 
 class GroupedViolationView:

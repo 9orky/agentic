@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import OrderedDict
 
-from ..domain.value_object import EdgeRuleViolation, FlowViolation
+from ..domain import EdgeRuleViolation, FlowViolation
 
 
 class ViolationDotRenderer:

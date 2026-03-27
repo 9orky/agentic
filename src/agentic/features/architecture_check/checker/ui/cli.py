@@ -6,7 +6,7 @@ from typing import cast
 import click
 
 from ..application import CheckerError
-from ..application.queries import BuildArchitectureReportQuery, build_default_architecture_report_query
+from ..application import BuildArchitectureReportQuery, build_default_architecture_report_query
 from .services import CheckSummaryPresenter
 from .views import GroupedViolationView, JsonReportView
 

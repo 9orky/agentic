@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-from ....domain.entity import DependencyGraph
-from ....domain.service import ArchitecturePolicyEvaluator
-from ....domain.value_object import ArchitectureCheckConfig, EdgeRuleViolation, FlowViolation
+from ....domain import ArchitectureCheckConfig, ArchitecturePolicyEvaluator, DependencyGraph, EdgeRuleViolation, FlowViolation
 
 
 class ArchitectureEvaluator:

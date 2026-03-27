@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from ....domain.entity import DependencyGraph
-from ....domain.value_object import ExtractedFile, NodeSelector
+from ....domain import DependencyGraph, ExtractedFile, NodeSelector
 
 
 class DependencyGraphBuilder:

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import sys
 
-from ...domain.value_object import CheckerError
+from ...domain import CheckerError
 from .extractor_spec import ExtractorSpec
 
 

@@ -7,7 +7,7 @@ import os
 import shutil
 import subprocess
 
-from ...domain.value_object import CheckerError, ExtractionResult, ExtractorContractError
+from ...domain import CheckerError, ExtractionResult, ExtractorContractError
 from ..extractor_registry import ExtractorSpec
 from .extractor_runtime import ExtractorRuntime
 
