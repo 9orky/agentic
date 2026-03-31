@@ -6,7 +6,7 @@ Use this README when the task is about changing the rule sets themselves, not wh
 
 ## How To Navigate The Rules Tree
 
-1. Start in [rules/AGENT.md](rules/AGENT.md) to obtain the available rule sets and the next valid links.
+1. Start in [rules/INDEX.md](rules/INDEX.md) to obtain the available rule sets and the next valid links.
 2. Follow one markdown link to the governing bootstrap file.
 3. If that bootstrap file offers child documents, choose one of those child links there.
 4. Continue step by step instead of skipping across the tree.
@@ -67,7 +67,7 @@ The risks below are standing guidance and should stay visible whenever the packa
 
 1. over-splitting can create too many hops and make discovery worse
 2. under-splitting preserves the context-window problem that the navigation model is meant to solve
-3. router bloat makes AGENT.md or a bootstrap file drift back into a rules dump
+3. router bloat makes INDEX.md or a bootstrap file drift back into a rules dump
 4. abstraction leaks happen when one rule set embeds another rule set's detailed logic instead of linking to it
 5. duplicated manifests of the packaged rules tree create drift; when code needs the tree shape, enumerate the packaged source-of-truth tree directly instead of copying file lists into multiple places
 6. tech-specific wording in shared rules makes the default contract less reusable and pushes package behavior toward one stack instead of a general architecture model

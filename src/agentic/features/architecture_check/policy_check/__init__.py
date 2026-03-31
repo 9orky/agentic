@@ -1,4 +1,5 @@
 from .application import ArchitectureSummary, BuildArchitectureReportQuery, CheckResult, CheckerError, describe_architecture, run_architecture_check
+from .application.queries import build_default_architecture_report_query
 from ..hotspots import build_default_describe_file_import_hotspots_query
 from .application.queries.build_architecture_report import build_default_architecture_report_query
 from .ui import ArchitectureCheckCli
@@ -21,12 +22,13 @@ def build_default_architecture_check_cli() -> ArchitectureCheckCli:
 architecture_check_cli = build_default_architecture_check_cli().register
 
 __all__ = [
-    "ArchitectureCheckCli",
     "ArchitectureSummary",
     "BuildArchitectureReportQuery",
     "CheckResult",
     "CheckerError",
     "architecture_check_cli",
+    "build_default_architecture_check_cli",
+    "build_default_architecture_report_query",
     "describe_architecture",
     "run_architecture_check",
 ]

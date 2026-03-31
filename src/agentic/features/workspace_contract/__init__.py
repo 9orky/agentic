@@ -3,7 +3,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from .rule_schema_audit.application import RuleSchemaValidationResult, build_default_describe_rule_schema_drift
+from .rules import (
+    RuleDocumentReport,
+    RuleSchemaReport,
+    RuleSchemaViolationReport,
+    build_rule_schema_report,
+)
 from .workspace_sync.application import build_default_bootstrap_project, build_default_describe_workspace_contract, build_default_update_project
 from .workspace_sync.domain import WorkspaceContractSummary
 
@@ -23,11 +28,13 @@ class SyncResult:
 
 __all__ = [
     "BootstrapError",
-    "RuleSchemaValidationResult",
+    "RuleDocumentReport",
+    "RuleSchemaReport",
+    "RuleSchemaViolationReport",
     "SyncResult",
     "WorkspaceContractSummary",
     "bootstrap_project",
-    "describe_rule_schema_drift",
+    "build_rule_schema_report",
     "describe_workspace_contract",
     "update_project",
 ]
@@ -44,20 +51,6 @@ def update_project(project_root: Path) -> SyncResult:
 def describe_workspace_contract(project_root: Path) -> WorkspaceContractSummary:
     try:
         return build_default_describe_workspace_contract().execute(project_root)
-    except NotADirectoryError as exc:
-        raise BootstrapError(str(exc)) from exc
-
-
-def describe_rule_schema_drift(
-    project_root: Path,
-    *,
-    include_local_mirror: bool = True,
-) -> RuleSchemaValidationResult:
-    try:
-        return build_default_describe_rule_schema_drift().execute(
-            project_root,
-            include_local_mirror=include_local_mirror,
-        )
     except NotADirectoryError as exc:
         raise BootstrapError(str(exc)) from exc
 

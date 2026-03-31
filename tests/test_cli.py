@@ -30,7 +30,7 @@ class CliTests(unittest.TestCase):
             project_root = Path(temp_dir)
 
             main(["init", "--project-root", str(project_root)])
-            shared_doc_path = project_root / "agentic" / "rules" / "AGENT.md"
+            shared_doc_path = project_root / "agentic" / "rules" / "INDEX.md"
             shared_doc_path.write_text(
                 "locally modified shared doc\n", encoding="utf-8")
 

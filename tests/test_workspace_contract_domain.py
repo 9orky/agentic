@@ -1,13 +1,13 @@
-import agentic.features.workspace_contract.rule_schema_audit.domain as rule_schema_audit_domain
-import agentic.features.workspace_contract.rule_schema_audit.domain.service as rule_schema_audit_domain_service
-import agentic.features.workspace_contract.rule_schema_audit.domain.value_object as rule_schema_audit_domain_value_object
+import agentic.features.workspace_contract.rules.domain as rules_domain
+import agentic.features.workspace_contract.rules.domain.service as rules_domain_service
+import agentic.features.workspace_contract.rules.domain.value_object as rules_domain_value_object
 import agentic.features.workspace_contract.workspace_sync.domain as workspace_sync_domain
 import agentic.features.workspace_contract.workspace_sync.domain.service as workspace_sync_domain_service
 import agentic.features.workspace_contract.workspace_sync.domain.value_object as workspace_sync_domain_value_object
 from pathlib import Path
 import unittest
 
-from agentic.features.workspace_contract.rule_schema_audit.domain import RuleDocumentClass, RuleDocumentSchema, RuleSchemaPolicy
+from agentic.features.workspace_contract.rules.domain import RuleDocumentClass, RuleDocumentSchema, RuleSchemaPolicy
 from agentic.features.workspace_contract.workspace_sync.domain import SharedRulePath, SyncAction, SyncPolicy, WorkspaceContractLayout
 
 
@@ -25,11 +25,16 @@ class WorkspaceContractDomainPackageTests(unittest.TestCase):
             ],
         )
 
-    def test_rule_schema_audit_domain_package_exports_expected_public_seam(self) -> None:
+    def test_rules_domain_package_exports_expected_public_seam(self) -> None:
         self.assertEqual(
-            rule_schema_audit_domain.__all__,
+            rules_domain.__all__,
             [
                 "RuleDocumentClass",
+                "RuleDocument",
+                "RuleDocumentCheck",
+                "RuleDocumentFile",
+                "RuleDocumentParseError",
+                "RuleDocumentRepository",
                 "RuleDocumentSchema",
                 "RuleSchemaPolicy",
                 "RuleSchemaViolation",
@@ -43,7 +48,7 @@ class WorkspaceContractDomainPackageTests(unittest.TestCase):
             ["SyncPolicy"],
         )
         self.assertEqual(
-            rule_schema_audit_domain_service.__all__,
+            rules_domain_service.__all__,
             ["RuleSchemaPolicy"],
         )
 
@@ -59,10 +64,10 @@ class WorkspaceContractDomainPackageTests(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            rule_schema_audit_domain_value_object.__all__,
+            rules_domain_value_object.__all__,
             [
                 "RuleDocumentClass",
-                "RuleDocumentSchema",
+                "RuleDocumentParseError",
                 "RuleSchemaViolation",
                 "RuleSectionRequirement",
             ],
@@ -78,28 +83,30 @@ class WorkspaceContractDomainPackageTests(unittest.TestCase):
 
         self.assertEqual(entries, {"__init__.py", "service", "value_object"})
 
-        audit_domain_dir = Path(
-            rule_schema_audit_domain.__file__).resolve().parent
-        audit_entries = {
+        rules_domain_dir = Path(
+            rules_domain.__file__).resolve().parent
+        rules_entries = {
             path.name
-            for path in audit_domain_dir.iterdir()
+            for path in rules_domain_dir.iterdir()
             if path.name != "__pycache__"
         }
 
         self.assertEqual(
-            audit_entries, {"__init__.py", "service", "value_object"})
+            rules_entries,
+            {"__init__.py", "entity.py", "repository.py", "service.py", "value_object.py"},
+        )
 
 
 class SharedRulePathTests(unittest.TestCase):
     def test_rejects_non_shared_rule_locations(self) -> None:
         with self.assertRaises(ValueError):
-            SharedRulePath(Path("rules") / "AGENT.md")
+            SharedRulePath(Path("rules") / "INDEX.md")
 
         with self.assertRaises(ValueError):
             SharedRulePath(Path("overrides") / "LOCAL.md")
 
         with self.assertRaises(ValueError):
-            SharedRulePath(Path("..") / "AGENT.md")
+            SharedRulePath(Path("..") / "INDEX.md")
 
     def test_returns_rules_relative_path(self) -> None:
         shared_rule_path = SharedRulePath(Path("feature") / "FEATURE.md")
@@ -112,16 +119,12 @@ class WorkspaceContractLayoutTests(unittest.TestCase):
     def test_resolves_runtime_paths(self) -> None:
         project_root = Path("/tmp/project")
         layout = WorkspaceContractLayout()
-        shared_rule_path = SharedRulePath(Path("AGENT.md"))
+        shared_rule_path = SharedRulePath(Path("INDEX.md"))
 
         self.assertEqual(layout.target_dir(project_root),
                          project_root / "agentic")
         self.assertEqual(layout.rules_dir(project_root),
                          project_root / "agentic" / "rules")
-        self.assertEqual(layout.overrides_dir(project_root),
-                         project_root / "agentic" / "rules" / "overrides")
-        self.assertEqual(layout.project_specific_dir(
-            project_root), project_root / "agentic" / "rules" / "project-specific")
         self.assertEqual(layout.config_path(project_root),
                          project_root / "agentic" / "agentic.yaml")
         self.assertEqual(
@@ -130,7 +133,7 @@ class WorkspaceContractLayoutTests(unittest.TestCase):
         )
         self.assertEqual(
             layout.shared_rule_destination(project_root, shared_rule_path),
-            project_root / "agentic" / "rules" / "AGENT.md",
+            project_root / "agentic" / "rules" / "INDEX.md",
         )
 
 
@@ -139,10 +142,10 @@ class SyncPolicyTests(unittest.TestCase):
         project_root = Path("/tmp/project")
         policy = SyncPolicy()
         shared_rule_paths = [
-            SharedRulePath(Path("feature") / "FEATURE.md"),
-            SharedRulePath(Path("AGENT.md")),
+            SharedRulePath(Path("structure") / "MODULE.md"),
+            SharedRulePath(Path("INDEX.md")),
         ]
-        existing_paths = [project_root / "agentic" / "rules" / "AGENT.md"]
+        existing_paths = [project_root / "agentic" / "rules" / "INDEX.md"]
 
         changes = policy.plan_shared_rule_changes(
             project_root,
@@ -152,15 +155,15 @@ class SyncPolicyTests(unittest.TestCase):
         )
 
         self.assertEqual([change.shared_rule_path.as_posix()
-                         for change in changes], ["AGENT.md", "feature/FEATURE.md"])
+                 for change in changes], ["INDEX.md", "structure/MODULE.md"])
         self.assertEqual([change.action for change in changes], [
                          SyncAction.PRESERVE, SyncAction.CREATE])
 
     def test_update_plan_marks_existing_shared_docs_for_update(self) -> None:
         project_root = Path("/tmp/project")
         policy = SyncPolicy()
-        shared_rule_paths = [SharedRulePath(Path("AGENT.md"))]
-        existing_paths = [project_root / "agentic" / "rules" / "AGENT.md"]
+        shared_rule_paths = [SharedRulePath(Path("INDEX.md"))]
+        existing_paths = [project_root / "agentic" / "rules" / "INDEX.md"]
 
         changes = policy.plan_shared_rule_changes(
             project_root,
@@ -175,22 +178,18 @@ class SyncPolicyTests(unittest.TestCase):
         project_root = Path("/tmp/project")
         policy = SyncPolicy()
         shared_rule_paths = [
-            SharedRulePath(Path("AGENT.md")),
-            SharedRulePath(Path("planning") / "PLANNING.md"),
+            SharedRulePath(Path("INDEX.md")),
+            SharedRulePath(Path("structure") / "MODULE.md"),
         ]
         existing_shared_rule_paths = [
-            project_root / "agentic" / "rules" / "AGENT.md"]
-        override_paths = [project_root / "agentic" /
-                          "rules" / "overrides" / "TESTS.md"]
-        project_specific_paths = [
-            project_root / "agentic" / "rules" / "project-specific" / "LOCAL.md"]
+            project_root / "agentic" / "rules" / "INDEX.md"]
 
         summary = policy.summarize_workspace_contract(
             project_root,
             shared_rule_paths,
             existing_shared_rule_paths,
-            override_paths,
-            project_specific_paths,
+            (),
+            (),
             agentic_dir_exists=True,
             config_exists=False,
         )
@@ -201,14 +200,13 @@ class SyncPolicyTests(unittest.TestCase):
         self.assertEqual(summary.config_path, project_root /
                          "agentic" / "agentic.yaml")
         self.assertEqual(summary.shared_rule_paths,
-                         (project_root / "agentic" / "rules" / "AGENT.md",))
+                         (project_root / "agentic" / "rules" / "INDEX.md",))
         self.assertEqual(
             summary.missing_shared_rule_paths,
-            (project_root / "agentic" / "rules" / "planning" / "PLANNING.md",),
+            (project_root / "agentic" / "rules" / "structure" / "MODULE.md",),
         )
-        self.assertEqual(summary.override_paths, tuple(override_paths))
-        self.assertEqual(summary.project_specific_paths,
-                         tuple(project_specific_paths))
+        self.assertEqual(summary.override_paths, ())
+        self.assertEqual(summary.project_specific_paths, ())
 
 
 class RuleDocumentSchemaTests(unittest.TestCase):
@@ -219,18 +217,19 @@ class RuleDocumentSchemaTests(unittest.TestCase):
         self.assertEqual(
             tuple(
                 requirement.canonical_heading for requirement in schema.required_sections()),
-            ("Purpose", "Use This When", "Available Options",
-             "Navigation Rule", "Exit Condition"),
+            ("Stop Or Descend", "Review Checks"),
         )
         self.assertTrue(schema.navigation_targets_required)
 
-    def test_leaf_schema_supports_scope_as_ownership_alias(self) -> None:
-        schema = RuleDocumentSchema.leaf()
+    def test_policy_schema_exposes_expected_required_sections(self) -> None:
+        schema = RuleDocumentSchema.policy()
 
-        self.assertEqual(schema.document_class, RuleDocumentClass.LEAF)
-        ownership_requirement = schema.required_sections()[2]
-        self.assertTrue(ownership_requirement.matches("Ownership"))
-        self.assertTrue(ownership_requirement.matches("Scope"))
+        self.assertEqual(schema.document_class, RuleDocumentClass.POLICY)
+        self.assertEqual(
+            tuple(
+                requirement.canonical_heading for requirement in schema.required_sections()),
+            ("Required Decisions", "Core Rules", "Review Checks"),
+        )
         self.assertFalse(schema.navigation_targets_required)
 
 
@@ -239,27 +238,21 @@ class RuleSchemaPolicyTests(unittest.TestCase):
         violations = RuleSchemaPolicy().validate_document(
             document_class=RuleDocumentClass.NAVIGATIONAL,
             observed_section_headings=(
-                "Purpose",
-                "Use This When",
-                "Available Options",
-                "Navigation Rule",
-                "Local Context",
-                "Exit Condition",
+                "Use This Branch When",
+                "Stop Or Descend",
+                "Review Checks",
             ),
             has_navigation_targets=True,
         )
 
         self.assertEqual(violations, ())
 
-    def test_reports_missing_required_leaf_section(self) -> None:
+    def test_reports_missing_required_policy_section(self) -> None:
         violations = RuleSchemaPolicy().validate_document(
-            document_class=RuleDocumentClass.LEAF,
+            document_class=RuleDocumentClass.POLICY,
             observed_section_headings=(
-                "Purpose",
-                "Applies When",
-                "Scope",
-                "Constraints",
-                "Acceptance Check",
+                "Required Decisions",
+                "Review Checks",
             ),
             has_navigation_targets=False,
         )
@@ -270,23 +263,24 @@ class RuleSchemaPolicyTests(unittest.TestCase):
 
     def test_reports_invalid_required_section_order(self) -> None:
         violations = RuleSchemaPolicy().validate_document(
-            document_class=RuleDocumentClass.LEAF,
+            document_class=RuleDocumentClass.EXECUTION,
             observed_section_headings=(
-                "Purpose",
-                "Applies When",
-                "Scope",
-                "Constraints",
-                "Core Rules",
-                "Acceptance Check",
+                "Required Sections",
+                "Execution Rules",
+                "Implementation Tree Rules",
+                "Step Contract Rules",
+                "Review Checks",
+                "Handoff Checks",
             ),
             has_navigation_targets=False,
+            stage="step",
         )
 
         self.assertEqual([violation.code for violation in violations], [
                          "invalid-section-order"])
         self.assertEqual(
             violations[0].message,
-            "Section order is invalid: Constraints appears before Core Rules",
+            "Section order is invalid: Execution Rules appears before Step Contract Rules",
         )
 
     def test_reports_missing_navigation_targets_only_for_navigational_documents(self) -> None:
@@ -295,23 +289,17 @@ class RuleSchemaPolicyTests(unittest.TestCase):
         navigational_violations = policy.validate_document(
             document_class=RuleDocumentClass.NAVIGATIONAL,
             observed_section_headings=(
-                "Purpose",
-                "Use This When",
-                "Available Options",
-                "Navigation Rule",
-                "Exit Condition",
+                "Stop Or Descend",
+                "Review Checks",
             ),
             has_navigation_targets=False,
         )
-        leaf_violations = policy.validate_document(
-            document_class=RuleDocumentClass.LEAF,
+        policy_violations = policy.validate_document(
+            document_class=RuleDocumentClass.POLICY,
             observed_section_headings=(
-                "Purpose",
-                "Applies When",
-                "Ownership",
+                "Required Decisions",
                 "Core Rules",
-                "Constraints",
-                "Acceptance Check",
+                "Review Checks",
             ),
             has_navigation_targets=False,
         )
@@ -320,7 +308,7 @@ class RuleSchemaPolicyTests(unittest.TestCase):
             [violation.code for violation in navigational_violations],
             ["missing-navigation-targets"],
         )
-        self.assertEqual(leaf_violations, ())
+        self.assertEqual(policy_violations, ())
 
 
 if __name__ == "__main__":

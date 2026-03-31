@@ -46,10 +46,6 @@ class BootstrapProjectTests(unittest.TestCase):
             for relative_path in _expected_shared_rule_paths():
                 self.assertTrue(
                     (project_root / "agentic" / relative_path).exists())
-            self.assertTrue((project_root / "agentic" /
-                            "rules" / "overrides").is_dir())
-            self.assertTrue((project_root / "agentic" /
-                            "rules" / "project-specific").is_dir())
             self.assertFalse((project_root / "agentic" / "guide").exists())
             self.assertFalse((project_root / "agentic" / "reference").exists())
             self.assertEqual(
@@ -79,16 +75,10 @@ class BootstrapProjectTests(unittest.TestCase):
             project_root = Path(temp_dir)
             bootstrap_project(project_root)
 
-            shared_doc_path = project_root / "agentic" / "rules" / "AGENT.md"
+            shared_doc_path = project_root / "agentic" / "rules" / "INDEX.md"
             config_path = project_root / "agentic" / "agentic.yaml"
             bootstrap_instruction_path = project_root / \
                 ".github" / "copilot-instructions.md"
-            project_specific_path = project_root / "agentic" / \
-                "rules" / "project-specific" / "LOCAL.md"
-            override_path = project_root / "agentic" / \
-                "rules" / "overrides" / "TESTS.md"
-            project_specific_path.write_text("local note\n", encoding="utf-8")
-            override_path.write_text("local override\n", encoding="utf-8")
 
             shared_doc_path.write_text(
                 "locally modified shared doc\n", encoding="utf-8")
@@ -103,7 +93,7 @@ class BootstrapProjectTests(unittest.TestCase):
             self.assertEqual(shared_doc_path.read_text(
                 encoding="utf-8"),
                 files("agentic").joinpath("resources", "rules",
-                                          "AGENT.md").read_text(encoding="utf-8"),
+                                          "INDEX.md").read_text(encoding="utf-8"),
             )
             self.assertEqual(
                 bootstrap_instruction_path.read_text(encoding="utf-8"),
@@ -112,17 +102,13 @@ class BootstrapProjectTests(unittest.TestCase):
             )
             self.assertEqual(config_path.read_text(
                 encoding="utf-8"), "language: php\n")
-            self.assertEqual(project_specific_path.read_text(
-                encoding="utf-8"), "local note\n")
-            self.assertEqual(override_path.read_text(
-                encoding="utf-8"), "local override\n")
 
     def test_update_preserves_unchanged_shared_docs(self) -> None:
         with TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)
             bootstrap_project(project_root)
 
-            shared_doc_path = project_root / "agentic" / "rules" / "AGENT.md"
+            shared_doc_path = project_root / "agentic" / "rules" / "INDEX.md"
 
             result = update_project(project_root)
 

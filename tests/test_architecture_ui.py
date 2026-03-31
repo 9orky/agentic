@@ -78,12 +78,22 @@ class ArchitectureCheckBoundaryAndUiTests(unittest.TestCase):
                         "FileImportHotspotEntry"))
         self.assertTrue(hasattr(architecture_hotspots,
                         "FileImportHotspotsResult"))
+        self.assertTrue(hasattr(architecture_hotspots,
+                        "build_default_file_import_hotspots_view"))
 
     def test_ui_package_exports_expected_public_seam(self) -> None:
         self.assertEqual(
             architecture_check_ui.__all__,
             ["ArchitectureCheckCli", "architecture_check_cli"],
         )
+
+    def test_policy_check_root_keeps_programmatic_api_and_registration_only(self) -> None:
+        self.assertNotIn("ArchitectureCheckCli",
+                         architecture_policy_check.__all__)
+        self.assertIn("architecture_check_cli",
+                      architecture_policy_check.__all__)
+        self.assertIn("build_default_architecture_check_cli",
+                      architecture_policy_check.__all__)
 
     def test_ui_service_and_view_packages_export_expected_public_seams(self) -> None:
         self.assertEqual(

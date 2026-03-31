@@ -31,8 +31,6 @@ agentic = [
     "resources/README.md",
     "resources/rules/*.md",
     "resources/rules/**/*.md",
-    "resources/rules/overrides/.gitkeep",
-    "resources/rules/project-specific/.gitkeep",
     "resources/arch/extractors/*.py",
     "resources/arch/extractors/*.js",
     "resources/arch/extractors/*.php",

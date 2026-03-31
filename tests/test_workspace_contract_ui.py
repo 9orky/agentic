@@ -1,6 +1,6 @@
 import agentic.features.workspace_contract as workspace_contract_boundary
-import agentic.features.workspace_contract.rule_schema_audit.ui as rule_schema_audit_ui
-import agentic.features.workspace_contract.rule_schema_audit.ui.views as rule_schema_audit_ui_views
+import agentic.features.workspace_contract.rules.ui as rules_ui
+import agentic.features.workspace_contract.rules.ui.views as rules_ui_views
 import agentic.features.workspace_contract.workspace_sync.ui as workspace_sync_ui
 import agentic.features.workspace_contract.workspace_sync.ui.services as workspace_sync_ui_services
 import agentic.features.workspace_contract.workspace_sync.ui.views as workspace_sync_ui_views
@@ -12,9 +12,10 @@ import unittest
 
 import click
 
-from agentic.features.workspace_contract import BootstrapError, RuleSchemaValidationResult, SyncResult, bootstrap_project, describe_rule_schema_drift, describe_workspace_contract, update_project
+from agentic.features.workspace_contract import BootstrapError, RuleSchemaReport, SyncResult, bootstrap_project, build_rule_schema_report, describe_workspace_contract, update_project
 from agentic.features.workspace_contract.cli import workspace_contract_cli
-from agentic.features.workspace_contract.rule_schema_audit.ui.views import RuleSchemaDriftView, build_default_rule_schema_drift_view
+from agentic.features.workspace_contract.rules.application import RuleDocumentReport, RuleSchemaViolationReport
+from agentic.features.workspace_contract.rules.ui.views import RuleSchemaReportView, build_default_rule_schema_report_view
 from agentic.features.workspace_contract.workspace_sync.ui import ProjectPathPresenter
 from agentic.features.workspace_contract.workspace_sync.ui.views import SyncSummaryView, build_default_sync_summary_view
 
@@ -25,11 +26,13 @@ class WorkspaceContractBoundaryTests(unittest.TestCase):
             workspace_contract_boundary.__all__,
             [
                 "BootstrapError",
-                "RuleSchemaValidationResult",
+                "RuleDocumentReport",
+                "RuleSchemaReport",
+                "RuleSchemaViolationReport",
                 "SyncResult",
                 "WorkspaceContractSummary",
                 "bootstrap_project",
-                "describe_rule_schema_drift",
+                "build_rule_schema_report",
                 "describe_workspace_contract",
                 "update_project",
             ],
@@ -42,12 +45,12 @@ class WorkspaceContractBoundaryTests(unittest.TestCase):
             bootstrap_result = bootstrap_project(project_root)
             update_result = update_project(project_root)
             summary = describe_workspace_contract(project_root)
-            drift_result = describe_rule_schema_drift(project_root)
+            report = build_rule_schema_report()
 
             self.assertIsInstance(bootstrap_result, SyncResult)
             self.assertIsInstance(update_result, SyncResult)
             self.assertTrue(summary.config_exists)
-            self.assertIsInstance(drift_result, RuleSchemaValidationResult)
+            self.assertIsInstance(report, RuleSchemaReport)
 
     def test_feature_boundary_raises_bootstrap_error_for_invalid_target(self) -> None:
         with TemporaryDirectory() as temp_dir:
@@ -66,11 +69,10 @@ class WorkspaceContractUiTests(unittest.TestCase):
                 "build_default_sync_summary_view"],
         )
 
-    def test_rule_schema_audit_ui_package_exports_expected_public_seam(self) -> None:
+    def test_rules_ui_package_exports_expected_public_seam(self) -> None:
         self.assertEqual(
-            rule_schema_audit_ui.__all__,
-            ["ProjectPathPresenter", "RuleSchemaDriftView",
-                "build_default_rule_schema_drift_view"],
+            rules_ui.__all__,
+            ["RuleSchemaReportView", "build_default_rule_schema_report_view", "rule_schema_cli"],
         )
 
     def test_ui_service_and_view_packages_export_expected_public_seams(self) -> None:
@@ -86,10 +88,10 @@ class WorkspaceContractUiTests(unittest.TestCase):
             ],
         )
         self.assertEqual(
-            rule_schema_audit_ui_views.__all__,
+            rules_ui_views.__all__,
             [
-                "RuleSchemaDriftView",
-                "build_default_rule_schema_drift_view",
+                "RuleSchemaReportView",
+                "build_default_rule_schema_report_view",
             ],
         )
 
@@ -103,14 +105,14 @@ class WorkspaceContractUiTests(unittest.TestCase):
 
         self.assertEqual(entries, {"__init__.py", "services", "views"})
 
-        audit_ui_dir = Path(rule_schema_audit_ui.__file__).resolve().parent
-        audit_entries = {
+        rules_ui_dir = Path(rules_ui.__file__).resolve().parent
+        rules_entries = {
             path.name
-            for path in audit_ui_dir.iterdir()
+            for path in rules_ui_dir.iterdir()
             if path.name != "__pycache__"
         }
 
-        self.assertEqual(audit_entries, {"__init__.py", "views"})
+        self.assertEqual(rules_entries, {"__init__.py", "cli.py", "views.py"})
 
     def test_cli_init_renders_created_files_and_next_step(self) -> None:
         app = click.Group()
@@ -136,7 +138,7 @@ class WorkspaceContractUiTests(unittest.TestCase):
 
         with TemporaryDirectory() as temp_dir:
             bootstrap_project(Path(temp_dir))
-            shared_doc_path = Path(temp_dir) / "agentic" / "rules" / "AGENT.md"
+            shared_doc_path = Path(temp_dir) / "agentic" / "rules" / "INDEX.md"
             shared_doc_path.write_text("locally modified\n", encoding="utf-8")
 
             output = StringIO()
@@ -147,62 +149,21 @@ class WorkspaceContractUiTests(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             rendered = output.getvalue()
             self.assertIn("Updated 1 shared file(s).", rendered)
-            self.assertIn("agentic/rules/AGENT.md", rendered)
+            self.assertIn("agentic/rules/INDEX.md", rendered)
 
     def test_cli_check_rules_reports_success_for_clean_workspace(self) -> None:
         app = click.Group()
         workspace_contract_cli(app)
 
-        with TemporaryDirectory() as temp_dir:
-            bootstrap_project(Path(temp_dir))
+        output = StringIO()
+        with redirect_stdout(output):
+            exit_code = app.main(["check-rules"], standalone_mode=False)
 
-            output = StringIO()
-            with redirect_stdout(output):
-                exit_code = app.main(
-                    ["check-rules", "--project-root", temp_dir], standalone_mode=False)
-
-            self.assertEqual(exit_code, 0)
-            rendered = output.getvalue()
-            self.assertIn("Rule schema check passed", rendered)
-            self.assertIn("Packaged rule documents checked:", rendered)
-            self.assertIn("Local rule documents checked:", rendered)
-
-    def test_cli_check_rules_reports_drift_and_returns_non_zero(self) -> None:
-        app = click.Group()
-        workspace_contract_cli(app)
-
-        with TemporaryDirectory() as temp_dir:
-            project_root = Path(temp_dir)
-            bootstrap_project(project_root)
-            local_command_doc = (
-                project_root
-                / "agentic"
-                / "rules"
-                / "feature"
-                / "module"
-                / "layers"
-                / "application"
-                / "COMMANDS.md"
-            )
-            local_command_doc.write_text(
-                local_command_doc.read_text(encoding="utf-8").replace(
-                    "### Naming",
-                    "### Command Naming",
-                ),
-                encoding="utf-8",
-            )
-
-            output = StringIO()
-            with redirect_stdout(output):
-                exit_code = app.main(
-                    ["check-rules", "--project-root", temp_dir], standalone_mode=False)
-
-            self.assertEqual(exit_code, 1)
-            rendered = output.getvalue()
-            self.assertIn("Rule schema drift detected.", rendered)
-            self.assertIn(
-                "[local] feature/module/layers/application/COMMANDS.md", rendered)
-            self.assertIn("anchor-profile-drift", rendered)
+        self.assertEqual(exit_code, 0)
+        rendered = output.getvalue()
+        self.assertIn("Rule schema report.", rendered)
+        self.assertIn("Documents checked:", rendered)
+        self.assertIn("Documents with issues: 0.", rendered)
 
     def test_sync_summary_view_renders_summary_counts(self) -> None:
         with TemporaryDirectory() as temp_dir:
@@ -219,22 +180,39 @@ class WorkspaceContractUiTests(unittest.TestCase):
             self.assertTrue(any(line.startswith("Config present: yes")
                             for line in rendered_lines))
 
-    def test_rule_schema_drift_view_renders_success_summary(self) -> None:
-        rendered_lines = build_default_rule_schema_drift_view().render(
-            RuleSchemaValidationResult(
-                packaged_documents=(Path("AGENT.md"),),
-                local_documents=(Path("AGENT.md"),),
-            ),
-            project_root=Path("/tmp/project"),
-            include_local_mirror=True,
+    def test_rule_schema_report_view_renders_summary_and_violations(self) -> None:
+        rendered_lines = build_default_rule_schema_report_view().render(
+            RuleSchemaReport(
+                documents=(
+                    RuleDocumentReport(
+                        path=Path("INDEX.md"),
+                        violations=(),
+                    ),
+                    RuleDocumentReport(
+                        path=Path("execution/STEP.md"),
+                        violations=(
+                            RuleSchemaViolationReport(
+                                code="missing-section",
+                                message="Missing required section: Handoff Checks",
+                                section_heading="Handoff Checks",
+                            ),
+                        ),
+                    ),
+                ),
+                documents_checked=2,
+                documents_with_issues=1,
+                has_findings=True,
+            )
         )
 
         self.assertEqual(
             rendered_lines,
             (
-                "Rule schema check passed for packaged rules and local mirror.",
-                "Packaged rule documents checked: 1.",
-                "Local rule documents checked: 1.",
+                "Rule schema report.",
+                "Documents checked: 2.",
+                "Documents with issues: 1.",
+                "- INDEX.md: ok",
+                "- execution/STEP.md: 1 violation(s) - missing-section (Handoff Checks) - Missing required section: Handoff Checks",
             ),
         )
 
@@ -244,15 +222,13 @@ class WorkspaceContractUiTests(unittest.TestCase):
             ("path_presenter",),
         )
         self.assertEqual(
-            tuple(__import__("inspect").signature(
-                RuleSchemaDriftView).parameters),
-            ("path_presenter",),
+            tuple(__import__("inspect").signature(RuleSchemaReportView).parameters),
+            (),
         )
         presenter = ProjectPathPresenter()
         self.assertIsInstance(SyncSummaryView(
             path_presenter=presenter), SyncSummaryView)
-        self.assertIsInstance(RuleSchemaDriftView(
-            path_presenter=presenter), RuleSchemaDriftView)
+        self.assertIsInstance(RuleSchemaReportView(), RuleSchemaReportView)
 
 
 if __name__ == "__main__":

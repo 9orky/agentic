@@ -36,8 +36,6 @@ class SyncSummaryView:
             f"Workspace contract at {self._path_presenter.present(summary.target_dir, project_root=project_root)}.",
             f"Shared files present: {len(summary.shared_rule_paths)}.",
             f"Shared files missing: {len(summary.missing_shared_rule_paths)}.",
-            f"Override files: {len(summary.override_paths)}.",
-            f"Project-specific files: {len(summary.project_specific_paths)}.",
             f"Config present: {'yes' if summary.config_exists else 'no'}.",
         ]
         return tuple(lines)

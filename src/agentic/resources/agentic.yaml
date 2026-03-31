@@ -21,6 +21,6 @@ rules:
     - { source: *feature, disallow: [*feature], allow_same_match: true, allow: [*feature] }
     - { source: *domain, disallow: [*infrastructure, *application, *ui] }
     - { source: *infrastructure, disallow: [src/agentic/features/*/*/domain/*/*, *application, *ui] }
-    - { source: *application, disallow: [src/agentic/features/*/*/domain/*/*, src/agentic/features/*/*/infrastructure/*/*, *ui] }
+    - { source: *application, disallow: [src/agentic/features/*/*/domain/*/*, src/agentic/features/*/*/infrastructure/*/*, *ui], allow: [src/agentic/features/*/*/infrastructure, src/agentic/features/*/*/infrastructure/__init__.py, src/agentic/features/workspace_contract/rules/infrastructure/file_repository.py] }
     - { source: *ui, disallow: [src/agentic/features/*/*/application/*/*, *infrastructure, *domain] }
   flow: { layers: [ui, application, infrastructure, domain], module_tag: feature, analyzers: [backward-flow, no-cycles] }

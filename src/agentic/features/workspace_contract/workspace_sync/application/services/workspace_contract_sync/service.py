@@ -41,7 +41,6 @@ class WorkspaceContractSyncService:
     ) -> tuple[Path, bool, tuple[Path, ...], tuple[Path, ...], tuple[Path, ...]]:
         target_dir, created_dir = self._workspace_writer.ensure_target_directory(
             project_root)
-        self._workspace_writer.ensure_local_extension_directories(project_root)
 
         shared_rule_paths = self._packaged_rules_reader.iter_shared_rule_paths()
         existing_shared_rule_paths = self._workspace_reader.existing_shared_rule_paths(

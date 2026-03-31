@@ -13,6 +13,7 @@ from typing import Any, cast
 import unittest
 
 from agentic.features.architecture_check.dependency_map.application import LoadConfigQuery
+from agentic.features.architecture_check.dependency_map.infrastructure import ExtractorRuntime
 from agentic.features.architecture_check.hotspots.application.queries import DescribeFileImportHotspotsQuery, FileImportHotspotEntry, FileImportHotspotsResult
 from agentic.features.architecture_check.policy_check.application.commands.run_architecture_check import CheckResult, RunArchitectureCheckCommand
 from agentic.features.architecture_check.policy_check.application.queries import ArchitectureSummary, BuildArchitectureReportQuery, DescribeArchitectureQuery, ViolationGroup
@@ -23,21 +24,31 @@ class ArchitectureCheckApplicationPackageTests(unittest.TestCase):
         self.assertEqual(
             architecture_dependency_map.__all__,
             [
+                "BuildDependencyMapQuery",
+                "BuildDependencyMapResult",
+                "DependencyMapBuildError",
+                "ExtractorRuntime",
                 "ArchitectureCheckConfig",
                 "ArchitectureCheckConfigError",
+                "CheckerError",
                 "ConfigLoadResult",
+                "LoadConfigQuery",
+                "build_default_build_dependency_map_query",
+                "build_default_load_config_query",
+                "build_dependency_map",
                 "load_config",
             ],
         )
         self.assertEqual(
             architecture_policy_check.__all__,
             [
-                "ArchitectureCheckCli",
                 "ArchitectureSummary",
                 "BuildArchitectureReportQuery",
                 "CheckResult",
                 "CheckerError",
                 "architecture_check_cli",
+                "build_default_architecture_check_cli",
+                "build_default_architecture_report_query",
                 "describe_architecture",
                 "run_architecture_check",
             ],
@@ -49,8 +60,29 @@ class ArchitectureCheckApplicationPackageTests(unittest.TestCase):
                 "FileImportHotspotEntry",
                 "FileImportHotspotsResult",
                 "build_default_describe_file_import_hotspots_query",
+                "build_default_file_import_hotspots_view",
             ],
         )
+
+    def test_module_roots_export_stable_builder_and_result_symbols(self) -> None:
+        self.assertTrue(hasattr(architecture_dependency_map,
+                        "BuildDependencyMapQuery"))
+        self.assertTrue(hasattr(architecture_dependency_map,
+                        "BuildDependencyMapResult"))
+        self.assertTrue(hasattr(architecture_dependency_map,
+                        "DependencyMapBuildError"))
+        self.assertTrue(
+            hasattr(architecture_dependency_map, "LoadConfigQuery"))
+        self.assertTrue(
+            hasattr(architecture_dependency_map, "ExtractorRuntime"))
+        self.assertIs(
+            architecture_dependency_map.ExtractorRuntime, ExtractorRuntime)
+        self.assertTrue(hasattr(architecture_policy_check,
+                        "build_default_architecture_report_query"))
+        self.assertTrue(hasattr(architecture_policy_check,
+                        "build_default_architecture_check_cli"))
+        self.assertTrue(hasattr(architecture_hotspots,
+                        "build_default_file_import_hotspots_view"))
 
     def test_dependency_map_application_exports_build_and_load_queries(self) -> None:
         self.assertEqual(
