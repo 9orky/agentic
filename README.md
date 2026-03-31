@@ -36,9 +36,6 @@ Example discovery path:
 
 1. planning work starts in `planning/PLANNING.md`
 2. material domain modeling routes through `ddd/DDD.md`
-3. strategic DDD detail lives in `ddd/STRATEGIC.md`
-4. step-contract detail lives in `planning/phases/STEPS.md`
-5. layer-specific constraints are read only from the relevant file under `feature/module/layers/`
 
 This keeps the read path short and inspectable. The agent does not need to load unrelated rule files to plan or refactor one narrow slice of work.
 
