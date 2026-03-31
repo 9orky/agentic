@@ -1,18 +1,72 @@
-import agentic.features.architecture_check.checker.application as architecture_check_application
-import agentic.features.architecture_check.checker.application.commands as architecture_check_application_commands
-import agentic.features.architecture_check.checker.application.queries as architecture_check_application_queries
-import agentic.features.architecture_check.checker.application.services as architecture_check_application_services
+import agentic.features.architecture_check.dependency_map as architecture_dependency_map
+import agentic.features.architecture_check.dependency_map.application as architecture_dependency_map_application
+import agentic.features.architecture_check.hotspots as architecture_hotspots
+import agentic.features.architecture_check.hotspots.application as architecture_hotspots_application
+import agentic.features.architecture_check.policy_check as architecture_policy_check
+import agentic.features.architecture_check.policy_check.application as architecture_check_application
+import agentic.features.architecture_check.policy_check.application.commands as architecture_check_application_commands
+import agentic.features.architecture_check.policy_check.application.queries as architecture_check_application_queries
+import agentic.features.architecture_check.policy_check.application.services as architecture_check_application_services
 import inspect
 from pathlib import Path
 from typing import Any, cast
 import unittest
 
-from agentic.features.architecture_check.checker.application.commands.run_architecture_check import CheckResult, RunArchitectureCheckCommand
-from agentic.features.architecture_check.checker.application.queries import ArchitectureSummary, BuildArchitectureReportQuery, DescribeArchitectureQuery, DescribeFileImportHotspotsQuery, FileImportHotspotEntry, FileImportHotspotsResult, LoadConfigQuery, ViolationGroup
+from agentic.features.architecture_check.dependency_map.application import LoadConfigQuery
+from agentic.features.architecture_check.hotspots.application.queries import DescribeFileImportHotspotsQuery, FileImportHotspotEntry, FileImportHotspotsResult
+from agentic.features.architecture_check.policy_check.application.commands.run_architecture_check import CheckResult, RunArchitectureCheckCommand
+from agentic.features.architecture_check.policy_check.application.queries import ArchitectureSummary, BuildArchitectureReportQuery, DescribeArchitectureQuery, ViolationGroup
 
 
 class ArchitectureCheckApplicationPackageTests(unittest.TestCase):
-    def test_application_package_exports_only_public_seam_and_next_ui_query(self) -> None:
+    def test_feature_seam_packages_export_staged_public_surfaces(self) -> None:
+        self.assertEqual(
+            architecture_dependency_map.__all__,
+            [
+                "ArchitectureCheckConfig",
+                "ArchitectureCheckConfigError",
+                "ConfigLoadResult",
+                "load_config",
+            ],
+        )
+        self.assertEqual(
+            architecture_policy_check.__all__,
+            [
+                "ArchitectureCheckCli",
+                "ArchitectureSummary",
+                "BuildArchitectureReportQuery",
+                "CheckResult",
+                "CheckerError",
+                "architecture_check_cli",
+                "describe_architecture",
+                "run_architecture_check",
+            ],
+        )
+        self.assertEqual(
+            architecture_hotspots.__all__,
+            [
+                "DescribeFileImportHotspotsQuery",
+                "FileImportHotspotEntry",
+                "FileImportHotspotsResult",
+                "build_default_describe_file_import_hotspots_query",
+            ],
+        )
+
+    def test_dependency_map_application_exports_build_and_load_queries(self) -> None:
+        self.assertEqual(
+            architecture_dependency_map_application.__all__,
+            [
+                "BuildDependencyMapQuery",
+                "BuildDependencyMapResult",
+                "DependencyMapBuildError",
+                "LoadConfigQuery",
+                "build_default_build_dependency_map_query",
+                "build_dependency_map",
+                "load_config",
+            ],
+        )
+
+    def test_application_package_exports_only_policy_check_public_seam(self) -> None:
         self.assertEqual(
             architecture_check_application.__all__,
             [
@@ -21,7 +75,6 @@ class ArchitectureCheckApplicationPackageTests(unittest.TestCase):
                 "CheckResult",
                 "CheckerError",
                 "describe_architecture",
-                "load_config",
                 "run_architecture_check",
             ],
         )
@@ -60,27 +113,18 @@ class ArchitectureCheckApplicationPackageTests(unittest.TestCase):
             architecture_check_application.__all__,
         )
 
-        self.assertTrue(
-            hasattr(architecture_check_application,
-                    "DescribeFileImportHotspotsQuery")
-        )
-        self.assertTrue(
-            hasattr(architecture_check_application, "FileImportHotspotEntry")
-        )
-        self.assertTrue(
-            hasattr(architecture_check_application, "FileImportHotspotsResult")
-        )
-        self.assertTrue(
-            hasattr(architecture_check_application, "ViolationGroup")
-        )
-        self.assertTrue(
-            hasattr(architecture_check_application,
-                    "build_default_architecture_report_query")
-        )
-        self.assertTrue(
-            hasattr(architecture_check_application,
-                    "build_default_describe_file_import_hotspots_query")
-        )
+        self.assertFalse(hasattr(architecture_check_application,
+                         "DescribeFileImportHotspotsQuery"))
+        self.assertFalse(
+            hasattr(architecture_check_application, "FileImportHotspotEntry"))
+        self.assertFalse(
+            hasattr(architecture_check_application, "FileImportHotspotsResult"))
+        self.assertFalse(
+            hasattr(architecture_check_application, "ViolationGroup"))
+        self.assertFalse(hasattr(architecture_check_application,
+                         "build_default_architecture_report_query"))
+        self.assertFalse(hasattr(architecture_check_application,
+                         "build_default_describe_file_import_hotspots_query"))
 
     def test_commands_package_exports_only_public_seam(self) -> None:
         self.assertEqual(
@@ -88,22 +132,27 @@ class ArchitectureCheckApplicationPackageTests(unittest.TestCase):
             ["CheckResult", "RunArchitectureCheckCommand", "run_architecture_check"],
         )
 
-    def test_queries_package_exports_only_public_seam_and_report_query(self) -> None:
+    def test_queries_package_exports_only_policy_check_seam(self) -> None:
         self.assertEqual(
             architecture_check_application_queries.__all__,
             [
                 "ArchitectureSummary",
                 "BuildArchitectureReportQuery",
                 "DescribeArchitectureQuery",
+                "ViolationGroup",
+                "build_default_architecture_report_query",
+                "describe_architecture",
+            ],
+        )
+
+    def test_hotspots_application_exports_only_hotspot_query_surface(self) -> None:
+        self.assertEqual(
+            architecture_hotspots_application.__all__,
+            [
                 "DescribeFileImportHotspotsQuery",
                 "FileImportHotspotEntry",
                 "FileImportHotspotsResult",
-                "LoadConfigQuery",
-                "ViolationGroup",
-                "build_default_architecture_report_query",
                 "build_default_describe_file_import_hotspots_query",
-                "describe_architecture",
-                "load_config",
             ],
         )
 
@@ -118,6 +167,34 @@ class ArchitectureCheckApplicationPackageTests(unittest.TestCase):
 
         self.assertEqual(
             entries, {"__init__.py", "commands", "queries", "services"})
+
+    def test_feature_root_contains_staged_sibling_module_seams(self) -> None:
+        feature_dir = Path(
+            architecture_dependency_map.__file__).resolve().parent.parent
+        entries = {
+            path.name
+            for path in feature_dir.iterdir()
+            if path.name != "__pycache__"
+        }
+
+        self.assertIn("dependency_map", entries)
+        self.assertIn("policy_check", entries)
+        self.assertIn("hotspots", entries)
+        self.assertNotIn("checker", entries)
+
+    def test_dependency_map_package_contains_owner_layers(self) -> None:
+        dependency_map_dir = Path(
+            architecture_dependency_map.__file__).resolve().parent
+        entries = {
+            path.name
+            for path in dependency_map_dir.iterdir()
+            if path.name != "__pycache__"
+        }
+
+        self.assertEqual(
+            entries,
+            {"__init__.py", "application", "domain", "infrastructure"},
+        )
 
     def test_queries_and_commands_depend_on_service_or_adapter_boundaries(self) -> None:
         self.assertEqual(
@@ -179,14 +256,8 @@ class ArchitectureCheckApplicationPackageTests(unittest.TestCase):
 
         self.assertEqual(
             entries,
-            {
-                "__init__.py",
-                "architecture_check_service.py",
-                "architecture_report_builder",
-                "architecture_summary_service.py",
-                "config_load_service.py",
-                "file_import_hotspots_service.py",
-            },
+            {"__init__.py", "architecture_check_service.py",
+                "architecture_report_builder", "architecture_summary_service.py"},
         )
 
     def test_services_anchor_exports_no_cross_layer_surface(self) -> None:
@@ -210,23 +281,22 @@ class ArchitectureCheckApplicationPackageTests(unittest.TestCase):
                 "__init__.py",
                 "architecture_check_report.py",
                 "architecture_evaluator.py",
-                "dependency_graph_builder.py",
                 "service.py",
                 "violation_renderer.py",
             },
         )
 
     def test_service_constructors_require_non_nullable_collaborators(self) -> None:
-        from agentic.features.architecture_check.checker.application.services.architecture_check_service import ArchitectureCheckService
-        from agentic.features.architecture_check.checker.application.services.architecture_summary_service import ArchitectureSummaryService
-        from agentic.features.architecture_check.checker.application.services.config_load_service import ConfigLoadService
-        from agentic.features.architecture_check.checker.application.services.file_import_hotspots_service import FileImportHotspotsService
-        from agentic.features.architecture_check.checker.application.services.architecture_report_builder import ArchitectureReportBuilder
-        from agentic.features.architecture_check.checker.application.services.architecture_report_builder.architecture_evaluator import ArchitectureEvaluator
+        from agentic.features.architecture_check.dependency_map.application.services.config_load_service import ConfigLoadService
+        from agentic.features.architecture_check.hotspots.application.services.file_import_hotspots_service import FileImportHotspotsService
+        from agentic.features.architecture_check.policy_check.application.services.architecture_check_service import ArchitectureCheckService
+        from agentic.features.architecture_check.policy_check.application.services.architecture_summary_service import ArchitectureSummaryService
+        from agentic.features.architecture_check.policy_check.application.services.architecture_report_builder import ArchitectureReportBuilder
+        from agentic.features.architecture_check.policy_check.application.services.architecture_report_builder.architecture_evaluator import ArchitectureEvaluator
 
         self.assertEqual(
             tuple(inspect.signature(ArchitectureCheckService).parameters),
-            ("summary_service", "extractor_runtime_factory"),
+            ("summary_service",),
         )
         self.assertEqual(
             tuple(inspect.signature(FileImportHotspotsService).parameters),
@@ -248,10 +318,7 @@ class ArchitectureCheckApplicationPackageTests(unittest.TestCase):
         self.assertEqual(
             tuple(inspect.signature(ArchitectureReportBuilder).parameters),
             (
-                "config_load_service",
-                "extractor_runtime_factory",
-                "extractor_spec_registry",
-                "dependency_graph_builder",
+                "build_dependency_map_query",
                 "architecture_evaluator",
                 "violation_dot_renderer",
             ),
@@ -504,9 +571,9 @@ class ArchitectureCheckApplicationDelegationTests(unittest.TestCase):
 
 class FileImportHotspotsServiceTests(unittest.TestCase):
     def test_service_counts_tracked_file_relationships_and_sorts_by_importers_desc_by_default(self) -> None:
-        from agentic.features.architecture_check.checker.application.services.architecture_report_builder.dependency_graph_builder import DependencyGraphBuilder
-        from agentic.features.architecture_check.checker.application.services.file_import_hotspots_service import FileImportHotspotsService
-        from agentic.features.architecture_check.checker.domain import ArchitectureCheckConfig, ConfigLoadResult, DependencyGraph, ExtractedFile, ExtractionResult, ExtractionSummary
+        from agentic.features.architecture_check.dependency_map.application.services.dependency_map_builder import DependencyGraphBuilder
+        from agentic.features.architecture_check.dependency_map.domain import ArchitectureCheckConfig, ConfigLoadResult, DependencyGraph, ExtractedFile, ExtractionResult, ExtractionSummary
+        from agentic.features.architecture_check.hotspots.application.services.file_import_hotspots_service import FileImportHotspotsService
 
         class ConfigLoadServiceStub:
             def __init__(self, result: ConfigLoadResult) -> None:
@@ -604,8 +671,8 @@ class FileImportHotspotsServiceTests(unittest.TestCase):
         self.assertEqual(tuple(built_graph.edges), tuple(graph.edges))
 
     def test_service_supports_import_count_sort_and_uses_explicit_runtime(self) -> None:
-        from agentic.features.architecture_check.checker.application.services.file_import_hotspots_service import FileImportHotspotsService
-        from agentic.features.architecture_check.checker.domain import ArchitectureCheckConfig, ConfigLoadResult, DependencyGraph, ExtractedFile, ExtractionResult, ExtractionSummary
+        from agentic.features.architecture_check.dependency_map.domain import ArchitectureCheckConfig, ConfigLoadResult, DependencyGraph, ExtractedFile, ExtractionResult, ExtractionSummary
+        from agentic.features.architecture_check.hotspots.application.services.file_import_hotspots_service import FileImportHotspotsService
 
         class ConfigLoadServiceStub:
             def __init__(self, result: ConfigLoadResult) -> None:

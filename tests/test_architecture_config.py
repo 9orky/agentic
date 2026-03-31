@@ -3,9 +3,9 @@ from tempfile import TemporaryDirectory
 import unittest
 
 from agentic.features.architecture_check import load_config
-from agentic.features.architecture_check.checker.application.queries.load_config import LoadConfigQuery
-from agentic.features.architecture_check.checker.application.services.config_load_service import ConfigLoadService
-from agentic.features.architecture_check.checker.infrastructure import ConfigLoader
+from agentic.features.architecture_check.dependency_map.application import LoadConfigQuery
+from agentic.features.architecture_check.dependency_map.application.services.config_load_service import ConfigLoadService
+from agentic.features.architecture_check.dependency_map.infrastructure import ConfigLoader
 from agentic.project_layout import AgenticProjectLayout
 
 

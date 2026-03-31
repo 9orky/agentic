@@ -1,8 +1,12 @@
 import agentic.features.architecture_check as architecture_check_boundary
-import agentic.features.architecture_check.checker.ui as architecture_check_ui
-import agentic.features.architecture_check.checker.ui.services as architecture_check_ui_services
-import agentic.features.architecture_check.checker.ui.views as architecture_check_ui_views
 import agentic.features.architecture_check.cli as architecture_check_feature_cli
+import agentic.features.architecture_check.hotspots as architecture_hotspots
+import agentic.features.architecture_check.hotspots.ui as architecture_hotspots_ui
+import agentic.features.architecture_check.hotspots.ui.views as architecture_hotspots_ui_views
+import agentic.features.architecture_check.policy_check as architecture_policy_check
+import agentic.features.architecture_check.policy_check.ui as architecture_check_ui
+import agentic.features.architecture_check.policy_check.ui.services as architecture_check_ui_services
+import agentic.features.architecture_check.policy_check.ui.views as architecture_check_ui_views
 import click
 import inspect
 from pathlib import Path
@@ -10,8 +14,8 @@ from typing import Any, cast
 import unittest
 from unittest import mock
 
-from agentic.features.architecture_check.checker.ui import ArchitectureCheckCli
-from agentic.features.architecture_check.checker.application import FileImportHotspotEntry, FileImportHotspotsResult
+from agentic.features.architecture_check.hotspots import FileImportHotspotEntry, FileImportHotspotsResult
+from agentic.features.architecture_check.policy_check.ui import ArchitectureCheckCli
 
 
 class ArchitectureCheckBoundaryAndUiTests(unittest.TestCase):
@@ -61,6 +65,20 @@ class ArchitectureCheckBoundaryAndUiTests(unittest.TestCase):
             ["architecture_check_cli"],
         )
 
+    def test_feature_cli_routes_through_policy_check_seam(self) -> None:
+        self.assertIs(
+            architecture_check_feature_cli.register_architecture_check_cli,
+            architecture_policy_check.architecture_check_cli,
+        )
+
+    def test_hotspots_seam_stages_hotspot_query_types(self) -> None:
+        self.assertTrue(hasattr(architecture_hotspots,
+                        "DescribeFileImportHotspotsQuery"))
+        self.assertTrue(hasattr(architecture_hotspots,
+                        "FileImportHotspotEntry"))
+        self.assertTrue(hasattr(architecture_hotspots,
+                        "FileImportHotspotsResult"))
+
     def test_ui_package_exports_expected_public_seam(self) -> None:
         self.assertEqual(
             architecture_check_ui.__all__,
@@ -74,8 +92,12 @@ class ArchitectureCheckBoundaryAndUiTests(unittest.TestCase):
         )
         self.assertEqual(
             architecture_check_ui_views.__all__,
-            ["FileImportHotspotsView", "GroupedViolationView", "JsonReportView"],
+            ["GroupedViolationView", "JsonReportView"],
         )
+        self.assertEqual(architecture_hotspots_ui.__all__,
+                         ["FileImportHotspotsView"])
+        self.assertEqual(architecture_hotspots_ui_views.__all__, [
+                         "FileImportHotspotsView"])
 
     def test_ui_directory_matches_allowed_anchor_shape(self) -> None:
         ui_dir = Path(architecture_check_ui.__file__).resolve().parent

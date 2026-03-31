@@ -1,7 +1,7 @@
 import json
-import agentic.features.architecture_check.checker.infrastructure as architecture_check_infrastructure
-import agentic.features.architecture_check.checker.infrastructure.extractor_registry as architecture_check_infrastructure_extractor_registry
-import agentic.features.architecture_check.checker.infrastructure.extractor_runtime as architecture_check_infrastructure_extractor_runtime
+import agentic.features.architecture_check.dependency_map.infrastructure as architecture_dependency_map_infrastructure
+import agentic.features.architecture_check.dependency_map.infrastructure.extractor_registry as architecture_dependency_map_extractor_registry
+import agentic.features.architecture_check.dependency_map.infrastructure.extractor_runtime as architecture_dependency_map_extractor_runtime
 from contextlib import redirect_stdout
 from io import StringIO
 from pathlib import Path
@@ -15,36 +15,35 @@ from agentic.cli import main
 class ArchitectureCheckInfrastructurePackageTests(unittest.TestCase):
     def test_infrastructure_package_exports_expected_public_seam(self) -> None:
         self.assertEqual(
-            architecture_check_infrastructure.__all__,
+            architecture_dependency_map_infrastructure.__all__,
             [
                 "ConfigLoader",
                 "ExtractorRuntime",
                 "ExtractorRuntimeFactory",
                 "ExtractorSpecRegistry",
                 "SubprocessExtractorRuntime",
-                "ViolationDotRenderer",
             ],
         )
 
     def test_infrastructure_package_does_not_reexport_anchor_internal_spec_type(self) -> None:
         self.assertFalse(
-            hasattr(architecture_check_infrastructure, "ExtractorSpec"))
+            hasattr(architecture_dependency_map_infrastructure, "ExtractorSpec"))
 
     def test_extractor_registry_anchor_exports_expected_public_seam(self) -> None:
         self.assertEqual(
-            architecture_check_infrastructure_extractor_registry.__all__,
+            architecture_dependency_map_extractor_registry.__all__,
             ["ExtractorSpec", "ExtractorSpecRegistry"],
         )
 
     def test_extractor_runtime_anchor_exports_expected_public_seam(self) -> None:
         self.assertEqual(
-            architecture_check_infrastructure_extractor_runtime.__all__,
+            architecture_dependency_map_extractor_runtime.__all__,
             ["ExtractorRuntime", "SubprocessExtractorRuntime"],
         )
 
     def test_infrastructure_directory_matches_allowed_anchor_shape(self) -> None:
         infrastructure_dir = Path(
-            architecture_check_infrastructure.__file__).resolve().parent
+            architecture_dependency_map_infrastructure.__file__).resolve().parent
         entries = {
             path.name
             for path in infrastructure_dir.iterdir()
@@ -53,22 +52,26 @@ class ArchitectureCheckInfrastructurePackageTests(unittest.TestCase):
 
         self.assertEqual(
             entries,
-            {"__init__.py", "config_loader.py", "dot_renderer.py",
+            {
+                "__init__.py",
+                "config_loader.py",
                 "extractor_runtime_factory.py",
-                "extractor_registry", "extractor_runtime"},
+                "extractor_registry",
+                "extractor_runtime",
+            },
         )
 
     def test_infrastructure_runtime_factory_creates_subprocess_runtime(self) -> None:
-        runtime = architecture_check_infrastructure.ExtractorRuntimeFactory().create()
+        runtime = architecture_dependency_map_infrastructure.ExtractorRuntimeFactory().create()
 
         self.assertIsInstance(
             runtime,
-            architecture_check_infrastructure.SubprocessExtractorRuntime,
+            architecture_dependency_map_infrastructure.SubprocessExtractorRuntime,
         )
 
 
 class ArchitectureReportingTests(unittest.TestCase):
-    @patch("agentic.features.architecture_check.checker.infrastructure.extractor_runtime.subprocess.run")
+    @patch("agentic.features.architecture_check.dependency_map.infrastructure.extractor_runtime.subprocess.run")
     def test_check_command_groups_flow_violations_in_text_output(self, mock_run: Mock) -> None:
         with TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)
@@ -129,7 +132,7 @@ class ArchitectureReportingTests(unittest.TestCase):
             self.assertIn(
                 "src/features/order/api.py -> src/modules/payment/service.py -> src/adapters/stripe/client.py -> [src/modules/user/service.py]  no-reentry", rendered)
 
-    @patch("agentic.features.architecture_check.checker.infrastructure.extractor_runtime.subprocess.run")
+    @patch("agentic.features.architecture_check.dependency_map.infrastructure.extractor_runtime.subprocess.run")
     def test_check_command_supports_json_output(self, mock_run: Mock) -> None:
         with TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)
@@ -174,7 +177,7 @@ class ArchitectureReportingTests(unittest.TestCase):
             self.assertEqual(payload["violations"][0]["path"], [
                              "src/domain/logic.py", "src/infra/database.py"])
 
-    @patch("agentic.features.architecture_check.checker.infrastructure.extractor_runtime.subprocess.run")
+    @patch("agentic.features.architecture_check.dependency_map.infrastructure.extractor_runtime.subprocess.run")
     def test_check_command_writes_dot_for_violating_paths(self, mock_run: Mock) -> None:
         with TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)

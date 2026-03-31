@@ -1,9 +1,10 @@
 import json
 import os
-import agentic.features.architecture_check.checker.domain as architecture_check_domain
-import agentic.features.architecture_check.checker.domain.entity as architecture_check_domain_entity
-import agentic.features.architecture_check.checker.domain.service as architecture_check_domain_service
-import agentic.features.architecture_check.checker.domain.value_object as architecture_check_domain_value_object
+import agentic.features.architecture_check.dependency_map.domain as architecture_dependency_map_domain
+import agentic.features.architecture_check.dependency_map.domain.entity as architecture_dependency_map_domain_entity
+import agentic.features.architecture_check.dependency_map.domain.value_object as architecture_dependency_map_domain_value_object
+import agentic.features.architecture_check.policy_check.domain as architecture_policy_check_domain
+import agentic.features.architecture_check.policy_check.domain.service as architecture_policy_check_domain_service
 from pathlib import Path
 import shutil
 from tempfile import TemporaryDirectory
@@ -14,9 +15,38 @@ from agentic.features.architecture_check import CheckerError, run_architecture_c
 
 
 class ArchitectureCheckDomainPackageTests(unittest.TestCase):
-    def test_domain_package_exports_expected_public_seam(self) -> None:
+    def test_dependency_map_domain_package_exports_expected_public_seam(self) -> None:
         self.assertEqual(
-            architecture_check_domain.__all__,
+            architecture_dependency_map_domain.__all__,
+            [
+                "ArchitectureCheckConfig",
+                "ArchitectureCheckConfigError",
+                "BoundaryRule",
+                "CheckerError",
+                "ConfigLoadResult",
+                "ConfigTagRule",
+                "DependencyGraph",
+                "DependencyRule",
+                "Edge",
+                "EdgeRuleViolation",
+                "ExtractedFile",
+                "ExtractionResult",
+                "ExtractionSummary",
+                "ExtractorContractError",
+                "FlowAnalyzerConfig",
+                "FlowRuleSet",
+                "FlowViolation",
+                "Node",
+                "NodeSelector",
+                "PatternMatch",
+                "RuleSet",
+                "TagRule",
+            ],
+        )
+
+    def test_policy_check_domain_package_exports_expected_public_seam(self) -> None:
+        self.assertEqual(
+            architecture_policy_check_domain.__all__,
             [
                 "ArchitectureCheckConfig",
                 "ArchitectureCheckConfigError",
@@ -31,10 +61,6 @@ class ArchitectureCheckDomainPackageTests(unittest.TestCase):
                 "DependencyRule",
                 "Edge",
                 "EdgeRuleViolation",
-                "ExtractedFile",
-                "ExtractionResult",
-                "ExtractionSummary",
-                "ExtractorContractError",
                 "FlowAnalyzerConfig",
                 "FlowRuleSet",
                 "FlowViolation",
@@ -48,15 +74,15 @@ class ArchitectureCheckDomainPackageTests(unittest.TestCase):
             ],
         )
 
-    def test_domain_entity_anchor_exports_expected_public_seam(self) -> None:
+    def test_dependency_map_domain_entity_anchor_exports_expected_public_seam(self) -> None:
         self.assertEqual(
-            architecture_check_domain_entity.__all__,
+            architecture_dependency_map_domain_entity.__all__,
             ["DependencyGraph", "Edge", "Node"],
         )
 
-    def test_domain_service_anchor_exports_expected_public_seam(self) -> None:
+    def test_policy_check_domain_service_anchor_exports_expected_public_seam(self) -> None:
         self.assertEqual(
-            architecture_check_domain_service.__all__,
+            architecture_policy_check_domain_service.__all__,
             [
                 "ArchitecturePolicyEvaluator",
                 "BackwardFlowAnalyzer",
@@ -68,7 +94,7 @@ class ArchitectureCheckDomainPackageTests(unittest.TestCase):
 
     def test_domain_value_object_anchor_exports_expected_public_seam(self) -> None:
         self.assertEqual(
-            architecture_check_domain_value_object.__all__,
+            architecture_dependency_map_domain_value_object.__all__,
             [
                 "ArchitectureCheckConfig",
                 "ArchitectureCheckConfigError",
@@ -93,7 +119,8 @@ class ArchitectureCheckDomainPackageTests(unittest.TestCase):
         )
 
     def test_domain_directory_matches_allowed_anchor_shape(self) -> None:
-        domain_dir = Path(architecture_check_domain.__file__).resolve().parent
+        domain_dir = Path(
+            architecture_dependency_map_domain.__file__).resolve().parent
         entries = {
             path.name
             for path in domain_dir.iterdir()
@@ -101,11 +128,11 @@ class ArchitectureCheckDomainPackageTests(unittest.TestCase):
         }
 
         self.assertEqual(
-            entries, {"__init__.py", "entity", "service", "value_object"})
+            entries, {"__init__.py", "entity", "value_object"})
 
 
 class CheckerTests(unittest.TestCase):
-    @patch("agentic.features.architecture_check.checker.infrastructure.extractor_runtime.subprocess.run")
+    @patch("agentic.features.architecture_check.dependency_map.infrastructure.extractor_runtime.subprocess.run")
     def test_rejects_non_json_extractor_output_through_public_seam(self, mock_run: Mock) -> None:
         with TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)
@@ -122,7 +149,7 @@ class CheckerTests(unittest.TestCase):
 
             self.assertIn("valid JSON", str(context.exception))
 
-    @patch("agentic.features.architecture_check.checker.infrastructure.extractor_runtime.subprocess.run")
+    @patch("agentic.features.architecture_check.dependency_map.infrastructure.extractor_runtime.subprocess.run")
     def test_rejects_invalid_extractor_contract_through_public_seam(self, mock_run: Mock) -> None:
         with TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)

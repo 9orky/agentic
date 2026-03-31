@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import click
 
-from .checker.ui import architecture_check_cli as register_architecture_check_cli
+from .policy_check import architecture_check_cli as register_architecture_check_cli
 
 
 def architecture_check_cli(app: click.Group) -> None:

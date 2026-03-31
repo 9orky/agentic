@@ -8,7 +8,7 @@ from agentic.features.architecture_check import run_architecture_check
 
 
 class ArchitectureFlowTests(unittest.TestCase):
-    @patch("agentic.features.architecture_check.checker.infrastructure.extractor_runtime.subprocess.run")
+    @patch("agentic.features.architecture_check.dependency_map.infrastructure.extractor_runtime.subprocess.run")
     def test_forward_only_flow_passes(self, mock_run: Mock) -> None:
         with TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)
@@ -42,7 +42,7 @@ class ArchitectureFlowTests(unittest.TestCase):
 
             self.assertEqual(result.violations, [])
 
-    @patch("agentic.features.architecture_check.checker.infrastructure.extractor_runtime.subprocess.run")
+    @patch("agentic.features.architecture_check.dependency_map.infrastructure.extractor_runtime.subprocess.run")
     def test_detects_backward_flow(self, mock_run: Mock) -> None:
         with TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)
@@ -70,7 +70,7 @@ class ArchitectureFlowTests(unittest.TestCase):
             self.assertIn("backward-flow", result.violations[0])
             self.assertIn("src/features/order/api", result.violations[0])
 
-    @patch("agentic.features.architecture_check.checker.infrastructure.extractor_runtime.subprocess.run")
+    @patch("agentic.features.architecture_check.dependency_map.infrastructure.extractor_runtime.subprocess.run")
     def test_detects_module_reentry(self, mock_run: Mock) -> None:
         with TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)
@@ -108,7 +108,7 @@ class ArchitectureFlowTests(unittest.TestCase):
             self.assertIn("no-reentry", result.violations[0])
             self.assertIn("src/modules/user/service", result.violations[0])
 
-    @patch("agentic.features.architecture_check.checker.infrastructure.extractor_runtime.subprocess.run")
+    @patch("agentic.features.architecture_check.dependency_map.infrastructure.extractor_runtime.subprocess.run")
     def test_detects_module_cycle(self, mock_run: Mock) -> None:
         with TemporaryDirectory() as temp_dir:
             project_root = Path(temp_dir)
