@@ -98,8 +98,10 @@ class RuleDocument(BaseModel):
             path=document_file.path,
             document_class=RuleDocumentClass.from_literal(metadata.doc_class),
             stage=getattr(metadata, "stage", None),
-            observed_section_headings=_section_headings_from(document_file.content),
-            has_navigation_targets=_has_navigation_targets(document_file.content, metadata),
+            observed_section_headings=_section_headings_from(
+                document_file.content),
+            has_navigation_targets=_has_navigation_targets(
+                document_file.content, metadata),
         )
 
 
@@ -130,7 +132,8 @@ class RuleDocumentSchema(BaseModel):
         return cls(
             document_class=RuleDocumentClass.NAVIGATIONAL,
             section_requirements=(
-                RuleSectionRequirement(headings=("Use This Branch When",), required=False),
+                RuleSectionRequirement(
+                    headings=("Use This Branch When",), required=False),
                 RuleSectionRequirement(headings=("Stop Or Descend",)),
                 RuleSectionRequirement(headings=("Branches",), required=False),
                 RuleSectionRequirement(headings=("Review Checks",)),
@@ -145,7 +148,8 @@ class RuleDocumentSchema(BaseModel):
             section_requirements=(
                 RuleSectionRequirement(headings=("Required Decisions",)),
                 RuleSectionRequirement(headings=("Core Rules",)),
-                RuleSectionRequirement(headings=("Layer Starter Rules",), required=False),
+                RuleSectionRequirement(
+                    headings=("Layer Starter Rules",), required=False),
                 RuleSectionRequirement(headings=("Review Checks",)),
             ),
         )
@@ -156,10 +160,12 @@ class RuleDocumentSchema(BaseModel):
             document_class=RuleDocumentClass.EXECUTION,
             section_requirements=(
                 RuleSectionRequirement(headings=("Required Sections",)),
-                RuleSectionRequirement(headings=("Optional Sections",), required=False),
+                RuleSectionRequirement(
+                    headings=("Optional Sections",), required=False),
                 RuleSectionRequirement(headings=("File Tree Rules",)),
                 RuleSectionRequirement(headings=("Phase Rules",)),
-                RuleSectionRequirement(headings=("Strategic Model Gate",), required=False),
+                RuleSectionRequirement(
+                    headings=("Strategic Model Gate",), required=False),
                 RuleSectionRequirement(headings=("Review Checks",)),
                 RuleSectionRequirement(headings=("Handoff Checks",)),
             ),
@@ -171,7 +177,8 @@ class RuleDocumentSchema(BaseModel):
             document_class=RuleDocumentClass.EXECUTION,
             section_requirements=(
                 RuleSectionRequirement(headings=("Required Sections",)),
-                RuleSectionRequirement(headings=("Implementation Tree Rules",)),
+                RuleSectionRequirement(
+                    headings=("Implementation Tree Rules",)),
                 RuleSectionRequirement(headings=("Step Contract Rules",)),
                 RuleSectionRequirement(headings=("Execution Rules",)),
                 RuleSectionRequirement(headings=("Review Checks",)),
@@ -190,11 +197,13 @@ class RuleDocumentSchema(BaseModel):
 def _metadata_from(content: str) -> NavigationalRuleDocumentMetadata | PolicyRuleDocumentMetadata | ExecutionRuleDocumentMetadata:
     match = _FRONTMATTER_PATTERN.match(content)
     if match is None:
-        raise RuleDocumentParseError("Rule document must declare YAML frontmatter")
+        raise RuleDocumentParseError(
+            "Rule document must declare YAML frontmatter")
 
     payload = yaml.safe_load(match.group("value"))
     if not isinstance(payload, dict):
-        raise RuleDocumentParseError("Rule document frontmatter must be a mapping")
+        raise RuleDocumentParseError(
+            "Rule document frontmatter must be a mapping")
 
     try:
         return _RULE_DOCUMENT_METADATA_ADAPTER.validate_python(payload)

@@ -12,15 +12,19 @@ exclusions: [.venv/**, agentic/**, tests/**]
 rules:
   tags:
     - { name: feature, match: &feature src/agentic/features/* }
+    - { name: module, match: &module src/agentic/features/*/* }
+    - { name: module_shim, match: &module_shim src/agentic/features/*/*/__init__.py }
     - { name: domain, match: &domain src/agentic/features/*/*/domain }
     - { name: infrastructure, match: &infrastructure src/agentic/features/*/*/infrastructure }
     - { name: application, match: &application src/agentic/features/*/*/application }
     - { name: ui, match: &ui src/agentic/features/*/*/ui }
   boundaries:
-    - { source: src/agentic/cli.py, disallow: [*feature], allow: [src/agentic/features/*/cli] }
-    - { source: *feature, disallow: [*feature], allow_same_match: true, allow: [*feature] }
+    - { source: src/agentic/cli.py, disallow: [*feature], allow: [&feature_cli src/agentic/features/*/cli.py] }
+    - { source: *feature, disallow: [*feature], allow_same_match: true, allow: [*feature, *module_shim] }
+    - { source: *module, disallow: [*module], allow_same_match: true, allow: [*module] }
     - { source: *domain, disallow: [*infrastructure, *application, *ui] }
-    - { source: *infrastructure, disallow: [src/agentic/features/*/*/domain/*/*, *application, *ui] }
-    - { source: *application, disallow: [src/agentic/features/*/*/domain/*/*, src/agentic/features/*/*/infrastructure/*/*, *ui], allow: [src/agentic/features/*/*/infrastructure, src/agentic/features/*/*/infrastructure/__init__.py, src/agentic/features/workspace_contract/rules/infrastructure/file_repository.py] }
-    - { source: *ui, disallow: [src/agentic/features/*/*/application/*/*, *infrastructure, *domain] }
+    - { source: *infrastructure, disallow: [*domain, *application, *ui], allow: [&domain_shim src/agentic/features/*/*/domain/__init__.py] }
+    - { source: *application, disallow: [*domain, *infrastructure, *ui], allow: [*domain_shim, &infrastructure_shim src/agentic/features/*/*/infrastructure/__init__.py, src/agentic/features/*/*/infrastructure/*.py, src/agentic/features/workspace_contract/rules/infrastructure/file_repository.py] }
+    - { source: *ui, disallow: [*application, *infrastructure, *domain], allow: [&application_shim src/agentic/features/*/*/application/__init__.py, src/agentic/features/*/*/application/*.py] }
+    - { source: src/agentic/features/*/*/application/services/*, disallow: [src/agentic/features/*/*/application/commands/*, src/agentic/features/*/*/application/queries/*] }
   flow: { layers: [ui, application, infrastructure, domain], module_tag: feature, analyzers: [backward-flow, no-cycles] }
