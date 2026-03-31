@@ -42,7 +42,7 @@ Do not place loose domain classes directly under `domain/` outside those anchors
 3. One class per file is mandatory in domain.
 4. If an anchor needs more than one class, switch that anchor to package form.
 5. Each anchor may be a file or a same-named package.
-6. If a tactical concept such as entity, aggregate boundary, or repository is absent, keep that absence intentional and documented in planning or DDD guidance rather than adding a placeholder.
+6. If a tactical concept such as entity, aggregate boundary, or repository is absent, keep that absence intentional and documented in planning guidance rather than adding a placeholder.
 7. Cross-layer consumers may import domain symbols only through `domain/__init__.py` or the owning anchor shim.
 
 ## Constraints
@@ -54,12 +54,6 @@ Do not place loose domain classes directly under `domain/` outside those anchors
 3. Helper logic that cannot justify a domain class does not belong in `domain`.
 4. Do not introduce generic buckets such as `helpers`, `utils`, or `common` under `domain`.
 5. Every touched domain concept must have an explicit tactical classification even when no new code anchor is introduced.
-
-## If Ambiguous, Go To
-
-### Tactical Classification
-
-When a domain concept is clear but its tactical classification is not, read [../../../ddd/TACTICAL.md](../../../ddd/TACTICAL.md) before introducing or moving code.
 
 ## Acceptance Check
 

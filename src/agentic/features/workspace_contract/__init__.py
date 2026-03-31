@@ -3,12 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from .contract.application import build_default_bootstrap_project
-from .contract.application import build_default_describe_rule_schema_drift
-from .contract.application import build_default_describe_workspace_contract
-from .contract.application import build_default_update_project
-from .contract.application import RuleSchemaValidationResult
-from .contract.domain import WorkspaceContractSummary
+from .rule_schema_audit.application import RuleSchemaValidationResult, build_default_describe_rule_schema_drift
+from .workspace_sync.application import build_default_bootstrap_project, build_default_describe_workspace_contract, build_default_update_project
+from .workspace_sync.domain import WorkspaceContractSummary
 
 
 class BootstrapError(RuntimeError):

@@ -1,50 +1,68 @@
-import agentic.features.workspace_contract.contract.infrastructure as workspace_contract_infrastructure
-import agentic.features.workspace_contract.contract.infrastructure.filesystem as workspace_contract_infrastructure_filesystem
-import agentic.features.workspace_contract.contract.infrastructure.resources as workspace_contract_infrastructure_resources
+import agentic.features.workspace_contract.rule_schema_audit.infrastructure as rule_schema_audit_infrastructure
+import agentic.features.workspace_contract.rule_schema_audit.infrastructure.filesystem as rule_schema_audit_infrastructure_filesystem
+import agentic.features.workspace_contract.workspace_sync.infrastructure as workspace_sync_infrastructure
+import agentic.features.workspace_contract.workspace_sync.infrastructure.filesystem as workspace_sync_infrastructure_filesystem
+import agentic.features.workspace_contract.workspace_sync.infrastructure.resources as workspace_sync_infrastructure_resources
 import re
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
 
-from agentic.features.workspace_contract.contract.domain import RuleDocumentClass, SharedRulePath, WorkspaceContractLayout
-from agentic.features.workspace_contract.contract.infrastructure import PackagedRulesReader, RuleMarkdownParser, RuleTreeReader, WorkspaceReader, WorkspaceWriter
+from agentic.features.workspace_contract.rule_schema_audit.domain import RuleDocumentClass
+from agentic.features.workspace_contract.rule_schema_audit.infrastructure import RuleMarkdownParser, RuleTreeReader
+from agentic.features.workspace_contract.workspace_sync.domain import SharedRulePath, WorkspaceContractLayout
+from agentic.features.workspace_contract.workspace_sync.infrastructure import PackagedRulesReader, WorkspaceReader, WorkspaceWriter
 
 
 class WorkspaceContractInfrastructurePackageTests(unittest.TestCase):
-    def test_infrastructure_package_exports_expected_public_seam(self) -> None:
+    def test_workspace_sync_infrastructure_package_exports_expected_public_seam(self) -> None:
         self.assertEqual(
-            workspace_contract_infrastructure.__all__,
+            workspace_sync_infrastructure.__all__,
+            [
+                "PackagedRulesReader",
+                "WorkspaceReader",
+                "WorkspaceWriter",
+            ],
+        )
+
+    def test_rule_schema_audit_infrastructure_package_exports_expected_public_seam(self) -> None:
+        self.assertEqual(
+            rule_schema_audit_infrastructure.__all__,
             [
                 "PackagedRulesReader",
                 "RuleMarkdownDocument",
                 "RuleMarkdownParser",
                 "RuleTreeReader",
                 "WorkspaceReader",
-                "WorkspaceWriter",
             ],
         )
 
     def test_filesystem_anchor_exports_expected_public_seam(self) -> None:
         self.assertEqual(
-            workspace_contract_infrastructure_filesystem.__all__,
+            workspace_sync_infrastructure_filesystem.__all__,
+            [
+                "WorkspaceReader",
+                "WorkspaceWriter",
+            ],
+        )
+        self.assertEqual(
+            rule_schema_audit_infrastructure_filesystem.__all__,
             [
                 "RuleMarkdownDocument",
                 "RuleMarkdownParser",
                 "RuleTreeReader",
-                "WorkspaceReader",
-                "WorkspaceWriter",
             ],
         )
 
     def test_resources_anchor_exports_expected_public_seam(self) -> None:
         self.assertEqual(
-            workspace_contract_infrastructure_resources.__all__,
+            workspace_sync_infrastructure_resources.__all__,
             ["PackagedRulesReader"],
         )
 
     def test_infrastructure_directory_matches_allowed_anchor_shape(self) -> None:
         infrastructure_dir = Path(
-            workspace_contract_infrastructure.__file__).resolve().parent
+            workspace_sync_infrastructure.__file__).resolve().parent
         entries = {
             path.name
             for path in infrastructure_dir.iterdir()
@@ -52,6 +70,16 @@ class WorkspaceContractInfrastructurePackageTests(unittest.TestCase):
         }
 
         self.assertEqual(entries, {"__init__.py", "filesystem", "resources"})
+
+        audit_infrastructure_dir = Path(
+            rule_schema_audit_infrastructure.__file__).resolve().parent
+        audit_entries = {
+            path.name
+            for path in audit_infrastructure_dir.iterdir()
+            if path.name != "__pycache__"
+        }
+
+        self.assertEqual(audit_entries, {"__init__.py", "filesystem"})
 
 
 class PackagedRulesReaderTests(unittest.TestCase):
@@ -110,9 +138,6 @@ class PackagedRulesReaderTests(unittest.TestCase):
         rendered_paths = tuple(path.as_posix() for path in shared_rule_paths)
 
         self.assertIn("AGENT.md", rendered_paths)
-        self.assertIn("ddd/DDD.md", rendered_paths)
-        self.assertIn("ddd/STRATEGIC.md", rendered_paths)
-        self.assertIn("ddd/TACTICAL.md", rendered_paths)
         self.assertIn(
             "feature/module/layers/application/COMMANDS.md", rendered_paths)
         self.assertIn(
@@ -142,7 +167,6 @@ class PackagedRulesReaderTests(unittest.TestCase):
         document_paths = reader.iter_rule_document_paths()
 
         self.assertIn(Path("AGENT.md"), document_paths)
-        self.assertIn(Path("ddd") / "DDD.md", document_paths)
         self.assertIn(Path("feature") / "module" / "layers" /
                       "application" / "COMMANDS.md", document_paths)
         self.assertIn(Path("feature") / "module" / "layers" /
@@ -305,7 +329,6 @@ class RuleTreeReaderTests(unittest.TestCase):
         document_paths = reader.iter_packaged_rule_documents()
 
         self.assertIn(Path("AGENT.md"), document_paths)
-        self.assertIn(Path("ddd") / "TACTICAL.md", document_paths)
         self.assertIn(Path("feature") / "module" /
                       "layers" / "DOMAIN.md", document_paths)
         self.assertEqual(document_paths, tuple(

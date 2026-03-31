@@ -1,37 +1,48 @@
-import agentic.features.workspace_contract.contract.application.commands as workspace_contract_application_commands
-import agentic.features.workspace_contract.contract.application.queries as workspace_contract_application_queries
-import agentic.features.workspace_contract.contract.application.services as workspace_contract_application_services
-import agentic.features.workspace_contract.contract.application as workspace_contract_application
+import agentic.features.workspace_contract.rule_schema_audit.application as rule_schema_audit_application
+import agentic.features.workspace_contract.rule_schema_audit.application.queries as rule_schema_audit_application_queries
+import agentic.features.workspace_contract.rule_schema_audit.application.services as rule_schema_audit_application_services
+import agentic.features.workspace_contract.workspace_sync.application as workspace_sync_application
+import agentic.features.workspace_contract.workspace_sync.application.commands as workspace_sync_application_commands
+import agentic.features.workspace_contract.workspace_sync.application.queries as workspace_sync_application_queries
+import agentic.features.workspace_contract.workspace_sync.application.services as workspace_sync_application_services
 import inspect
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, cast
 import unittest
 
-from agentic.features.workspace_contract.contract.application import BootstrapProject, DescribeRuleSchemaDrift, DescribeWorkspaceContract, RuleSchemaValidationResult, UpdateProject, build_default_bootstrap_project, build_default_describe_rule_schema_drift, build_default_describe_workspace_contract, build_default_update_project
-from agentic.features.workspace_contract.contract.domain import WorkspaceContractSummary
+from agentic.features.workspace_contract.rule_schema_audit.application import DescribeRuleSchemaDrift, RuleSchemaValidationResult, build_default_describe_rule_schema_drift
+from agentic.features.workspace_contract.workspace_sync.application import BootstrapProject, DescribeWorkspaceContract, UpdateProject, build_default_bootstrap_project, build_default_describe_workspace_contract, build_default_update_project
+from agentic.features.workspace_contract.workspace_sync.domain import WorkspaceContractSummary
 
 
 class WorkspaceContractApplicationTests(unittest.TestCase):
-    def test_application_package_exports_only_public_seam(self) -> None:
+    def test_workspace_sync_application_package_exports_only_public_seam(self) -> None:
         self.assertEqual(
-            workspace_contract_application.__all__,
+            workspace_sync_application.__all__,
             [
                 "BootstrapProject",
-                "DescribeRuleSchemaDrift",
                 "DescribeWorkspaceContract",
+                "UpdateProject",
+                "build_default_bootstrap_project",
+                "build_default_describe_workspace_contract",
+                "build_default_update_project",
+            ],
+        )
+
+    def test_rule_schema_audit_application_package_exports_only_public_seam(self) -> None:
+        self.assertEqual(
+            rule_schema_audit_application.__all__,
+            [
+                "DescribeRuleSchemaDrift",
                 "RuleSchemaValidationResult",
-                "UpdateProject",
-                "build_default_bootstrap_project",
                 "build_default_describe_rule_schema_drift",
-                "build_default_describe_workspace_contract",
-                "build_default_update_project",
             ],
         )
 
-    def test_commands_package_exports_only_public_seam(self) -> None:
+    def test_workspace_sync_commands_package_exports_only_public_seam(self) -> None:
         self.assertEqual(
-            workspace_contract_application_commands.__all__,
+            workspace_sync_application_commands.__all__,
             [
                 "BootstrapProject",
                 "UpdateProject",
@@ -40,23 +51,31 @@ class WorkspaceContractApplicationTests(unittest.TestCase):
             ],
         )
 
-    def test_queries_package_exports_only_public_seam(self) -> None:
+    def test_workspace_sync_queries_package_exports_only_public_seam(self) -> None:
         self.assertEqual(
-            workspace_contract_application_queries.__all__,
+            workspace_sync_application_queries.__all__,
+            [
+                "DescribeWorkspaceContract",
+                "build_default_describe_workspace_contract",
+            ],
+        )
+
+    def test_rule_schema_audit_queries_package_exports_only_public_seam(self) -> None:
+        self.assertEqual(
+            rule_schema_audit_application_queries.__all__,
             [
                 "DescribeRuleSchemaDrift",
-                "DescribeWorkspaceContract",
                 "build_default_describe_rule_schema_drift",
-                "build_default_describe_workspace_contract",
             ],
         )
 
     def test_services_anchor_exports_no_cross_layer_surface(self) -> None:
-        self.assertEqual(workspace_contract_application_services.__all__, [])
+        self.assertEqual(workspace_sync_application_services.__all__, [])
+        self.assertEqual(rule_schema_audit_application_services.__all__, [])
 
-    def test_application_directory_matches_allowed_anchor_shape(self) -> None:
+    def test_workspace_sync_application_directory_matches_allowed_anchor_shape(self) -> None:
         application_dir = Path(
-            workspace_contract_application.__file__).resolve().parent
+            workspace_sync_application.__file__).resolve().parent
         entries = {
             path.name
             for path in application_dir.iterdir()
@@ -66,9 +85,20 @@ class WorkspaceContractApplicationTests(unittest.TestCase):
         self.assertEqual(
             entries, {"__init__.py", "commands", "queries", "services"})
 
-    def test_services_directory_matches_refactor_target_shape(self) -> None:
+    def test_rule_schema_audit_application_directory_matches_allowed_anchor_shape(self) -> None:
+        application_dir = Path(
+            rule_schema_audit_application.__file__).resolve().parent
+        entries = {
+            path.name
+            for path in application_dir.iterdir()
+            if path.name != "__pycache__"
+        }
+
+        self.assertEqual(entries, {"__init__.py", "queries", "services"})
+
+    def test_workspace_sync_services_directory_matches_refactor_target_shape(self) -> None:
         services_dir = Path(
-            workspace_contract_application.__file__).resolve().parent / "services"
+            workspace_sync_application.__file__).resolve().parent / "services"
         entries = {
             path.name
             for path in services_dir.iterdir()
@@ -79,11 +109,21 @@ class WorkspaceContractApplicationTests(unittest.TestCase):
             entries,
             {
                 "__init__.py",
-                "rule_schema_validation",
                 "workspace_contract_summary_service.py",
                 "workspace_contract_sync",
             },
         )
+
+    def test_rule_schema_audit_services_directory_matches_refactor_target_shape(self) -> None:
+        services_dir = Path(
+            rule_schema_audit_application.__file__).resolve().parent / "services"
+        entries = {
+            path.name
+            for path in services_dir.iterdir()
+            if path.name != "__pycache__"
+        }
+
+        self.assertEqual(entries, {"__init__.py", "rule_schema_validation"})
 
     def test_commands_and_queries_depend_only_on_service_boundary(self) -> None:
         self.assertEqual(
@@ -236,7 +276,6 @@ class RuleSchemaValidationApplicationTests(unittest.TestCase):
 
             self.assertFalse(result.has_findings)
             self.assertIn(Path("AGENT.md"), result.packaged_documents)
-            self.assertIn(Path("ddd") / "DDD.md", result.packaged_documents)
             self.assertIn(Path("feature") / "module" / "layers" /
                           "APPLICATION.md", result.local_documents)
 

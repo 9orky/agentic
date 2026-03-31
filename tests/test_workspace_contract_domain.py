@@ -1,22 +1,21 @@
-import agentic.features.workspace_contract.contract.domain as workspace_contract_domain
-import agentic.features.workspace_contract.contract.domain.service as workspace_contract_domain_service
-import agentic.features.workspace_contract.contract.domain.value_object as workspace_contract_domain_value_object
+import agentic.features.workspace_contract.rule_schema_audit.domain as rule_schema_audit_domain
+import agentic.features.workspace_contract.rule_schema_audit.domain.service as rule_schema_audit_domain_service
+import agentic.features.workspace_contract.rule_schema_audit.domain.value_object as rule_schema_audit_domain_value_object
+import agentic.features.workspace_contract.workspace_sync.domain as workspace_sync_domain
+import agentic.features.workspace_contract.workspace_sync.domain.service as workspace_sync_domain_service
+import agentic.features.workspace_contract.workspace_sync.domain.value_object as workspace_sync_domain_value_object
 from pathlib import Path
 import unittest
 
-from agentic.features.workspace_contract.contract.domain import RuleDocumentClass, RuleDocumentSchema, RuleSchemaPolicy, SharedRulePath, SyncAction, SyncPolicy, WorkspaceContractLayout
+from agentic.features.workspace_contract.rule_schema_audit.domain import RuleDocumentClass, RuleDocumentSchema, RuleSchemaPolicy
+from agentic.features.workspace_contract.workspace_sync.domain import SharedRulePath, SyncAction, SyncPolicy, WorkspaceContractLayout
 
 
 class WorkspaceContractDomainPackageTests(unittest.TestCase):
-    def test_domain_package_exports_expected_public_seam(self) -> None:
+    def test_workspace_sync_domain_package_exports_expected_public_seam(self) -> None:
         self.assertEqual(
-            workspace_contract_domain.__all__,
+            workspace_sync_domain.__all__,
             [
-                "RuleDocumentClass",
-                "RuleDocumentSchema",
-                "RuleSchemaPolicy",
-                "RuleSchemaViolation",
-                "RuleSectionRequirement",
                 "SharedRulePath",
                 "SyncAction",
                 "SyncChange",
@@ -26,20 +25,32 @@ class WorkspaceContractDomainPackageTests(unittest.TestCase):
             ],
         )
 
+    def test_rule_schema_audit_domain_package_exports_expected_public_seam(self) -> None:
+        self.assertEqual(
+            rule_schema_audit_domain.__all__,
+            [
+                "RuleDocumentClass",
+                "RuleDocumentSchema",
+                "RuleSchemaPolicy",
+                "RuleSchemaViolation",
+                "RuleSectionRequirement",
+            ],
+        )
+
     def test_domain_service_anchor_exports_expected_public_seam(self) -> None:
         self.assertEqual(
-            workspace_contract_domain_service.__all__,
-            ["RuleSchemaPolicy", "SyncPolicy"],
+            workspace_sync_domain_service.__all__,
+            ["SyncPolicy"],
+        )
+        self.assertEqual(
+            rule_schema_audit_domain_service.__all__,
+            ["RuleSchemaPolicy"],
         )
 
     def test_domain_value_object_anchor_exports_expected_public_seam(self) -> None:
         self.assertEqual(
-            workspace_contract_domain_value_object.__all__,
+            workspace_sync_domain_value_object.__all__,
             [
-                "RuleDocumentClass",
-                "RuleDocumentSchema",
-                "RuleSchemaViolation",
-                "RuleSectionRequirement",
                 "SharedRulePath",
                 "SyncAction",
                 "SyncChange",
@@ -47,9 +58,18 @@ class WorkspaceContractDomainPackageTests(unittest.TestCase):
                 "WorkspaceContractSummary",
             ],
         )
+        self.assertEqual(
+            rule_schema_audit_domain_value_object.__all__,
+            [
+                "RuleDocumentClass",
+                "RuleDocumentSchema",
+                "RuleSchemaViolation",
+                "RuleSectionRequirement",
+            ],
+        )
 
     def test_domain_directory_matches_allowed_anchor_shape(self) -> None:
-        domain_dir = Path(workspace_contract_domain.__file__).resolve().parent
+        domain_dir = Path(workspace_sync_domain.__file__).resolve().parent
         entries = {
             path.name
             for path in domain_dir.iterdir()
@@ -57,6 +77,17 @@ class WorkspaceContractDomainPackageTests(unittest.TestCase):
         }
 
         self.assertEqual(entries, {"__init__.py", "service", "value_object"})
+
+        audit_domain_dir = Path(
+            rule_schema_audit_domain.__file__).resolve().parent
+        audit_entries = {
+            path.name
+            for path in audit_domain_dir.iterdir()
+            if path.name != "__pycache__"
+        }
+
+        self.assertEqual(
+            audit_entries, {"__init__.py", "service", "value_object"})
 
 
 class SharedRulePathTests(unittest.TestCase):

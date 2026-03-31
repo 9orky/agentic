@@ -1,7 +1,9 @@
 import agentic.features.workspace_contract as workspace_contract_boundary
-import agentic.features.workspace_contract.contract.ui as workspace_contract_ui
-import agentic.features.workspace_contract.contract.ui.services as workspace_contract_ui_services
-import agentic.features.workspace_contract.contract.ui.views as workspace_contract_ui_views
+import agentic.features.workspace_contract.rule_schema_audit.ui as rule_schema_audit_ui
+import agentic.features.workspace_contract.rule_schema_audit.ui.views as rule_schema_audit_ui_views
+import agentic.features.workspace_contract.workspace_sync.ui as workspace_sync_ui
+import agentic.features.workspace_contract.workspace_sync.ui.services as workspace_sync_ui_services
+import agentic.features.workspace_contract.workspace_sync.ui.views as workspace_sync_ui_views
 from contextlib import redirect_stdout
 from io import StringIO
 from pathlib import Path
@@ -12,8 +14,9 @@ import click
 
 from agentic.features.workspace_contract import BootstrapError, RuleSchemaValidationResult, SyncResult, bootstrap_project, describe_rule_schema_drift, describe_workspace_contract, update_project
 from agentic.features.workspace_contract.cli import workspace_contract_cli
-from agentic.features.workspace_contract.contract.ui.services import ProjectPathPresenter
-from agentic.features.workspace_contract.contract.ui.views import RuleSchemaDriftView, SyncSummaryView, build_default_rule_schema_drift_view, build_default_sync_summary_view
+from agentic.features.workspace_contract.rule_schema_audit.ui.views import RuleSchemaDriftView, build_default_rule_schema_drift_view
+from agentic.features.workspace_contract.workspace_sync.ui import ProjectPathPresenter
+from agentic.features.workspace_contract.workspace_sync.ui.views import SyncSummaryView, build_default_sync_summary_view
 
 
 class WorkspaceContractBoundaryTests(unittest.TestCase):
@@ -56,35 +59,58 @@ class WorkspaceContractBoundaryTests(unittest.TestCase):
 
 
 class WorkspaceContractUiTests(unittest.TestCase):
-    def test_ui_package_exports_expected_public_seam(self) -> None:
-        self.assertEqual(workspace_contract_ui.__all__,
-                         ["workspace_contract_cli"])
+    def test_sync_ui_package_exports_expected_public_seam(self) -> None:
+        self.assertEqual(
+            workspace_sync_ui.__all__,
+            ["ProjectPathPresenter", "SyncSummaryView",
+                "build_default_sync_summary_view"],
+        )
+
+    def test_rule_schema_audit_ui_package_exports_expected_public_seam(self) -> None:
+        self.assertEqual(
+            rule_schema_audit_ui.__all__,
+            ["ProjectPathPresenter", "RuleSchemaDriftView",
+                "build_default_rule_schema_drift_view"],
+        )
 
     def test_ui_service_and_view_packages_export_expected_public_seams(self) -> None:
         self.assertEqual(
-            workspace_contract_ui_services.__all__,
+            workspace_sync_ui_services.__all__,
             ["ProjectPathPresenter"],
         )
         self.assertEqual(
-            workspace_contract_ui_views.__all__,
+            workspace_sync_ui_views.__all__,
+            [
+                "SyncSummaryView",
+                "build_default_sync_summary_view",
+            ],
+        )
+        self.assertEqual(
+            rule_schema_audit_ui_views.__all__,
             [
                 "RuleSchemaDriftView",
-                "SyncSummaryView",
                 "build_default_rule_schema_drift_view",
-                "build_default_sync_summary_view",
             ],
         )
 
     def test_ui_directory_matches_allowed_anchor_shape(self) -> None:
-        ui_dir = Path(workspace_contract_ui.__file__).resolve().parent
+        ui_dir = Path(workspace_sync_ui.__file__).resolve().parent
         entries = {
             path.name
             for path in ui_dir.iterdir()
             if path.name != "__pycache__"
         }
 
-        self.assertEqual(
-            entries, {"__init__.py", "cli.py", "services", "views"})
+        self.assertEqual(entries, {"__init__.py", "services", "views"})
+
+        audit_ui_dir = Path(rule_schema_audit_ui.__file__).resolve().parent
+        audit_entries = {
+            path.name
+            for path in audit_ui_dir.iterdir()
+            if path.name != "__pycache__"
+        }
+
+        self.assertEqual(audit_entries, {"__init__.py", "views"})
 
     def test_cli_init_renders_created_files_and_next_step(self) -> None:
         app = click.Group()

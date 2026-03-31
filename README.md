@@ -35,7 +35,7 @@ Current top-level flow:
 Example discovery path:
 
 1. planning work starts in `planning/PLANNING.md`
-2. material domain modeling routes through `ddd/DDD.md`
+2. material domain modeling stays within the planning guides and the affected plan files
 
 This keeps the read path short and inspectable. The agent does not need to load unrelated rule files to plan or refactor one narrow slice of work.
 

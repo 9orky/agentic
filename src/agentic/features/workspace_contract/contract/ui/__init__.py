@@ -1,3 +1,0 @@
-from .cli import workspace_contract_cli
-
-__all__ = ["workspace_contract_cli"]
