@@ -17,7 +17,6 @@ Document Class: navigational
 | --- | --- | --- |
 | Rules maintenance | how the packaged rules tree should be navigated, split, and kept under continuous refinement | [../README.md](../README.md) |
 | Feature rules | which feature module owns a responsibility and which next module or layer document can resolve placement questions | [feature/FEATURE.md](feature/FEATURE.md) |
-| Domain-driven design rules | the strategic and tactical domain-modeling rules, plus the contract for a project-local `DDD.md` artifact | [ddd/DDD.md](ddd/DDD.md) |
 | Planning rules | which planning stage applies now and which planning document gives the next level of detail | [planning/PLANNING.md](planning/PLANNING.md) |
 | Module rules | the module-boundary rules that define public seams, private internals, and dependency direction | [module/MODULE.md](module/MODULE.md) |
 | Refactoring rules | the target-design refactoring rules and whether placement questions must route into feature guidance | [refactoring/REFACTORING.md](refactoring/REFACTORING.md) |
