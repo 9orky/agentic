@@ -1,0 +1,1 @@
+"""Rule-schema feature tests."""

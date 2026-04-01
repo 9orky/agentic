@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 import click
 
 from ..application import bootstrap_project, update_project
@@ -10,14 +8,10 @@ from .views import build_default_sync_summary_view
 
 @click.command(name="init")
 @click.option("--project-root", default=".", show_default=True, help="Project root to bootstrap")
-def _init_command(project_root: str) -> int:
-    resolved_project_root = Path(project_root).expanduser().resolve()
-
-    try:
-        result = bootstrap_project(resolved_project_root)
-    except NotADirectoryError as exc:
-        click.echo(f"Error: {exc}")
-        return 1
+@click.pass_obj
+def _init_command(runtime, project_root: str) -> int:
+    resolved_project_root = runtime.resolve_project_root(project_root)
+    result = bootstrap_project(resolved_project_root)
 
     for line in build_default_sync_summary_view().render_bootstrap_result(
         result,
@@ -29,14 +23,10 @@ def _init_command(project_root: str) -> int:
 
 @click.command(name="update")
 @click.option("--project-root", default=".", show_default=True, help="Project root to update")
-def _update_command(project_root: str) -> int:
-    resolved_project_root = Path(project_root).expanduser().resolve()
-
-    try:
-        result = update_project(resolved_project_root)
-    except NotADirectoryError as exc:
-        click.echo(f"Error: {exc}")
-        return 1
+@click.pass_obj
+def _update_command(runtime, project_root: str) -> int:
+    resolved_project_root = runtime.resolve_project_root(project_root)
+    result = update_project(resolved_project_root)
 
     for line in build_default_sync_summary_view().render_update_result(
         result,

@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-import click
+from importlib import import_module
 
-from .rules import rule_schema_cli as register_rule_schema_cli
-from .sync import sync_cli
+import click
 
 __all__ = ["workspace_contract_cli"]
 
 
 def workspace_contract_cli(app: click.Group) -> None:
-    sync_cli(app)
-    register_rule_schema_cli(app)
+    import_module(".sync.ui.cli", __package__).sync_cli(app)
+    import_module(".rules.ui.cli", __package__).rule_schema_cli(app)

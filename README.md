@@ -2,50 +2,27 @@
 
 `agentic` is a pipx-first CLI for bootstrapping a project-local architecture contract that both humans and agents can read.
 
-The installed package gives you the command surface.
+Project documentation lives under [docs/INDEX.md](/Users/gorky/Projects/agentic/docs/INDEX.md). That docs tree explains the project and its runtime behavior to humans; it is not part of the packaged rule corpus under `src/agentic/resources/rules/`.
 
-The generated `agentic/` folder gives a project a durable collaboration surface: shared rules, local extensions, and the architecture config that `agentic check` validates.
+The installed package gives you the command surface. The generated `agentic/` folder gives a target repository a durable collaboration contract: packaged shared rules, workspace-local extensions, and the architecture config that `agentic check` validates.
 
-## What It Ships
+## Core Commands
 
-The packaged rules are organized as a navigable documentation tree rather than one flat bundle of long files.
+- `agentic`: bootstrap the current directory using the default `init` behavior
+- `agentic init`: create the project-local contract
+- `agentic update`: refresh mirrored packaged assets while preserving local workspace additions
+- `agentic check`: run the architecture check using the project config
+- `agentic hotspots`: inspect import hotspot counts from the dependency graph
+- `agentic check-rule-schema`: validate the packaged markdown rule corpus
 
-That shape exists so an agent can build only the context it needs:
+## Documentation
 
-1. start at `AGENT.md`
-2. route to the governing rule-set bootstrap file
-3. descend only into the narrower documents required by the task
-
-The shared source of truth for that tree lives under `src/agentic/resources/rules/`.
-
-Use [src/agentic/resources/README.md](src/agentic/resources/README.md) to obtain the operating guidance for maintaining the packaged rules tree.
-
-The runtime contract that gets bootstrapped into a target project is generated from those packaged resources.
-
-## Navigable Rules
-
-The rules are split by concern.
-
-Current top-level flow:
-
-1. `AGENT.md` is the global router.
-2. Each rule set has its own folder and its own bootstrap file.
-3. Detailed constraints live below that bootstrap layer.
-
-Example discovery path:
-
-1. planning work starts in `planning/PLANNING.md`
-2. material domain modeling stays within the planning guides and the affected plan files
-
-This keeps the read path short and inspectable. The agent does not need to load unrelated rule files to plan or refactor one narrow slice of work.
-
-## Architecture Check
-
-Use the feature guide below to obtain the architecture-check configuration model, matching semantics, and checker behavior:
-
-- [src/agentic/features/architecture_check/README.md](src/agentic/features/architecture_check/README.md)
-
-That guide is the place for checker details. This README stays focused on what agentic is and how its rule system is organized.
+- [docs/project/overview.md](/Users/gorky/Projects/agentic/docs/project/overview.md): what the project is and why it exists
+- [docs/project/getting-started.md](/Users/gorky/Projects/agentic/docs/project/getting-started.md): installation assumptions and first-use flow
+- [docs/runtime/workspace-contract.md](/Users/gorky/Projects/agentic/docs/runtime/workspace-contract.md): generated contract behavior and sync model
+- [docs/runtime/architecture-check.md](/Users/gorky/Projects/agentic/docs/runtime/architecture-check.md): architecture-check behavior and config guidance
+- [docs/maintainers/rule-system.md](/Users/gorky/Projects/agentic/docs/maintainers/rule-system.md): packaged rules versus workspace-local additions
+- [docs/maintainers/validation-scope.md](/Users/gorky/Projects/agentic/docs/maintainers/validation-scope.md): what current rule-schema validation does and does not check
 
 ## Project Idea
 

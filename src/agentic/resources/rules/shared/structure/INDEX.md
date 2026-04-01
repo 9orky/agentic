@@ -15,7 +15,9 @@ read_strategy: progressive
 read_directly: false
 child_paths:
   - MODULE.md
-  - feature/INDEX.md
+  - FEATURE.md
+  - FEATURE_LAYERS.md
+  - FEATURE_FILE_TREE.md
 ---
 
 # Structure
@@ -28,10 +30,13 @@ child_paths:
 ## Stop Or Descend
 
 - Read [MODULE.md](MODULE.md) first for the base module rule.
-- Descend to [feature/INDEX.md](feature/INDEX.md) only when the module is also a feature-shaped unit.
+- Read [FEATURE.md](FEATURE.md) when the module is also a feature-shaped unit.
+- Read [FEATURE_LAYERS.md](FEATURE_LAYERS.md) only when explicit layers are part of the contract.
+- Read [FEATURE_FILE_TREE.md](FEATURE_FILE_TREE.md) only when the layer model implies deterministic tree growth.
 - Stop here if the task does not need structural classification.
 
 ## Review Checks
 
 - Module classification happens before deeper specialization.
+- Feature and layer rules are opened only when the stricter specialization is real.
 - The agent stops at the shallowest structural rule that fits.

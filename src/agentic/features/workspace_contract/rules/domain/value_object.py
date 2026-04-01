@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from enum import StrEnum
+from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
@@ -50,11 +51,20 @@ class RuleSchemaViolation(BaseModel):
     code: str
     message: str
     section_heading: str | None = None
+    reference_path: str | None = None
+
+
+class RuleReference(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    source_path: Path
+    raw_path: str
 
 
 __all__ = [
     "RuleDocumentClass",
     "RuleDocumentParseError",
+    "RuleReference",
     "RuleSchemaViolation",
     "RuleSectionRequirement",
 ]

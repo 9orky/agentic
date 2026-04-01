@@ -12,8 +12,7 @@ tags:
   - api
 read_directly: false
 escalation_paths:
-  - ../project/structure/MODULE.md
-  - feature/INDEX.md
+  - FEATURE.md
   - ../architecture/OWNERSHIP.md
   - ../architecture/BOUNDARIES.md
 ---

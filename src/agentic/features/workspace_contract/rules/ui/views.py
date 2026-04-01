@@ -7,7 +7,9 @@ class RuleSchemaReportView:
     def render(self, report: RuleSchemaReport) -> tuple[str, ...]:
         lines = [
             "Rule schema report.",
+            f"Documents discovered: {report.documents_discovered}.",
             f"Documents checked: {report.documents_checked}.",
+            f"Collection coverage: {'complete' if report.collection_complete else 'incomplete'}.",
             f"Documents with issues: {report.documents_with_issues}.",
         ]
         lines.extend(self._render_document(document)
@@ -26,6 +28,11 @@ class RuleSchemaReportView:
 
     @staticmethod
     def _render_violation(violation: RuleSchemaViolationReport) -> str:
+        if violation.reference_path is not None:
+            return (
+                f"{violation.code} ({violation.reference_path}) - "
+                f"{violation.message}"
+            )
         if violation.section_heading is None:
             return f"{violation.code} - {violation.message}"
         return (

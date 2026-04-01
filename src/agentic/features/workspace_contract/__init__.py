@@ -1,28 +1,3 @@
-from .rules import (
-    RuleDocumentReport,
-    RuleSchemaReport,
-    RuleSchemaViolationReport,
-    build_rule_schema_report,
-)
-from .sync import (
-    BootstrapProjectResult,
-    UpdateProjectResult,
-    WorkspaceContractSummary,
-    bootstrap_project,
-    describe_workspace_contract,
-    update_project,
-)
+"""Workspace-contract feature package."""
 
-
-__all__ = [
-    "BootstrapProjectResult",
-    "RuleDocumentReport",
-    "RuleSchemaReport",
-    "RuleSchemaViolationReport",
-    "UpdateProjectResult",
-    "WorkspaceContractSummary",
-    "bootstrap_project",
-    "build_rule_schema_report",
-    "describe_workspace_contract",
-    "update_project",
-]
+__all__: list[str] = []

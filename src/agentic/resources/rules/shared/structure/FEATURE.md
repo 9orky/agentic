@@ -12,10 +12,9 @@ tags:
   - boundary
 read_directly: false
 escalation_paths:
-  - ../../project/structure/feature/FEATURE.md
-  - layers/INDEX.md
-  - ../../architecture/OWNERSHIP.md
-  - ../../architecture/BOUNDARIES.md
+  - FEATURE_LAYERS.md
+  - ../architecture/OWNERSHIP.md
+  - ../architecture/BOUNDARIES.md
 ---
 
 # Feature Module

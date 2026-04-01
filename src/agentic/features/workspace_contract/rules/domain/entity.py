@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import re
+from posixpath import normpath
 from pathlib import Path
 from typing import Literal, Self
 
 import yaml
 from pydantic import BaseModel, ConfigDict, TypeAdapter, ValidationError, model_validator
 
-from .value_object import RuleDocumentClass, RuleDocumentParseError, RuleSchemaViolation, RuleSectionRequirement
+from .value_object import RuleDocumentClass, RuleDocumentParseError, RuleReference, RuleSchemaViolation, RuleSectionRequirement
 
 _FRONTMATTER_PATTERN = re.compile(
     r"\A---\s*\n(?P<value>.*?)\n---\s*(?:\n|\Z)", re.DOTALL)
@@ -90,6 +91,7 @@ class RuleDocument(BaseModel):
     stage: str | None = None
     observed_section_headings: tuple[str, ...]
     has_navigation_targets: bool
+    references: tuple[RuleReference, ...] = ()
 
     @classmethod
     def from_file(cls, document_file: RuleDocumentFile) -> RuleDocument:
@@ -102,6 +104,7 @@ class RuleDocument(BaseModel):
                 document_file.content),
             has_navigation_targets=_has_navigation_targets(
                 document_file.content, metadata),
+            references=_references_from(document_file.path, metadata),
         )
 
 
@@ -228,6 +231,29 @@ def _has_navigation_targets(
     if isinstance(metadata, NavigationalRuleDocumentMetadata) and metadata.child_paths:
         return True
     return _MARKDOWN_LINK_PATTERN.search(content) is not None
+
+
+def _references_from(
+    document_path: Path,
+    metadata: NavigationalRuleDocumentMetadata | PolicyRuleDocumentMetadata | ExecutionRuleDocumentMetadata,
+) -> tuple[RuleReference, ...]:
+    if isinstance(metadata, NavigationalRuleDocumentMetadata):
+        raw_paths = metadata.child_paths
+    else:
+        raw_paths = metadata.tightens_paths + metadata.escalation_paths
+
+    return tuple(
+        RuleReference(
+            source_path=document_path,
+            raw_path=_normalize_reference_path(raw_path),
+        )
+        for raw_path in raw_paths
+    )
+
+
+def _normalize_reference_path(raw_path: str) -> str:
+    normalized = normpath(raw_path.strip())
+    return "." if normalized == "" else normalized
 
 
 __all__ = [

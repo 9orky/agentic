@@ -12,10 +12,9 @@ tags:
   - dependencies
 read_directly: false
 escalation_paths:
-  - ../../../../project/structure/feature/layers/LAYERS.md
-  - FILE_TREE.md
-  - ../../../architecture/DEPENDENCIES.md
-  - ../../../architecture/OWNERSHIP.md
+  - FEATURE_FILE_TREE.md
+  - ../architecture/DEPENDENCIES.md
+  - ../architecture/OWNERSHIP.md
 ---
 
 # Layered Module

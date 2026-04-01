@@ -12,10 +12,9 @@ tags:
   - layers
 read_directly: false
 escalation_paths:
-  - ../../../../project/structure/feature/layers/FILE_TREE.md
-  - LAYERS.md
-  - ../../../architecture/BOUNDARIES.md
-  - ../../../change/REFACTORING.md
+  - FEATURE_LAYERS.md
+  - ../architecture/BOUNDARIES.md
+  - ../change/REFACTORING.md
 ---
 
 # Layer File Tree

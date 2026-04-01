@@ -2,46 +2,40 @@
 doc_class: navigational
 rule_kind: navigation
 audience: agent
-purpose: Route rule lookup to the shallowest branch that fits the current task.
+purpose: Explain the packaged rule corpus and route readers into the shared guidance tree.
 applies_when:
   - Starting rule selection for a task or target folder.
+  - The agent needs packaged guidance that ships with agentic.
 tags:
+  - bootstrap
   - routing
   - rules
 entrypoint: true
 read_strategy: progressive
 read_directly: true
 child_paths:
-  - structure/INDEX.md
-  - project/INDEX.md
-  - architecture/INDEX.md
-  - change/INDEX.md
-  - execution/INDEX.md
-  - verification/INDEX.md
+  - shared/INDEX.md
 ---
 
 # Rules
 
+## Read Order
+
+- Start with [shared/INDEX.md](shared/INDEX.md) for canonical reusable guidance.
+
 ## Stop Or Descend
 
 - Stop here if the task does not need branch-specific rules yet.
-- Descend only to the first branch whose assumptions fit the current task.
-- Prefer the shallowest matching branch over deeper specialization.
-- For code-shape questions, classify structure before applying architecture, change, or verification rules.
-- Enter [project/INDEX.md](project/INDEX.md) only after the matching shared branch is already known and repository-local tightening is needed.
+- Descend into the shared packaged branch when task-specific guidance is needed.
+- Prefer the shallowest matching shared branch over deeper specialization.
+- Workspace-local additions belong to the generated project contract, not to this packaged rule tree.
 
 ## Branches
 
-- [structure/INDEX.md](structure/INDEX.md): classify a target as a module, feature module, or layered specialization
-- [project/INDEX.md](project/INDEX.md): apply repository-local supplements after the shared branch is already in scope
-- [architecture/INDEX.md](architecture/INDEX.md): ownership, boundary, and dependency rules for structural placement
-- [change/INDEX.md](change/INDEX.md): rules for reshaping or replacing existing implementation
-- [execution/INDEX.md](execution/INDEX.md): execution artifacts used before and during implementation
-- [verification/INDEX.md](verification/INDEX.md): testing and proof rules for validating behavior
+- [shared/INDEX.md](shared/INDEX.md): canonical reusable rules organized by category
 
 ## Review Checks
 
+- The packaged rule corpus routes only to packaged shared guidance.
 - The next read is explicit.
-- No deeper branch is opened without a matching need.
-- Structure is classified before deeper structural constraints are applied.
-- Project-local rules are not opened before the shared branch is known.
+- Workspace-local additions are not represented as packaged branches.

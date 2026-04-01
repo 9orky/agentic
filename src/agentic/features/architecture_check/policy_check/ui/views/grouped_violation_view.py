@@ -4,8 +4,11 @@ from typing import Protocol
 
 
 class ViolationGroupLike(Protocol):
-    title: str
-    entries: tuple[str, ...]
+    @property
+    def title(self) -> str: ...
+
+    @property
+    def entries(self) -> tuple[str, ...]: ...
 
 
 class GroupedViolationView:

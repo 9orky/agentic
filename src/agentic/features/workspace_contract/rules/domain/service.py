@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+from pathlib import Path, PurePosixPath
+from posixpath import normpath
+
 from .entity import RuleDocument, RuleDocumentCheck, RuleDocumentFile, RuleDocumentSchema
-from .value_object import RuleDocumentClass, RuleSchemaViolation, RuleSectionRequirement
+from .value_object import RuleDocumentClass, RuleReference, RuleSchemaViolation, RuleSectionRequirement
 
 
 class RuleSchemaPolicy:
@@ -68,6 +71,37 @@ class RuleSchemaPolicy:
                 stage=document.stage,
             ),
         )
+
+    def validate_references(
+        self,
+        *,
+        document: RuleDocument,
+        known_paths: set[Path],
+    ) -> tuple[RuleSchemaViolation, ...]:
+        violations: list[RuleSchemaViolation] = []
+
+        for reference in document.references:
+            resolved_path = self._resolve_reference_path(reference)
+            if resolved_path is None:
+                violations.append(
+                    RuleSchemaViolation(
+                        code="invalid-reference-path",
+                        message="Rule metadata reference must resolve to a markdown rule document inside the packaged rules tree",
+                        reference_path=reference.raw_path,
+                    )
+                )
+                continue
+
+            if resolved_path not in known_paths:
+                violations.append(
+                    RuleSchemaViolation(
+                        code="missing-reference-target",
+                        message="Rule metadata reference does not point to a packaged rule document",
+                        reference_path=reference.raw_path,
+                    )
+                )
+
+        return tuple(violations)
 
     def _validate_requirements(
         self,
@@ -141,6 +175,24 @@ class RuleSchemaPolicy:
                 )
 
         return tuple(violations)
+
+    @staticmethod
+    def _resolve_reference_path(reference: RuleReference) -> Path | None:
+        base_path = PurePosixPath(reference.source_path.as_posix()).parent
+        normalized_reference = normpath(
+            str(base_path.joinpath(reference.raw_path)))
+        resolved_path = PurePosixPath(normalized_reference)
+
+        if str(resolved_path) == ".":
+            return None
+        if resolved_path.is_absolute():
+            return None
+        if resolved_path.suffix != ".md":
+            return None
+        if any(part == ".." for part in resolved_path.parts):
+            return None
+
+        return Path(str(resolved_path))
 
 
 __all__ = ["RuleSchemaPolicy"]

@@ -5,8 +5,10 @@ from typing import Literal, Protocol, cast
 
 import click
 
+from ..application.queries.build_architecture_report import BuildArchitectureReportResult
 from .services import CheckSummaryPresenter
 from .views import GroupedViolationView, JsonReportView
+from ...hotspots.application.services.file_import_hotspots_service import FileImportHotspotsResult
 
 
 FileImportHotspotsSortBy = Literal["imported_by_count", "imports_count"]
@@ -19,7 +21,7 @@ class BuildArchitectureReportQueryLike(Protocol):
         explicit_config_path: str | None = None,
         *,
         extractor_runtime: object | None = None,
-    ) -> object:
+    ) -> BuildArchitectureReportResult:
         ...
 
 
@@ -32,7 +34,7 @@ class DescribeFileImportHotspotsQueryLike(Protocol):
         sort_by: FileImportHotspotsSortBy = "imported_by_count",
         descending: bool = True,
         extractor_runtime: object | None = None,
-    ) -> object:
+    ) -> FileImportHotspotsResult:
         ...
 
 
@@ -119,17 +121,10 @@ class ArchitectureCheckCli:
         )
 
     def run_check(self, project_root: str, config: str | None, output_format: str, dot_path: str | None) -> int:
-        try:
-            report = self._build_architecture_report_query.execute(
-                Path(project_root).expanduser().resolve(),
-                config,
-            )
-        except Exception as exc:
-            if output_format == "json":
-                click.echo(f'{{"error": {exc.args[0]!r}}}')
-                return 1
-            click.echo(f"Error: {exc}")
-            return 1
+        report = self._build_architecture_report_query.execute(
+            Path(project_root).expanduser().resolve(),
+            config,
+        )
 
         if report.check_error is not None:
             if output_format == "json":
@@ -181,19 +176,12 @@ class ArchitectureCheckCli:
         descending: bool,
         output_format: str,
     ) -> int:
-        try:
-            result = self._describe_file_import_hotspots_query.describe(
-                Path(project_root).expanduser().resolve(),
-                config,
-                sort_by=cast(FileImportHotspotsSortBy, sort_by),
-                descending=descending,
-            )
-        except Exception as exc:
-            if output_format == "json":
-                click.echo(f'{{"error": {exc.args[0]!r}}}')
-                return 1
-            click.echo(f"Error: {exc}")
-            return 1
+        result = self._describe_file_import_hotspots_query.describe(
+            Path(project_root).expanduser().resolve(),
+            config,
+            sort_by=cast(FileImportHotspotsSortBy, sort_by),
+            descending=descending,
+        )
 
         if output_format == "json":
             click.echo(self._json_report_view.render(result.to_json_dict()))

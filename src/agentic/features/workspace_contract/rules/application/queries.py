@@ -4,7 +4,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
 
-from ..domain import RuleDocumentCheck, RuleDocumentClass, RuleDocumentFile, RuleDocumentParseError, RuleSchemaPolicy
+from ..domain import RuleDocumentCheck, RuleDocumentClass, RuleDocumentFile, RuleDocumentParseError, RuleDocumentRepository, RuleSchemaPolicy
 from ..infrastructure import file_repository
 
 
@@ -14,6 +14,7 @@ class RuleSchemaViolationReport(BaseModel):
     code: str
     message: str
     section_heading: str | None = None
+    reference_path: str | None = None
 
 
 class RuleDocumentReport(BaseModel):
@@ -31,16 +32,24 @@ class RuleSchemaReport(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     documents: tuple[RuleDocumentReport, ...]
+    documents_discovered: int
     documents_checked: int
     documents_with_issues: int
+    collection_complete: bool
     has_findings: bool
 
 
-def build_rule_schema_report() -> RuleSchemaReport:
-    policy = RuleSchemaPolicy()
+def build_rule_schema_report(
+    *,
+    repository: RuleDocumentRepository = file_repository,
+    policy: RuleSchemaPolicy | None = None,
+) -> RuleSchemaReport:
+    active_policy = policy or RuleSchemaPolicy()
+    document_files = repository.find()
+    known_paths = {document.path for document in document_files}
     documents = tuple(
-        _map_document_report(document, policy)
-        for document in file_repository.find()
+        _map_document_report(document, active_policy, known_paths=known_paths)
+        for document in document_files
     )
     documents_with_issues = sum(
         1
@@ -49,8 +58,10 @@ def build_rule_schema_report() -> RuleSchemaReport:
     )
     return RuleSchemaReport(
         documents=documents,
+        documents_discovered=len(document_files),
         documents_checked=len(documents),
         documents_with_issues=documents_with_issues,
+        collection_complete=len(documents) == len(document_files),
         has_findings=documents_with_issues > 0,
     )
 
@@ -58,9 +69,21 @@ def build_rule_schema_report() -> RuleSchemaReport:
 def _map_document_report(
     document_file: RuleDocumentFile,
     policy: RuleSchemaPolicy,
+    *,
+    known_paths: set[Path],
 ) -> RuleDocumentReport:
     try:
-        return _report_from_check(policy.inspect_document(document_file))
+        document_check = policy.inspect_document(document_file)
+        semantic_violations = policy.validate_references(
+            document=document_check.document,
+            known_paths=known_paths,
+        )
+        return _report_from_check(
+            RuleDocumentCheck(
+                document=document_check.document,
+                violations=document_check.violations + semantic_violations,
+            )
+        )
     except RuleDocumentParseError as exc:
         return RuleDocumentReport(
             path=document_file.path,
