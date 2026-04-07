@@ -33,13 +33,15 @@ escalation_paths: []
 ## File Tree Rules
 
 - `File Tree` is the first section.
+- The big-picture artifact is named `PLAN.md`.
 - The tree lists folders and files only.
 - Class, method, and function signatures are not allowed.
+- If `Phases` names layers or rings, `File Tree` and `Phases` use the same set.
 
 ## Phase Rules
 
 - `Phases` is the center of the document.
-- Each phase states objective, owning layer, inputs, outputs, and acceptance.
+- Each phase states objective, owning layer or ring, inputs, outputs, and acceptance.
 - Phase order becomes step order after approval.
 
 ## Strategic Model Gate
@@ -50,6 +52,7 @@ escalation_paths: []
 ## Review Checks
 
 - The file tree comes first.
+- The artifact filename is `PLAN.md`.
 - The document stays at file-tree, phase, and contract level.
 - Phases translate directly into step files.
 - Overall acceptance is explicit.

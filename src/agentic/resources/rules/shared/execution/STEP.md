@@ -29,6 +29,8 @@ escalation_paths: []
 ## Implementation Tree Rules
 
 - `Implementation Tree` is the first section.
+- The step artifact is named `PLAN_STEP_0X.md`.
+- The `0X` suffix matches the approved phase order from `PLAN.md`.
 - The tree reuses the approved big-picture tree and adds implementation signatures.
 - Planned classes, functions, and seams are named where they will be implemented.
 
@@ -46,6 +48,7 @@ escalation_paths: []
 ## Review Checks
 
 - The implementation tree comes first.
+- The artifact filename matches `PLAN_STEP_0X.md`.
 - Signatures are present where implementation is planned.
 - Scope is narrow and verifiable.
 - Verification matches the step goal.

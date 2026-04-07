@@ -28,7 +28,7 @@ child_paths:
 - Stop here if the task does not need branch-specific rules yet.
 - Descend into the shared packaged branch when task-specific guidance is needed.
 - Prefer the shallowest matching shared branch over deeper specialization.
-- Workspace-local additions belong to the generated project contract, not to this packaged rule tree.
+- Workspace-local project-profile artifacts belong to the generated project contract, not to this packaged rule tree.
 
 ## Branches
 
@@ -38,4 +38,4 @@ child_paths:
 
 - The packaged rule corpus routes only to packaged shared guidance.
 - The next read is explicit.
-- Workspace-local additions are not represented as packaged branches.
+- Workspace-local project-profile artifacts are not represented as packaged branches.

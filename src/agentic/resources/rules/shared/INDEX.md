@@ -32,6 +32,7 @@ child_paths:
 - Descend only to the first shared branch whose assumptions fit the current task.
 - Prefer the shallowest matching branch over deeper specialization.
 - For code-shape questions, classify structure before applying architecture, change, or verification rules.
+- If repository-specific narrowing is still needed after the shared branch is known, switch to the generated local profile in the project contract rather than expecting another packaged shared branch.
 
 ## Branches
 
@@ -46,3 +47,4 @@ child_paths:
 - The next shared read is explicit.
 - No deeper shared branch is opened without a matching need.
 - Structure is classified before deeper structural constraints are applied.
+- Shared guidance remains the reusable baseline before any local project profile is consulted.
