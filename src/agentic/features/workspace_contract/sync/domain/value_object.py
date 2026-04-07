@@ -57,11 +57,8 @@ class WorkspaceContractLayout:
     def rules_dir(self, project_root: Path) -> Path:
         return self.target_dir(project_root) / "rules"
 
-    def overrides_dir(self, project_root: Path) -> Path:
-        return self.rules_dir(project_root) / "overrides"
-
-    def project_specific_dir(self, project_root: Path) -> Path:
-        return self.rules_dir(project_root) / "project"
+    def local_dir(self, project_root: Path) -> Path:
+        return self.rules_dir(project_root) / "local"
 
     def config_path(self, project_root: Path) -> Path:
         return self.target_dir(project_root) / "agentic.yaml"
@@ -82,13 +79,13 @@ class WorkspaceContractSummary:
     config_exists: bool
     shared_rule_paths: tuple[Path, ...] = ()
     missing_shared_rule_paths: tuple[Path, ...] = ()
-    override_paths: tuple[Path, ...] = ()
-    project_specific_paths: tuple[Path, ...] = ()
+    local_paths: tuple[Path, ...] = ()
 
 
 @dataclass(frozen=True)
 class WorkspaceWritePlan:
     target_dir: Path
+    required_dirs: tuple[Path, ...] = ()
     changes: tuple[SyncChange, ...] = ()
     preserved_paths: tuple[Path, ...] = ()
 

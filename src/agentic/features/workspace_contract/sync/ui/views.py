@@ -17,9 +17,11 @@ class SyncSummaryView:
             )
         )
         lines.append(
-            "Safe to rerun: plain 'agentic' preserves existing local files.")
+            "Local profile surface: agentic/rules/local/.")
         lines.append(
-            "Next step: review agentic/agentic.yaml and run 'agentic check'.")
+            "Safe to rerun: plain 'agentic' preserves existing local files in agentic/rules/local/.")
+        lines.append(
+            "Next step: review agentic/agentic.yaml and agentic/rules/local/ and run 'agentic check'.")
         return tuple(lines)
 
     def render_update_result(self, result: Mapping[str, Any], *, project_root: Path) -> tuple[str, ...]:
@@ -33,7 +35,7 @@ class SyncSummaryView:
             )
         )
         lines.append(
-            "Next step: review refreshed rules and run 'agentic check'.")
+            "Next step: review refreshed shared rules, agentic/agentic.yaml, and agentic/rules/local/ and run 'agentic check'.")
         return tuple(lines)
 
     def _render_sync_header(self, result: Mapping[str, Any], *, project_root: Path) -> tuple[str, ...]:

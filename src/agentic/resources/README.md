@@ -15,12 +15,19 @@
 - Treat everything here as shipped package data, not as ad hoc project notes.
 - Keep project-facing documentation in `docs/`, not in this packaged resources tree.
 - Do not represent project-local rule policy here unless the runtime is intentionally shipping reusable defaults.
+- Keep agent-facing bootstrap guidance here limited to reusable operating instructions and starter contract comments.
 
 ## Rules Tree
 
 - The packaged rules tree is shared guidance only.
 - Workspace-local rule additions belong in the generated project contract, not in this packaged resources tree.
 - Rule-schema validation scans the packaged rules tree from here.
+
+## Agentic YAML Guidance
+
+- `agentic.yaml` ships with starter comments that explain how an agent should derive tags, boundaries, flow, exclusions, and narrow exceptions.
+- `copilot-instructions.md` reinforces the same authoring sequence from the bootstrap side.
+- Repo-specific decisions still belong under the generated `agentic/rules/local/` surface rather than in packaged resources.
 
 ## Key References
 

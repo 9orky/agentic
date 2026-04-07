@@ -14,8 +14,8 @@ This page covers the normal first-use flow for the `agentic` CLI.
 ## First Bootstrap Flow
 
 1. Run `agentic` or `agentic init` in the target repository.
-2. Review the generated `agentic/agentic.yaml` and mirrored rule files.
-3. Add stricter project-local guidance under `agentic/rules/overrides/` or `agentic/rules/project/` when needed.
+2. Review the generated `agentic/agentic.yaml`, mirrored shared rules, and the local profile surface under `agentic/rules/local/`.
+3. Keep repo-specific narrowing under `agentic/rules/local/` when shared guidance is not enough.
 4. Run `agentic check` to validate the architecture agreement against the current codebase.
 
 ## Update Flow
@@ -25,7 +25,7 @@ Use `agentic update` when packaged shared assets need to be refreshed in an exis
 Current behavior is conservative:
 
 - packaged shared files can be updated
-- existing local workspace files are preserved
+- existing local workspace files under `agentic/rules/local/` are preserved
 - the command reports created, updated, and preserved files
 
 ## Read Next
@@ -41,4 +41,4 @@ Current behavior is conservative:
 
 ## Boundary
 
-Keep this page focused on operator-facing usage. Deep runtime semantics belong in the runtime docs section.
+Keep this page focused on operator-facing usage. The generated `agentic/` folder is the live operating contract; deep runtime semantics belong in the runtime docs section.

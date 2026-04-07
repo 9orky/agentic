@@ -15,7 +15,7 @@ This page documents what `check-rules` and `check-rule-schema` currently validat
 ## What Is Not Checked
 
 - The validator does not compute or verify a merged effective-rule set.
-- It does not validate workspace-local rule additions under `agentic/rules/`.
+- It does not validate workspace-local profile additions under `agentic/rules/local/`.
 - It does not verify general markdown quality beyond the current structural checks.
 - It does not prove that every markdown link points to a live file.
 

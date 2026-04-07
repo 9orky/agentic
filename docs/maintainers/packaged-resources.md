@@ -14,6 +14,7 @@
 - Workspace sync loads packaged rules recursively from `src/agentic/resources/rules/` through the runtime loader in [src/agentic/features/workspace_contract/sync/infrastructure/file_repository.py](/Users/gorky/Projects/agentic/src/agentic/features/workspace_contract/sync/infrastructure/file_repository.py).
 - The sync feature also loads packaged `agentic.yaml` and `copilot-instructions.md` from the same packaged resources root.
 - Rule-schema validation scans the packaged rules tree, not the human-facing docs tree under `docs/`.
+- Repo-specific operating decisions still belong in the generated `agentic/` contract, especially under `agentic/rules/local/`, not in packaged resources.
 
 ## Maintainer Rules
 
@@ -31,4 +32,4 @@
 
 ## Boundary
 
-Use this page for maintainership guidance about packaged assets. The governing rule content itself still lives inside the packaged rule tree.
+Use this page for maintainership guidance about packaged assets. The governing shared rule content lives inside the packaged rule tree, while the generated `agentic/` folder remains the live repository contract.

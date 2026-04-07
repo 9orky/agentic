@@ -1,6 +1,6 @@
 # Rule System
 
-This page explains the current packaged-rule model and how it differs from workspace-local rule additions.
+This page explains the current packaged-rule model and how it differs from the generated repo-local profile surface.
 
 ## Current Model
 
@@ -20,6 +20,12 @@ This page explains the current packaged-rule model and how it differs from works
 - The user reviews that generated local profile and fine-tunes it with an agent.
 - Shared rules stay reusable and generic; local rules stay narrow and project-specific.
 
+## Audience Split
+
+- The generated `agentic/` folder is the live operating contract for repository work.
+- `docs/` explains the model to humans and maintainers.
+- Packaged resources under `src/agentic/resources/` are shipped runtime inputs, not a substitute for the generated local contract.
+
 ## Proposed Local Profile Format
 
 - Keep the local profile as markdown rule documents with strict YAML frontmatter rather than introducing a separate data format first.
@@ -27,7 +33,6 @@ This page explains the current packaged-rule model and how it differs from works
 - `profile_kind` should stay within a small controlled set such as `workflow`, `layers`, `module_seams`, and `starter_files`.
 - `narrows_paths` should point only to shared rule documents so local output narrows the shared baseline instead of forking other local files.
 - The markdown body should stay in fixed sections: `Observed Repository Facts`, `Local Decisions`, `Constraints`, and `Review Checks`.
-- `Observed Repository Facts` captures what the agent discovered; `Local Decisions` captures the actual narrowing the project wants to keep.
 - This format is the current documentation target for machine validation and user review. It is not yet a fully enforced runtime contract.
 
 ## Metadata Status
@@ -43,12 +48,4 @@ This page explains the current packaged-rule model and how it differs from works
 - Local profiles must not invert inward dependency direction, weaken seam-based boundaries, or restate shared rules as if they were project-specific.
 - Local profiles should stay small enough that an agent can regenerate them deterministically after repository discovery.
 
-## Source Inputs
-
-- [src/agentic/resources/rules/INDEX.md](/Users/gorky/Projects/agentic/src/agentic/resources/rules/INDEX.md)
-- [src/agentic/features/workspace_contract/sync/domain/value_object.py](/Users/gorky/Projects/agentic/src/agentic/features/workspace_contract/sync/domain/value_object.py)
-- [src/agentic/features/workspace_contract/rules/domain/entity.py](/Users/gorky/Projects/agentic/src/agentic/features/workspace_contract/rules/domain/entity.py)
-
-## Boundary
-
-Keep this page descriptive and maintainership-focused. Governing rule content still belongs in the packaged rule tree itself, and workspace-local policy still belongs in the generated project contract. Do not describe a computed effective-rule graph unless runtime code actually implements it.
+Keep this page descriptive and maintainership-focused. Do not describe a computed effective-rule graph unless runtime code actually implements it.

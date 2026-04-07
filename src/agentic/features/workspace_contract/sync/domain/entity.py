@@ -20,8 +20,7 @@ class Workspace:
     config_content: str
     bootstrap_instruction_content: str
     existing_shared_rule_paths: tuple[Path, ...] = ()
-    override_paths: tuple[Path, ...] = ()
-    project_specific_paths: tuple[Path, ...] = ()
+    local_paths: tuple[Path, ...] = ()
     agentic_dir_exists: bool = False
     config_exists: bool = False
     bootstrap_instruction_exists: bool = False
@@ -40,13 +39,8 @@ class Workspace:
         )
         object.__setattr__(
             self,
-            "override_paths",
-            _unique_paths(tuple(self.override_paths)),
-        )
-        object.__setattr__(
-            self,
-            "project_specific_paths",
-            _unique_paths(tuple(self.project_specific_paths)),
+            "local_paths",
+            _unique_paths(tuple(self.local_paths)),
         )
 
     def expected_shared_rule_paths(self) -> tuple[Path, ...]:
@@ -85,8 +79,7 @@ class Workspace:
             config_exists=self.config_exists,
             shared_rule_paths=present_shared_rule_paths,
             missing_shared_rule_paths=missing_shared_rule_paths,
-            override_paths=self.override_paths,
-            project_specific_paths=self.project_specific_paths,
+            local_paths=self.local_paths,
         )
 
     def _build_write_plan(
@@ -163,6 +156,8 @@ class Workspace:
 
         return WorkspaceWritePlan(
             target_dir=self.layout.target_dir(self.project_root),
+            required_dirs=_sort_paths(
+                (self.layout.local_dir(self.project_root),)),
             changes=tuple(changes),
             preserved_paths=_sort_paths(tuple(preserved_paths)),
         )

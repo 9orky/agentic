@@ -39,11 +39,12 @@ This page is the maintained high-level map of the current `agentic` repository.
 
 - [agentic/agentic.yaml](/Users/gorky/Projects/agentic/agentic/agentic.yaml) is the workspace-facing architecture config in this repository snapshot.
 - [agentic/rules/](/Users/gorky/Projects/agentic/agentic/rules) is the workspace-facing rule contract surface.
-- Workspace-local additions belong under `agentic/rules/overrides/` and `agentic/rules/project/` when present.
+- [agentic/rules/local/](/Users/gorky/Projects/agentic/agentic/rules/local) is the only repo-local profile surface inside that contract.
 
 ## Documentation Split
 
 - `docs/` explains the project to humans.
+- `agentic/` is the live project contract that agents and humans inspect while operating on a repository.
 - `src/agentic/resources/rules/` defines packaged rule assets for the runtime.
 - The two surfaces should stay conceptually separate.
 

@@ -21,12 +21,12 @@ The installed package gives you the runtime and CLI surface.
 The generated `agentic/` folder gives the target project a durable collaboration surface:
 
 - mirrored packaged shared rules
-- workspace-local additions the repository can own directly
+- a repo-local profile surface under `agentic/rules/local/`
 - a checked architecture config
 
 ## Human And Agent Value
 
-For agents, the value is constrained discovery. Guidance is externalized into a predictable project surface rather than left entirely inside hidden prompt state.
+For agents, the value is constrained discovery. The generated `agentic/` folder is the primary operating boundary, so guidance is externalized into a predictable project surface rather than left entirely inside hidden prompt state.
 
 For humans, the value is inspectability. The collaboration contract becomes visible as files, config, and runtime checks that can be reviewed in the repository.
 
@@ -35,7 +35,7 @@ For humans, the value is inspectability. The collaboration contract becomes visi
 - [getting-started.md](/Users/gorky/Projects/agentic/docs/project/getting-started.md) for first-use flow
 - [../runtime/workspace-contract.md](/Users/gorky/Projects/agentic/docs/runtime/workspace-contract.md) for generated contract behavior
 - [../runtime/architecture-check.md](/Users/gorky/Projects/agentic/docs/runtime/architecture-check.md) for architecture-check behavior
-- [../maintainers/rule-system.md](/Users/gorky/Projects/agentic/docs/maintainers/rule-system.md) for maintainership details about rules and local extensions
+- [../maintainers/rule-system.md](/Users/gorky/Projects/agentic/docs/maintainers/rule-system.md) for maintainership details about rules and the local profile model
 
 ## Source Inputs
 

@@ -2,7 +2,7 @@
 
 This `docs/` tree is the human-facing documentation surface for the `agentic` project.
 
-It is not part of the packaged rule corpus. Agents should not treat `docs/` as governing rule input in the same way as `src/agentic/resources/rules/` or the generated workspace rule contract.
+It is not part of the packaged rule corpus. Agents should not treat `docs/` as governing rule input in the same way as `src/agentic/resources/rules/` or the generated workspace rule contract under `agentic/`.
 
 ## Purpose
 
@@ -25,21 +25,17 @@ It is not part of the packaged rule corpus. Agents should not treat `docs/` as g
 
 - `docs/` explains the project.
 - `src/agentic/resources/rules/` defines packaged rule assets.
-- `agentic/rules/` is the generated or workspace-owned rule contract surface.
+- `agentic/` is the generated live operating contract surface, including `agentic/rules/local/` for repo-specific narrowing.
 
 If a page belongs to `docs/`, write it as project documentation. Do not write it as a rule router, policy document, or execution artifact for agents.
 
 ## Migration Map
-
-### README.md
 
 - Product summary stays in `README.md` as the landing page.
 - Rule-system explanation moves to [maintainers/rule-system.md](/Users/gorky/Projects/agentic/docs/maintainers/rule-system.md) and [runtime/workspace-contract.md](/Users/gorky/Projects/agentic/docs/runtime/workspace-contract.md).
 - Architecture-check explanation moves to [runtime/architecture-check.md](/Users/gorky/Projects/agentic/docs/runtime/architecture-check.md).
 - Broader project framing moves to [project/overview.md](/Users/gorky/Projects/agentic/docs/project/overview.md).
 - First-use and command-surface guidance moves to [project/getting-started.md](/Users/gorky/Projects/agentic/docs/project/getting-started.md).
-
-### docs/architecture-mapping.md
 
 - The maintained architecture map now lives at [architecture/mapping.md](/Users/gorky/Projects/agentic/docs/architecture/mapping.md).
 - The legacy page now exists only as a redirect note because its content had drifted into an architecture-check guide.

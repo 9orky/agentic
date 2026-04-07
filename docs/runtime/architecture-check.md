@@ -47,7 +47,7 @@ rules:
 - Boundary `allow` patterns are matched in exact mode.
 - Tag `match` patterns are matched in scope mode.
 
-That exact-versus-scope distinction is what makes broad boundary rules and narrow public-seam exceptions work together.
+That distinction is what makes broad seam rules and narrow public exceptions work together.
 
 ## Authoring Guidance
 
@@ -57,22 +57,12 @@ That exact-versus-scope distinction is what makes broad boundary rules and narro
 - Use tags and flow analyzers only when direct boundary rules are not enough.
 - Exclude generated or vendored code early so the dependency graph stays meaningful.
 
+For live repository work, `agentic/agentic.yaml` inside the generated `agentic/` folder is the durable contract being checked. This page is the human-facing feature guide.
+
 ## Limits
 
 - The checker relies on extractor implementations whose fidelity can vary by language.
 - Read and traversal failures can still fail the check explicitly.
-- This page is the user-facing feature guide, not the exhaustive implementation reference.
+- This page is the feature guide, not the exhaustive implementation reference.
 
-## Related Docs
-
-- [workspace-contract.md](/Users/gorky/Projects/agentic/docs/runtime/workspace-contract.md) for the generated contract surface
-- [../architecture/mapping.md](/Users/gorky/Projects/agentic/docs/architecture/mapping.md) for the current repository architecture map
-
-## Source Inputs
-
-- [docs/architecture-mapping.md](/Users/gorky/Projects/agentic/docs/architecture-mapping.md)
-- [src/agentic/features/architecture_check/cli.py](/Users/gorky/Projects/agentic/src/agentic/features/architecture_check/cli.py)
-
-## Boundary
-
-This page is for explaining the feature, not for embedding rule-routing behavior or code-level internals exhaustively.
+Related docs: [workspace-contract.md](/Users/gorky/Projects/agentic/docs/runtime/workspace-contract.md) and [../architecture/mapping.md](/Users/gorky/Projects/agentic/docs/architecture/mapping.md).

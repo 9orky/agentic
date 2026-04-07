@@ -23,10 +23,8 @@ class FileRepository(WorkspaceRepository):
                 layout,
                 shared_rule_documents,
             ),
-            override_paths=self._list_workspace_files(
-                layout.overrides_dir(project_root)),
-            project_specific_paths=self._list_workspace_files(
-                layout.project_specific_dir(project_root)),
+            local_paths=self._list_workspace_files(
+                layout.local_dir(project_root)),
             agentic_dir_exists=layout.target_dir(project_root).is_dir(),
             config_exists=layout.config_path(project_root).is_file(),
             bootstrap_instruction_exists=layout.bootstrap_instruction_path(

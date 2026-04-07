@@ -26,6 +26,7 @@ def update_project(
 
 def _materialize_write_plan(write_plan: WorkspaceWritePlan) -> UpdateProjectResult:
     created_dir = _ensure_target_dir(write_plan.target_dir)
+    _ensure_required_dirs(write_plan.required_dirs)
     created_files: list[Path] = []
     updated_files: list[Path] = []
     preserved_files = list(write_plan.preserved_paths)
@@ -62,6 +63,11 @@ def _ensure_target_dir(target_dir: Path) -> bool:
 
     target_dir.mkdir(parents=True, exist_ok=True)
     return True
+
+
+def _ensure_required_dirs(required_dirs: tuple[Path, ...]) -> None:
+    for required_dir in required_dirs:
+        required_dir.mkdir(parents=True, exist_ok=True)
 
 
 def _has_same_content(change: SyncChange) -> bool:

@@ -30,6 +30,15 @@ class SyncCliFunctionalTests(unittest.TestCase):
             packaged_snapshot,
         )
 
+    def test_init_creates_local_profile_surface(self) -> None:
+        result = self._invoke_from_mocked_cwd(["init"])
+
+        self.assertEqual(result.exit_code, 0, result.output)
+        self.assertTrue((self.project_root / "agentic" /
+                        "rules" / "local").is_dir())
+        self.assertIn(
+            "Local profile surface: agentic/rules/local/.", result.output)
+
     def test_update_rewrites_only_mutated_rule_files(self) -> None:
         packaged_before = _snapshot_packaged_rules()
         init_result = self._invoke_from_mocked_cwd(["init"])

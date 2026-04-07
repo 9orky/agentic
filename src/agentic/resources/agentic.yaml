@@ -5,6 +5,25 @@
 # The checker evaluates these rules against a normalized architecture map keyed
 # by repo-relative file path. Each entry contains imports, classes, and
 # functions.
+#
+# Agent authoring contract:
+# - Start from project seams you can name stably with tags.
+# - Derive tags from durable ownership seams such as features, modules, layers,
+#   adapters, or package boundaries.
+# - Prefer a small tag set with broad coverage over one-off path matches.
+# - Prefer broad boundary rules before narrow `allow` exceptions.
+# - Use `allow_same_match` when same-owner imports should remain legal.
+# - Add narrow `allow` entries only for real public seams, shims, or adapters.
+# - Add `flow` only when the project has a stable directional model worth checking.
+# - Keep exclusions limited to paths that should not participate in the map.
+# - Reuse repo-specific facts already captured under agentic/rules/local/.
+#
+# Compact authoring sequence:
+# 1. Name stable seams with tags.
+# 2. Add boundary rules for the important ownership constraints.
+# 3. Add narrow exceptions only where the seam is intentionally public.
+# 4. Add flow only if the repository has a real directional model.
+# 5. Add exclusions last and keep them narrow.
 
 language: python
 exclusions: [.venv/**, agentic/**, tests/**]
