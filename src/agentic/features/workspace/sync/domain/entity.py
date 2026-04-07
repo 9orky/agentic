@@ -157,7 +157,11 @@ class Workspace:
         return WorkspaceWritePlan(
             target_dir=self.layout.target_dir(self.project_root),
             required_dirs=_sort_paths(
-                (self.layout.local_dir(self.project_root),)),
+                (
+                    self.layout.code_dir(self.project_root),
+                    self.layout.local_dir(self.project_root),
+                )
+            ),
             changes=tuple(changes),
             preserved_paths=_sort_paths(tuple(preserved_paths)),
         )

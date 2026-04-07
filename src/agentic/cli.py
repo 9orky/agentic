@@ -6,7 +6,7 @@ from pathlib import Path
 import click
 
 from .features.architecture_check.cli import architecture_check_cli
-from .features.workspace_contract.cli import workspace_contract_cli
+from .features.workspace.cli import workspace_contract_cli
 
 
 @dataclass(frozen=True)

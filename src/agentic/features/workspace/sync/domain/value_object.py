@@ -54,6 +54,9 @@ class WorkspaceContractLayout:
     def target_dir(self, project_root: Path) -> Path:
         return project_root / "agentic"
 
+    def code_dir(self, project_root: Path) -> Path:
+        return self.target_dir(project_root) / "code"
+
     def rules_dir(self, project_root: Path) -> Path:
         return self.target_dir(project_root) / "rules"
 

@@ -1,11 +1,11 @@
 from __future__ import annotations
 
+import os
 import random
 import tempfile
 import unittest
 from importlib.resources import files
 from pathlib import Path
-from unittest.mock import patch
 
 from click.testing import CliRunner
 
@@ -22,7 +22,7 @@ class SyncCliFunctionalTests(unittest.TestCase):
     def test_init_mirrors_packaged_rule_tree_without_hardcoded_manifest(self) -> None:
         packaged_snapshot = _snapshot_packaged_rules()
 
-        result = self._invoke_from_mocked_cwd(["init"])
+        result = self._invoke_from_cwd(["init"])
 
         self.assertEqual(result.exit_code, 0, result.output)
         self.assertEqual(
@@ -31,7 +31,7 @@ class SyncCliFunctionalTests(unittest.TestCase):
         )
 
     def test_init_creates_local_profile_surface(self) -> None:
-        result = self._invoke_from_mocked_cwd(["init"])
+        result = self._invoke_from_cwd(["init"])
 
         self.assertEqual(result.exit_code, 0, result.output)
         self.assertTrue((self.project_root / "agentic" /
@@ -39,9 +39,15 @@ class SyncCliFunctionalTests(unittest.TestCase):
         self.assertIn(
             "Local profile surface: agentic/rules/local/.", result.output)
 
+    def test_init_creates_code_surface(self) -> None:
+        result = self._invoke_from_cwd(["init"])
+
+        self.assertEqual(result.exit_code, 0, result.output)
+        self.assertTrue((self.project_root / "agentic" / "code").is_dir())
+
     def test_update_rewrites_only_mutated_rule_files(self) -> None:
         packaged_before = _snapshot_packaged_rules()
-        init_result = self._invoke_from_mocked_cwd(["init"])
+        init_result = self._invoke_from_cwd(["init"])
         self.assertEqual(init_result.exit_code, 0, init_result.output)
 
         rule_root = self.project_root / "agentic" / "rules"
@@ -63,7 +69,7 @@ class SyncCliFunctionalTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-        update_result = self._invoke_from_mocked_cwd(["update"])
+        update_result = self._invoke_from_cwd(["update"])
 
         self.assertEqual(update_result.exit_code, 0, update_result.output)
         self.assertEqual(_snapshot_packaged_rules(), packaged_before)
@@ -76,12 +82,26 @@ class SyncCliFunctionalTests(unittest.TestCase):
             },
         )
 
-    def _invoke_from_mocked_cwd(self, args: list[str]):
-        with patch(
-            "agentic.cli.Path.cwd",
-            return_value=self.project_root,
-        ):
+    def test_update_recreates_missing_code_surface(self) -> None:
+        init_result = self._invoke_from_cwd(["init"])
+        self.assertEqual(init_result.exit_code, 0, init_result.output)
+
+        code_dir = self.project_root / "agentic" / "code"
+        self.assertTrue(code_dir.is_dir())
+        code_dir.rmdir()
+
+        update_result = self._invoke_from_cwd(["update"])
+
+        self.assertEqual(update_result.exit_code, 0, update_result.output)
+        self.assertTrue(code_dir.is_dir())
+
+    def _invoke_from_cwd(self, args: list[str]):
+        previous_cwd = Path.cwd()
+        try:
+            os.chdir(self.project_root)
             return self.runner.invoke(agentic_cli, args, catch_exceptions=False)
+        finally:
+            os.chdir(previous_cwd)
 
 
 def _snapshot_packaged_rules() -> dict[str, str]:
