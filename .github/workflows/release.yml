@@ -44,7 +44,7 @@ jobs:
         run: python -m unittest discover -s tests
 
       - name: Run architecture self-check
-        run: agentic architecture check --project-root .
+        run: agentic architecture check --project-root . --config agentic/agentic.yaml
 
       - name: Validate extractor syntax
         run: |
