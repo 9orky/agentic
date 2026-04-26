@@ -10,8 +10,7 @@ from pydantic import BaseModel, ConfigDict, TypeAdapter, ValidationError, model_
 
 from .value_object import RuleDocumentClass, RuleDocumentParseError, RuleReference, RuleSchemaViolation, RuleSectionRequirement
 
-_FRONTMATTER_PATTERN = re.compile(
-    r"\A---\s*\n(?P<value>.*?)\n---\s*(?:\n|\Z)", re.DOTALL)
+_FRONTMATTER_PATTERN = re.compile(r"\A---\s*\n(?P<value>.*?)\n---\s*(?:\n|\Z)", re.DOTALL)
 _SECTION_HEADING_PATTERN = re.compile(r"^##\s+(?P<value>.+)$", re.MULTILINE)
 _MARKDOWN_LINK_PATTERN = re.compile(r"\[[^\]]+\]\([^)]+\)")
 

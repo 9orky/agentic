@@ -27,6 +27,8 @@
 
 language: python
 exclusions: [.venv/**, agentic/**, tests/**]
+code:
+  skip: ["*__pycache__*"]
 
 rules:
   tags:

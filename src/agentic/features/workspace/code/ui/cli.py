@@ -5,7 +5,7 @@ from pathlib import Path
 import click
 from agentic.project_layout import AgenticProjectLayout
 
-from ..application import describe_recipe_generation, generate_recipe
+from ..application import describe_recipe_generation, generate_recipe, load_code_generation_settings
 from .views import build_default_code_generation_view
 
 
@@ -19,8 +19,13 @@ def _code_command(ctx: click.Context, recipe_name: str, path: str, dry_run: bool
     project_root = runtime.resolve_project_root(".")
     target_path = Path(path)
     view = build_default_code_generation_view()
+    layout = AgenticProjectLayout()
     try:
-        recipe_root = _resolve_recipe_root(project_root)
+        recipe_root = _resolve_recipe_root(project_root, layout=layout)
+        code_config = load_code_generation_settings(
+            project_root=project_root,
+            config_candidate_paths=layout.config_candidate_paths,
+        )
         recipe_root_label = _present_path(
             recipe_root, project_root=project_root)
     except ValueError as exc:
@@ -29,7 +34,12 @@ def _code_command(ctx: click.Context, recipe_name: str, path: str, dry_run: bool
     if dry_run:
         try:
             result = describe_recipe_generation(
-                recipe_name, project_root, target_path, recipe_root=recipe_root)
+                recipe_name,
+                project_root,
+                target_path,
+                recipe_root=recipe_root,
+                config=code_config,
+            )
         except ValueError as exc:
             raise click.ClickException(str(exc)) from exc
         for line in view.render_dry_run_result(
@@ -48,6 +58,7 @@ def _code_command(ctx: click.Context, recipe_name: str, path: str, dry_run: bool
             project_root,
             target_path,
             recipe_root=recipe_root,
+            config=code_config,
         )
     except ValueError as exc:
         raise click.ClickException(str(exc)) from exc
@@ -69,9 +80,8 @@ def _present_path(path: Path, *, project_root: Path) -> str:
         return str(path)
 
 
-def _resolve_recipe_root(project_root: Path) -> Path:
+def _resolve_recipe_root(project_root: Path, *, layout: AgenticProjectLayout) -> Path:
     target_root = project_root.resolve()
-    layout = AgenticProjectLayout()
 
     for candidate in (target_root, *target_root.parents):
         code_dir = layout.target_dir(candidate) / "code"

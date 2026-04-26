@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from fnmatch import fnmatch
 from pathlib import Path
 
 
@@ -27,4 +28,21 @@ class RelativePath:
         return root_path / self.value
 
 
-__all__ = ["RelativePath"]
+@dataclass(frozen=True)
+class CodeGenerationConfig:
+    skip_globs: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        normalized_globs = tuple(
+            value.strip().replace("\\", "/")
+            for value in self.skip_globs
+            if value.strip()
+        )
+        object.__setattr__(self, "skip_globs", normalized_globs)
+
+    def should_skip(self, relative_path: RelativePath) -> bool:
+        relative_path_text = relative_path.as_posix()
+        return any(fnmatch(relative_path_text, pattern) for pattern in self.skip_globs)
+
+
+__all__ = ["CodeGenerationConfig", "RelativePath"]

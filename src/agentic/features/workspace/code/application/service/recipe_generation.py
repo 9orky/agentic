@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 from shutil import copy2
 from typing import TypedDict
 
-from ...domain import Recipe, RecipeRepository
-from ...infrastructure import FileRecipeRepository
+from ...domain import CodeGenerationConfig, Recipe, RecipeRepository
+from ...infrastructure import FileCodeGenerationConfigLoader, FileRecipeRepository
 
 
 class RecipeGenerationReport(TypedDict):
@@ -27,8 +28,9 @@ class GenerateRecipeResult(TypedDict):
 
 
 class RecipeGenerationService:
-    def __init__(self, *, repository: RecipeRepository) -> None:
+    def __init__(self, *, repository: RecipeRepository, config: CodeGenerationConfig | None = None) -> None:
         self._repository = repository
+        self._config = config or CodeGenerationConfig()
 
     def describe(self, recipe_name: str, cwd: Path) -> RecipeGenerationReport:
         target_root = Path(cwd).resolve()
@@ -88,13 +90,15 @@ class RecipeGenerationService:
         except LookupError:
             return None
 
-    @staticmethod
-    def _plan_paths(recipe: Recipe, target_root: Path) -> tuple[tuple[Path, ...], tuple[Path, ...]]:
+    def _plan_paths(self, recipe: Recipe, target_root: Path) -> tuple[tuple[Path, ...], tuple[Path, ...]]:
         create_paths: list[Path] = []
         skipped_paths: list[Path] = []
 
         for relative_path in recipe.relative_paths:
             target_path = relative_path.resolve_from(target_root)
+            if self._config.should_skip(relative_path):
+                skipped_paths.append(target_path)
+                continue
             if target_path.exists():
                 skipped_paths.append(target_path)
                 continue
@@ -120,6 +124,7 @@ def build_recipe_generation_service(
     *,
     recipe_root: Path | None = None,
     repository: RecipeRepository | None = None,
+    config: CodeGenerationConfig | None = None,
 ) -> RecipeGenerationService:
     if repository is None and recipe_root is None:
         raise ValueError(
@@ -133,7 +138,18 @@ def build_recipe_generation_service(
 
     return RecipeGenerationService(
         repository=resolved_repository,
+        config=config,
     )
+
+
+def load_code_generation_config(
+    *,
+    project_root: Path,
+    config_candidate_paths: Callable[[Path], tuple[Path, ...]],
+) -> CodeGenerationConfig:
+    return FileCodeGenerationConfigLoader(
+        config_candidate_paths=config_candidate_paths,
+    ).load(project_root)
 
 
 __all__ = [
@@ -141,4 +157,5 @@ __all__ = [
     "RecipeGenerationReport",
     "RecipeGenerationService",
     "build_recipe_generation_service",
+    "load_code_generation_config",
 ]

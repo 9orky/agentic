@@ -1,7 +1,9 @@
 from pathlib import Path
 
+from .config_loader import FileCodeGenerationConfigLoader
 from .recipe_repository import FileRecipeRepository
 
 recipe_repository = FileRecipeRepository(Path("agentic") / "code")
 
-__all__ = ["FileRecipeRepository", "recipe_repository"]
+__all__ = ["FileCodeGenerationConfigLoader",
+           "FileRecipeRepository", "recipe_repository"]

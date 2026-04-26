@@ -68,7 +68,7 @@ class CodeGenerationView:
             lines.extend(self._render_path_list(
                 created_paths, project_root=project_root))
         if skipped_paths:
-            lines.append(f"Skipped {len(skipped_paths)} existing path(s).")
+            lines.append(f"Skipped {len(skipped_paths)} path(s).")
             lines.extend(self._render_path_list(
                 skipped_paths, project_root=project_root))
         if not created_paths and not skipped_paths:

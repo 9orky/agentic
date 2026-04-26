@@ -138,9 +138,62 @@ class CodeCliTests(unittest.TestCase):
         result = self._invoke_from_cwd(target_dir, ["code", "feature"])
 
         self.assertEqual(result.exit_code, 0, result.output)
-        self.assertIn("Skipped 1 existing path(s).", result.output)
+        self.assertIn("Skipped 1 path(s).", result.output)
         self.assertEqual(
             (target_dir / "entity.py").read_text(encoding="utf-8"), "local change\n")
+
+    def test_code_command_skips_paths_matching_agentic_config_globs(self) -> None:
+        recipe_dir = self.project_root / "agentic" / "code" / "feature"
+        (recipe_dir / "module" / "__pycache__").mkdir(parents=True)
+        (recipe_dir / "module" / "__pycache__" / "cache.pyc").write_text(
+            "cached\n",
+            encoding="utf-8",
+        )
+        (recipe_dir / "module" / "entity.py").write_text(
+            "class Entity: ...\n",
+            encoding="utf-8",
+        )
+        (self.project_root / "agentic" / "agentic.yaml").write_text(
+            'code:\n  skip: ["*__pycache__*"]\n',
+            encoding="utf-8",
+        )
+
+        target_dir = self.project_root / "src" / "feature_mod"
+        target_dir.mkdir(parents=True)
+
+        result = self._invoke_from_cwd(target_dir, ["code", "feature"])
+
+        self.assertEqual(result.exit_code, 0, result.output)
+        self.assertTrue((target_dir / "module" / "entity.py").is_file())
+        self.assertFalse((target_dir / "module" / "__pycache__").exists())
+        self.assertIn("Skipped 2 path(s).", result.output)
+
+    def test_code_command_dry_run_skips_paths_matching_agentic_config_globs(self) -> None:
+        recipe_dir = self.project_root / "agentic" / "code" / "feature"
+        (recipe_dir / "module" / "__pycache__").mkdir(parents=True)
+        (recipe_dir / "module" / "__pycache__" / "cache.pyc").write_text(
+            "cached\n",
+            encoding="utf-8",
+        )
+        (recipe_dir / "module" / "entity.py").write_text(
+            "class Entity: ...\n",
+            encoding="utf-8",
+        )
+        (self.project_root / "agentic" / "agentic.yaml").write_text(
+            'code:\n  skip: ["*__pycache__*"]\n',
+            encoding="utf-8",
+        )
+
+        target_dir = self.project_root / "src" / "feature_mod"
+        target_dir.mkdir(parents=True)
+
+        result = self._invoke_from_cwd(
+            target_dir, ["code", "feature", "--dry-run"])
+
+        self.assertEqual(result.exit_code, 0, result.output)
+        self.assertFalse((target_dir / "module").exists())
+        self.assertIn("Would create 2 path(s).", result.output)
+        self.assertIn("Skipped 2 path(s).", result.output)
 
     def test_code_command_generates_recipe_tree_in_requested_path(self) -> None:
         recipe_dir = self.project_root / "agentic" / "code" / "feature"
