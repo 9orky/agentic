@@ -11,7 +11,7 @@
 
 ## Runtime Consumption
 
-- Workspace sync loads packaged rules recursively from `src/agentic/resources/rules/` through the runtime loader in [src/agentic/features/workspace_contract/sync/infrastructure/file_repository.py](/Users/gorky/Projects/agentic/src/agentic/features/workspace_contract/sync/infrastructure/file_repository.py).
+- Workspace sync loads packaged rules recursively from `src/agentic/resources/rules/` through the runtime loader in [src/agentic/features/workspace/sync/infrastructure/file_repository.py](/Users/gorky/Projects/agentic/src/agentic/features/workspace/sync/infrastructure/file_repository.py).
 - The sync feature also loads packaged `agentic.yaml` and `copilot-instructions.md` from the same packaged resources root.
 - Rule-schema validation scans the packaged rules tree, not the human-facing docs tree under `docs/`.
 - Repo-specific operating decisions still belong in the generated `agentic/` contract, especially under `agentic/rules/local/`, not in packaged resources.
@@ -28,7 +28,7 @@
 - [src/agentic/resources/rules/INDEX.md](/Users/gorky/Projects/agentic/src/agentic/resources/rules/INDEX.md)
 - [src/agentic/resources/copilot-instructions.md](/Users/gorky/Projects/agentic/src/agentic/resources/copilot-instructions.md)
 - [src/agentic/resources/README.md](/Users/gorky/Projects/agentic/src/agentic/resources/README.md)
-- [src/agentic/features/workspace_contract/sync/infrastructure/file_repository.py](/Users/gorky/Projects/agentic/src/agentic/features/workspace_contract/sync/infrastructure/file_repository.py)
+- [src/agentic/features/workspace/sync/infrastructure/file_repository.py](/Users/gorky/Projects/agentic/src/agentic/features/workspace/sync/infrastructure/file_repository.py)
 
 ## Boundary
 

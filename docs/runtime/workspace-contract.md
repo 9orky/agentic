@@ -9,7 +9,7 @@ The workspace contract is the generated project surface that `agentic` writes in
 - `agentic/rules/local/`: the repo-local profile surface preserved across sync operations
 - `.github/copilot-instructions.md`: bootstrap instruction content used for agent guidance
 
-The layout is defined by [src/agentic/features/workspace_contract/sync/domain/value_object.py](/Users/gorky/Projects/agentic/src/agentic/features/workspace_contract/sync/domain/value_object.py).
+The layout is defined by [src/agentic/features/workspace/sync/domain/value_object.py](/Users/gorky/Projects/agentic/src/agentic/features/workspace/sync/domain/value_object.py).
 
 ## Discovery And Review Workflow
 

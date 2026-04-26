@@ -43,9 +43,10 @@ rules:
     - { source: src/agentic/cli.py, disallow: [*feature], allow: [&feature_cli src/agentic/features/*/cli.py] }
     - { source: *feature, disallow: [*feature], allow_same_match: true, allow: [*feature, *module_shim] }
     - { source: *module, disallow: [*module], allow_same_match: true, allow: [*module] }
+    - { source: src/agentic/features/architecture/**, disallow: [*module], allow: [src/agentic/features/architecture/**] }
     - { source: *domain, disallow: [*infrastructure, *application, *ui] }
     - { source: *infrastructure, disallow: [*domain, *application, *ui], allow: [&domain_shim src/agentic/features/*/*/domain/__init__.py] }
-    - { source: *application, disallow: [*domain, *infrastructure, *ui], allow: [*domain_shim, &infrastructure_shim src/agentic/features/*/*/infrastructure/__init__.py, src/agentic/features/*/*/infrastructure/*.py, src/agentic/features/workspace_contract/rules/infrastructure/file_repository.py] }
+    - { source: *application, disallow: [*domain, *infrastructure, *ui], allow: [*domain_shim, &infrastructure_shim src/agentic/features/*/*/infrastructure/__init__.py, src/agentic/features/*/*/infrastructure/*.py, src/agentic/features/workspace/rules/infrastructure/file_repository.py] }
     - { source: *ui, disallow: [*application, *infrastructure, *domain], allow: [&application_shim src/agentic/features/*/*/application/__init__.py, src/agentic/features/*/*/application/*.py] }
     - { source: src/agentic/features/*/*/application/services/*, disallow: [src/agentic/features/*/*/application/commands/*, src/agentic/features/*/*/application/queries/*] }
   flow: { layers: [ui, application, infrastructure, domain], module_tag: feature, analyzers: [backward-flow, no-cycles] }

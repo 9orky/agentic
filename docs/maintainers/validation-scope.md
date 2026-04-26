@@ -21,9 +21,9 @@ This page documents what `check-rules` and `check-rule-schema` currently validat
 
 ## Source Inputs
 
-- [src/agentic/features/workspace_contract/rules/application/queries.py](/Users/gorky/Projects/agentic/src/agentic/features/workspace_contract/rules/application/queries.py)
-- [src/agentic/features/workspace_contract/rules/domain/entity.py](/Users/gorky/Projects/agentic/src/agentic/features/workspace_contract/rules/domain/entity.py)
-- [src/agentic/features/workspace_contract/rules/domain/service.py](/Users/gorky/Projects/agentic/src/agentic/features/workspace_contract/rules/domain/service.py)
+- [src/agentic/features/workspace/rules/application/queries.py](/Users/gorky/Projects/agentic/src/agentic/features/workspace/rules/application/queries.py)
+- [src/agentic/features/workspace/rules/domain/entity.py](/Users/gorky/Projects/agentic/src/agentic/features/workspace/rules/domain/entity.py)
+- [src/agentic/features/workspace/rules/domain/service.py](/Users/gorky/Projects/agentic/src/agentic/features/workspace/rules/domain/service.py)
 
 ## Boundary
 

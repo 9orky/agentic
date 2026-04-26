@@ -1,2 +1,0 @@
-class ExtractorContractError(RuntimeError):
-    pass

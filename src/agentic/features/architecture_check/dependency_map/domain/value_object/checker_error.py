@@ -1,2 +1,0 @@
-class CheckerError(RuntimeError):
-    pass

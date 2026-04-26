@@ -5,7 +5,7 @@ from pathlib import Path
 
 import click
 
-from .features.architecture_check.cli import architecture_check_cli
+from .features.architecture.cli import architecture_cli
 from .features.workspace.cli import workspace_contract_cli
 
 
@@ -26,7 +26,14 @@ def build_cli_runtime(*, cwd: Path | None = None) -> AgenticCliRuntime:
     return AgenticCliRuntime(cwd=runtime_cwd)
 
 
-@click.group(name="agentic", invoke_without_command=True)
+@click.group(
+    name="agentic",
+    invoke_without_command=True,
+    help=(
+        "Bootstrap a project-local architecture contract, inspect dependency "
+        "rules, and generate shared project scaffolding."
+    ),
+)
 @click.pass_context
 def agentic_cli(ctx: click.Context) -> int | None:
     ctx.obj = build_cli_runtime()
@@ -36,7 +43,10 @@ def agentic_cli(ctx: click.Context) -> int | None:
     return ctx.invoke(agentic_cli.commands["init"], project_root=".")
 
 
-@agentic_cli.command("help")
+@agentic_cli.command(
+    "help",
+    help="Show the top-level command guide.",
+)
 @click.pass_context
 def help_command(ctx: click.Context) -> int:
     parent = ctx.parent
@@ -46,7 +56,7 @@ def help_command(ctx: click.Context) -> int:
 
 
 workspace_contract_cli(agentic_cli)
-architecture_check_cli(agentic_cli)
+architecture_cli(agentic_cli)
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -23,7 +23,7 @@ class SyncSummaryView:
         lines.append(
             f"Safe to rerun: plain 'agentic' preserves existing local files in {target_dir}/rules/local/.")
         lines.append(
-            f"Next step: review {target_dir}/agentic.yaml and {target_dir}/rules/local/ and run 'agentic check'.")
+            f"Next step: review {target_dir}/agentic.yaml and {target_dir}/rules/local/ and run 'agentic architecture check'.")
         return tuple(lines)
 
     def render_update_result(self, result: Mapping[str, Any], *, project_root: Path) -> tuple[str, ...]:
@@ -39,7 +39,7 @@ class SyncSummaryView:
             )
         )
         lines.append(
-            f"Next step: review refreshed shared rules, {target_dir}/agentic.yaml, and {target_dir}/rules/local/ and run 'agentic check'.")
+            f"Next step: review refreshed shared rules, {target_dir}/agentic.yaml, and {target_dir}/rules/local/ and run 'agentic architecture check'.")
         return tuple(lines)
 
     def _render_sync_header(self, result: Mapping[str, Any], *, project_root: Path) -> tuple[str, ...]:

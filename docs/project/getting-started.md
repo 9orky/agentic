@@ -7,8 +7,9 @@ This page covers the normal first-use flow for the `agentic` CLI.
 - `agentic`: bootstrap the current directory using the default `init` path
 - `agentic init --project-root <path>`: create the project-local contract
 - `agentic update --project-root <path>`: refresh mirrored packaged assets in an existing project contract
-- `agentic check --project-root <path>`: run the architecture check
-- `agentic hotspots --project-root <path>`: inspect import hotspot counts
+- `agentic architecture check --project-root <path>`: run the architecture check
+- `agentic architecture hotspots --project-root <path>`: inspect risky files in the architecture graph
+- `agentic architecture summary --project-root <path>`: get a short agent-facing reading order and risk briefing
 - `agentic check-rule-schema`: validate the packaged markdown rule contract
 
 ## First Bootstrap Flow
@@ -16,7 +17,7 @@ This page covers the normal first-use flow for the `agentic` CLI.
 1. Run `agentic` or `agentic init` in the target repository.
 2. Review the generated `agentic/agentic.yaml`, mirrored shared rules, and the local profile surface under `agentic/rules/local/`.
 3. Keep repo-specific narrowing under `agentic/rules/local/` when shared guidance is not enough.
-4. Run `agentic check` to validate the architecture agreement against the current codebase.
+4. Run `agentic architecture check` to validate the architecture agreement against the current codebase.
 
 ## Update Flow
 
@@ -31,8 +32,8 @@ Current behavior is conservative:
 ## Read Next
 
 - [../runtime/workspace-contract.md](/Users/gorky/Projects/agentic/docs/runtime/workspace-contract.md) for the generated contract model
-- [../runtime/architecture-check.md](/Users/gorky/Projects/agentic/docs/runtime/architecture-check.md) for architecture-check behavior and config guidance
-- [../INDEX.md](/Users/gorky/Projects/agentic/docs/INDEX.md) for the full docs hub
+- [../runtime/architecture-check.md](/Users/gorky/Projects/agentic/docs/runtime/architecture-check.md) for architecture runtime behavior and config guidance
+- [../index.md](/Users/gorky/Projects/agentic/docs/index.md) for the full docs hub
 
 ## Source Inputs
 

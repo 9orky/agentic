@@ -19,14 +19,19 @@ This page is the maintained high-level map of the current `agentic` repository.
 
 ### Workspace Contract
 
-- [src/agentic/features/workspace_contract/](/Users/gorky/Projects/agentic/src/agentic/features/workspace_contract) owns project bootstrap, update, and packaged rule-schema validation.
+- [src/agentic/features/workspace/](/Users/gorky/Projects/agentic/src/agentic/features/workspace) owns project bootstrap, update, code generation, and packaged rule-schema validation.
 - `sync/` owns the generated contract layout and file mirroring behavior.
+- `code/` owns packaged code-generation recipes.
 - `rules/` owns schema checks for packaged markdown rule documents.
 
-### Architecture Check
+### Architecture
 
-- [src/agentic/features/architecture_check/](/Users/gorky/Projects/agentic/src/agentic/features/architecture_check) owns dependency extraction, boundary analysis, and hotspot reporting.
-- The feature is exposed through `agentic check` and `agentic hotspots`.
+- [src/agentic/features/architecture/](/Users/gorky/Projects/agentic/src/agentic/features/architecture) owns dependency extraction, boundary analysis, and hotspot reporting.
+- `map/` owns config loading, extractor orchestration, and dependency-graph construction.
+- `check/` owns policy evaluation and reporting.
+- `hotspots/` owns hotspot analysis over the same dependency graph.
+- `summary/` owns agent-facing repository briefings built from the same graph.
+- The feature is exposed through `agentic architecture check`, `agentic architecture hotspots`, and `agentic architecture summary`.
 
 ## Packaged Versus Generated Assets
 
@@ -48,15 +53,6 @@ This page is the maintained high-level map of the current `agentic` repository.
 - `src/agentic/resources/rules/` defines packaged rule assets for the runtime.
 - The two surfaces should stay conceptually separate.
 
-## Drift Note
-
-The legacy page [docs/architecture-mapping.md](/Users/gorky/Projects/agentic/docs/architecture-mapping.md) drifted into an architecture-check config guide rather than a repository architecture map. Its useful feature-guide content belongs in [../runtime/architecture-check.md](/Users/gorky/Projects/agentic/docs/runtime/architecture-check.md), while this page becomes the maintained architecture map.
-
-## Source Inputs
-
-- [docs/architecture-mapping.md](/Users/gorky/Projects/agentic/docs/architecture-mapping.md)
-- Current repository structure and code layout
-
 ## Boundary
 
-Refresh this page against the live repo structure before treating it as authoritative. The legacy source page may drift.
+Refresh this page against the live repo structure before treating it as authoritative.

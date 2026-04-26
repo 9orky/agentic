@@ -9,6 +9,81 @@ import sys
 from pathlib import Path
 
 
+def line_span(node: ast.AST) -> int | None:
+    start_line = getattr(node, "lineno", None)
+    end_line = getattr(node, "end_lineno", None)
+    if start_line is None or end_line is None:
+        return None
+    return max(end_line - start_line + 1, 0)
+
+
+def compute_code_line_count(content: str) -> int:
+    total = 0
+    for line in content.splitlines():
+        stripped = line.strip()
+        if stripped and not stripped.startswith("#"):
+            total += 1
+    return total
+
+
+def public_symbol_count(
+    class_details: list[dict[str, object]],
+    function_details: list[dict[str, object]],
+) -> int:
+    public_classes = sum(
+        1
+        for class_detail in class_details
+        if isinstance(class_detail.get("name"), str)
+        and class_detail["name"]
+        and not class_detail["name"].startswith("_")
+    )
+    public_functions = sum(
+        1
+        for function_detail in function_details
+        if isinstance(function_detail.get("name"), str)
+        and function_detail["name"]
+        and not function_detail["name"].startswith("_")
+    )
+    public_methods = sum(
+        1
+        for class_detail in class_details
+        for method_detail in class_detail.get("methods", [])
+        if isinstance(method_detail, dict)
+        and isinstance(method_detail.get("name"), str)
+        and method_detail["name"]
+        and not method_detail["name"].startswith("_")
+    )
+    return public_classes + public_functions + public_methods
+
+
+def function_detail(node: ast.FunctionDef | ast.AsyncFunctionDef) -> dict[str, object]:
+    return {
+        "name": node.name,
+        "line_count": line_span(node),
+        "cyclomatic_complexity": None,
+    }
+
+
+def method_detail(node: ast.FunctionDef | ast.AsyncFunctionDef) -> dict[str, object]:
+    return {
+        "name": node.name,
+        "line_count": line_span(node),
+    }
+
+
+def class_detail(node: ast.ClassDef) -> dict[str, object]:
+    methods = [
+        method_detail(child)
+        for child in node.body
+        if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef))
+    ]
+    return {
+        "name": node.name,
+        "methods": methods,
+        "line_count": line_span(node),
+    }
+
+
 def normalize_pattern(value: str) -> str:
     return value.replace("\\", "/").strip().strip("/")
 
@@ -196,7 +271,7 @@ def resolve_import_targets(module_index: dict[str, str], module_name: str, impor
 
 
 def extract(directory: Path, exclusions: list[str]) -> dict[str, object]:
-    result: dict[str, dict[str, list[str]]] = {}
+    result: dict[str, dict[str, object]] = {}
     included_paths, files_found, files_excluded = collect_python_files(
         directory, exclusions)
     module_index = build_module_index(included_paths, directory)
@@ -216,9 +291,15 @@ def extract(directory: Path, exclusions: list[str]) -> dict[str, object]:
             )
             continue
 
+        for parent in ast.walk(tree):
+            for child in ast.iter_child_nodes(parent):
+                child.parent = parent
+
         imports: list[str] = []
         classes: list[str] = []
         functions: list[str] = []
+        class_details: list[dict[str, object]] = []
+        function_details: list[dict[str, object]] = []
 
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
@@ -249,13 +330,29 @@ def extract(directory: Path, exclusions: list[str]) -> dict[str, object]:
                     )
             elif isinstance(node, ast.ClassDef):
                 classes.append(node.name)
-            elif isinstance(node, ast.FunctionDef):
+                class_details.append(class_detail(node))
+            elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 functions.append(node.name)
+                if isinstance(getattr(node, "parent", None), ast.Module):
+                    function_details.append(function_detail(node))
+
+        metrics = {
+            "line_count": len(content.splitlines()),
+            "code_line_count": compute_code_line_count(content),
+            "public_symbol_count": public_symbol_count(class_details, function_details),
+            "max_method_count_per_class": max(
+                (len(class_detail["methods"]) for class_detail in class_details),
+                default=0,
+            ),
+        }
 
         result[relative_path] = {
             "imports": imports,
             "classes": classes,
             "functions": functions,
+            "class_details": class_details,
+            "function_details": function_details,
+            "metrics": metrics,
         }
 
     if extraction_failures:

@@ -1,11 +1,20 @@
-# Architecture Check
+# Architecture
 
-The architecture-check feature validates an `agentic.yaml` or `agentic.yml` agreement against an extracted dependency map.
+The `architecture` feature validates an `agentic.yaml` or `agentic.yml` agreement against an extracted dependency map.
 
 ## Main Commands
 
-- `agentic check`: run the architecture check and report violations
-- `agentic hotspots`: show file import hotspot counts from the same dependency graph
+- `agentic architecture check`: run the architecture check and report violations
+- `agentic architecture hotspots`: rank risky files from the same dependency graph
+- `agentic architecture summary`: produce an agent-facing reading order and risk briefing
+
+## What Hotspots And Summary Add
+
+- `hotspots` can sort by risk score, incoming imports, outgoing imports, symbol
+  surface, public symbol count, or file size
+- `hotspots --explain <path>` tells you why one tracked file is risky
+- `summary` turns the graph into a short reading order plus a few risk notes an
+  agent can act on quickly
 
 ## What It Validates
 

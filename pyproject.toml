@@ -1,17 +1,60 @@
 [build-system]
-requires = ["setuptools>=69", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "agentic"
 version = "0.1.0"
-description = "Bootstrap and run project-local architecture rules for humans and LLMs."
+description = "A pipx-first CLI for architecture-aware collaboration between humans and coding agents."
 readme = "README.md"
 requires-python = ">=3.11"
+license = "MIT"
+authors = [
+    {name = "Tomasz Szpak"},
+]
+keywords = [
+    "agents",
+    "architecture",
+    "cli",
+    "llm",
+    "pipx",
+    "software-architecture",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Documentation",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Quality Assurance",
+]
 dependencies = [
     "click>=8.1",
     "pydantic>=2.8",
     "PyYAML>=6.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/9orky/agentic"
+Blog = "https://szpak.dev/"
+Documentation = "https://github.com/9orky/agentic/tree/main/docs"
+Repository = "https://github.com/9orky/agentic"
+Issues = "https://github.com/9orky/agentic/issues"
+Changelog = "https://github.com/9orky/agentic/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+dev = [
+    "build>=1.2",
+    "twine>=5.1",
 ]
 
 [project.scripts]
@@ -20,6 +63,7 @@ agentic = "agentic.cli:main"
 [tool.setuptools]
 package-dir = {"" = "src"}
 include-package-data = true
+license-files = ["LICENSE"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

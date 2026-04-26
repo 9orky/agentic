@@ -5,6 +5,355 @@ import path from 'node:path';
 const targetDir = process.argv[2] || process.cwd();
 const exclusions = process.argv[3] ? JSON.parse(process.argv[3]) : [];
 
+function buildLineStarts(content) {
+    const lineStarts = [0];
+    for (let index = 0; index < content.length; index += 1) {
+        if (content[index] === '\n') {
+            lineStarts.push(index + 1);
+        }
+    }
+    return lineStarts;
+}
+
+function lineNumberAt(lineStarts, index) {
+    let low = 0;
+    let high = lineStarts.length - 1;
+    while (low <= high) {
+        const middle = Math.floor((low + high) / 2);
+        if (lineStarts[middle] <= index) {
+            low = middle + 1;
+        } else {
+            high = middle - 1;
+        }
+    }
+    return high + 1;
+}
+
+function lineSpan(lineStarts, startIndex, endIndex) {
+    return Math.max(lineNumberAt(lineStarts, endIndex) - lineNumberAt(lineStarts, startIndex) + 1, 0);
+}
+
+function computeCodeLineCount(content) {
+    let total = 0;
+    content.split('\n').forEach(line => {
+        const stripped = line.trim();
+        if (!stripped || stripped.startsWith('//') || stripped === '/*' || stripped === '*/' || stripped.startsWith('*')) {
+            return;
+        }
+        total += 1;
+    });
+    return total;
+}
+
+function publicSymbolCount(
+    classDetails,
+    functionDetails,
+    exportedClassNames,
+    exportedFunctionNames,
+    publicMethodCountsByClass,
+    extraPublicSurfaceCount,
+) {
+    const publicClasses = classDetails.filter(
+        item => exportedClassNames.has(item.name) && item.name && !item.name.startsWith('_'),
+    ).length;
+    const publicFunctions = functionDetails.filter(
+        item => exportedFunctionNames.has(item.name) && item.name && !item.name.startsWith('_'),
+    ).length;
+    const publicMethods = classDetails.reduce(
+        (total, item) => total + (exportedClassNames.has(item.name) ? (publicMethodCountsByClass.get(item.name) || 0) : 0),
+        0,
+    );
+    return publicClasses + publicFunctions + publicMethods + extraPublicSurfaceCount;
+}
+
+function collectExportSurface(content, localClassNames, localFunctionNames) {
+    const exportedClassNames = new Set();
+    const exportedFunctionNames = new Set();
+    let extraPublicSurfaceCount = 0;
+
+    const localClassNameSet = new Set(localClassNames);
+    const localFunctionNameSet = new Set(localFunctionNames);
+
+    const namedExportRegex = /\bexport\s*\{([^}]+)\}(?:\s*from\s*['"][^'"]+['"])?/g;
+    let match;
+    while ((match = namedExportRegex.exec(content)) !== null) {
+        const exportBody = match[1];
+        const isReExport = /\bfrom\s*['"][^'"]+['"]/.test(match[0]);
+        const specifiers = exportBody
+            .split(',')
+            .map(item => item.trim())
+            .filter(Boolean);
+
+        for (const specifier of specifiers) {
+            const [localRaw, exportedRaw] = specifier.split(/\s+as\s+/i).map(item => item.trim());
+            const localName = localRaw;
+            const exportedName = exportedRaw || localRaw;
+
+            if (isReExport) {
+                extraPublicSurfaceCount += 1;
+                continue;
+            }
+
+            if (exportedName === 'default') {
+                if (localClassNameSet.has(localName)) {
+                    exportedClassNames.add(localName);
+                } else if (localFunctionNameSet.has(localName)) {
+                    exportedFunctionNames.add(localName);
+                } else {
+                    extraPublicSurfaceCount += 1;
+                }
+                continue;
+            }
+
+            if (localClassNameSet.has(localName)) {
+                exportedClassNames.add(localName);
+                continue;
+            }
+            if (localFunctionNameSet.has(localName)) {
+                exportedFunctionNames.add(localName);
+                continue;
+            }
+            extraPublicSurfaceCount += 1;
+        }
+    }
+
+    const exportAllMatches = content.match(/\bexport\s+\*\s+from\s+['"][^'"]+['"]/g) || [];
+    extraPublicSurfaceCount += exportAllMatches.length;
+
+    const defaultValueExportRegex = /\bexport\s+default\s+(?!class\b)(?!function\b)(?!async\s+function\b)([A-Za-z_$][\w$]*)\s*;?/g;
+    while ((match = defaultValueExportRegex.exec(content)) !== null) {
+        const exportedName = match[1];
+        if (localClassNameSet.has(exportedName)) {
+            exportedClassNames.add(exportedName);
+        } else if (localFunctionNameSet.has(exportedName)) {
+            exportedFunctionNames.add(exportedName);
+        } else {
+            extraPublicSurfaceCount += 1;
+        }
+    }
+
+    const anonymousDefaultClassMatches = content.match(/\bexport\s+default\s+class\b(?!\s+[A-Za-z_$][\w$]*)/g) || [];
+    const anonymousDefaultFunctionMatches = content.match(/\bexport\s+default\s+(?:async\s+)?function\b(?!\s+[A-Za-z_$][\w$]*)/g) || [];
+    extraPublicSurfaceCount += anonymousDefaultClassMatches.length + anonymousDefaultFunctionMatches.length;
+
+    return { exportedClassNames, exportedFunctionNames, extraPublicSurfaceCount };
+}
+
+function findMatchingBrace(content, openBraceIndex) {
+    let depth = 0;
+    let inSingleQuote = false;
+    let inDoubleQuote = false;
+    let inTemplate = false;
+    let inLineComment = false;
+    let inBlockComment = false;
+
+    for (let index = openBraceIndex; index < content.length; index += 1) {
+        const current = content[index];
+        const next = content[index + 1];
+
+        if (inLineComment) {
+            if (current === '\n') {
+                inLineComment = false;
+            }
+            continue;
+        }
+        if (inBlockComment) {
+            if (current === '*' && next === '/') {
+                inBlockComment = false;
+                index += 1;
+            }
+            continue;
+        }
+        if (inSingleQuote) {
+            if (current === '\\') {
+                index += 1;
+                continue;
+            }
+            if (current === '\'') {
+                inSingleQuote = false;
+            }
+            continue;
+        }
+        if (inDoubleQuote) {
+            if (current === '\\') {
+                index += 1;
+                continue;
+            }
+            if (current === '"') {
+                inDoubleQuote = false;
+            }
+            continue;
+        }
+        if (inTemplate) {
+            if (current === '\\') {
+                index += 1;
+                continue;
+            }
+            if (current === '`') {
+                inTemplate = false;
+            }
+            continue;
+        }
+
+        if (current === '/' && next === '/') {
+            inLineComment = true;
+            index += 1;
+            continue;
+        }
+        if (current === '/' && next === '*') {
+            inBlockComment = true;
+            index += 1;
+            continue;
+        }
+        if (current === '\'') {
+            inSingleQuote = true;
+            continue;
+        }
+        if (current === '"') {
+            inDoubleQuote = true;
+            continue;
+        }
+        if (current === '`') {
+            inTemplate = true;
+            continue;
+        }
+        if (current === '{') {
+            depth += 1;
+            continue;
+        }
+        if (current === '}') {
+            depth -= 1;
+            if (depth === 0) {
+                return index;
+            }
+        }
+    }
+    return -1;
+}
+
+function isWithinRanges(index, ranges) {
+    return ranges.some(range => index >= range.start && index <= range.end);
+}
+
+function collectClassDetails(content, lineStarts) {
+    const classDetails = [];
+    const classRanges = [];
+    const exportedClassNames = new Set();
+    const publicMethodCountsByClass = new Map();
+    const classRegex = /\b(?:export\s+(?:default\s+)?)?class\s+([A-Za-z_$][\w$]*)[^{]*\{/g;
+    let match;
+    while ((match = classRegex.exec(content)) !== null) {
+        const className = match[1];
+        const declarationText = match[0];
+        const openBraceIndex = content.indexOf('{', match.index);
+        if (openBraceIndex < 0) {
+            continue;
+        }
+        const closeBraceIndex = findMatchingBrace(content, openBraceIndex);
+        if (closeBraceIndex < 0) {
+            continue;
+        }
+
+        const body = content.slice(openBraceIndex + 1, closeBraceIndex);
+        const methods = [];
+        const seenMethods = new Set();
+        let publicMethodCount = 0;
+        const methodRegex = /(?:^|\n)\s*((?:public|protected|private|static|async|get|set|readonly)\s+)*([#A-Za-z_$][\w$]*)\s*\([^()\n]*\)\s*\{/g;
+        let methodMatch;
+        while ((methodMatch = methodRegex.exec(body)) !== null) {
+            const modifiers = (methodMatch[1] || '').trim();
+            const methodName = methodMatch[2];
+            if (seenMethods.has(methodName)) {
+                continue;
+            }
+            seenMethods.add(methodName);
+            const methodStart = openBraceIndex + 1 + methodMatch.index;
+            const methodOpenBrace = body.indexOf('{', methodMatch.index);
+            const methodBraceIndex = openBraceIndex + 1 + methodOpenBrace;
+            const methodCloseBraceIndex = findMatchingBrace(content, methodBraceIndex);
+            methods.push({
+                name: methodName,
+                line_count: methodCloseBraceIndex >= 0
+                    ? lineSpan(lineStarts, methodStart, methodCloseBraceIndex)
+                    : null,
+            });
+            if (
+                !methodName.startsWith('#')
+                && !methodName.startsWith('_')
+                && !modifiers.includes('private')
+                && !modifiers.includes('protected')
+                && methodName !== 'constructor'
+            ) {
+                publicMethodCount += 1;
+            }
+        }
+
+        classDetails.push({
+            name: className,
+            methods,
+            line_count: lineSpan(lineStarts, match.index, closeBraceIndex),
+        });
+        classRanges.push({ start: match.index, end: closeBraceIndex });
+        if (/\bexport\b/.test(declarationText)) {
+            exportedClassNames.add(className);
+        }
+        publicMethodCountsByClass.set(className, publicMethodCount);
+    }
+
+    return { classDetails, classRanges, exportedClassNames, publicMethodCountsByClass };
+}
+
+function collectFunctionDetails(content, lineStarts, classRanges) {
+    const functionDetails = [];
+    const functionNames = [];
+    const seenNames = new Set();
+    const exportedFunctionNames = new Set();
+
+    function addFunction(name, startIndex, endIndex, isExported) {
+        if (!name || seenNames.has(name) || isWithinRanges(startIndex, classRanges)) {
+            return;
+        }
+        seenNames.add(name);
+        functionNames.push(name);
+        if (isExported) {
+            exportedFunctionNames.add(name);
+        }
+        functionDetails.push({
+            name,
+            line_count: endIndex >= startIndex ? lineSpan(lineStarts, startIndex, endIndex) : null,
+            cyclomatic_complexity: null,
+        });
+    }
+
+    const functionRegex = /\b(?:export\s+)?(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\([^)]*\)\s*\{/g;
+    let match;
+    while ((match = functionRegex.exec(content)) !== null) {
+        const openBraceIndex = content.indexOf('{', match.index);
+        const closeBraceIndex = openBraceIndex >= 0 ? findMatchingBrace(content, openBraceIndex) : -1;
+        addFunction(
+            match[1],
+            match.index,
+            closeBraceIndex >= 0 ? closeBraceIndex : match.index,
+            /\bexport\b/.test(match[0]),
+        );
+    }
+
+    const arrowFunctionRegex = /\b(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?(?:\([^)]*\)|[A-Za-z_$][\w$]*)\s*=>\s*(\{)?/g;
+    while ((match = arrowFunctionRegex.exec(content)) !== null) {
+        const hasBlockBody = match[2] === '{';
+        const openBraceIndex = hasBlockBody ? content.indexOf('{', match.index) : -1;
+        const closeBraceIndex = hasBlockBody && openBraceIndex >= 0 ? findMatchingBrace(content, openBraceIndex) : match.index;
+        addFunction(
+            match[1],
+            match.index,
+            closeBraceIndex >= 0 ? closeBraceIndex : match.index,
+            /\bexport\b/.test(match[0]),
+        );
+    }
+
+    return { functionDetails, functionNames, exportedFunctionNames };
+}
+
 function normalizePattern(value) {
     return value.replace(/\\/g, '/').replace(/^\/+|\/+$/g, '').trim();
 }
@@ -147,8 +496,7 @@ getAllFiles(targetDir).forEach(file => {
     }
 
     const imports = [];
-    const classes = [];
-    const functions = [];
+    const lineStarts = buildLineStarts(content);
 
     function addImport(impPath) {
         if (impPath.startsWith('.')) {
@@ -177,23 +525,52 @@ getAllFiles(targetDir).forEach(file => {
         addImport(match[1]);
     }
 
-    const classRegex = /class\s+(\w+)/g;
-    while ((match = classRegex.exec(content)) !== null) {
-        classes.push(match[1]);
+    const {
+        classDetails,
+        classRanges,
+        exportedClassNames: directlyExportedClassNames,
+        publicMethodCountsByClass,
+    } = collectClassDetails(content, lineStarts);
+    const { functionDetails, functionNames, exportedFunctionNames: directlyExportedFunctionNames } = collectFunctionDetails(content, lineStarts, classRanges);
+    const classes = classDetails.map(item => item.name);
+    const functions = functionNames;
+    const {
+        exportedClassNames,
+        exportedFunctionNames,
+        extraPublicSurfaceCount,
+    } = collectExportSurface(content, classes, functions);
+    for (const className of directlyExportedClassNames) {
+        exportedClassNames.add(className);
     }
-
-    const funcRegex = /function\s+(\w+)/g;
-    while ((match = funcRegex.exec(content)) !== null) {
-        functions.push(match[1]);
+    for (const functionName of directlyExportedFunctionNames) {
+        exportedFunctionNames.add(functionName);
     }
-
-    const arrowFuncRegex = /(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?(?:\([^)]*\)|[\w]+)\s*=>/g;
-    while ((match = arrowFuncRegex.exec(content)) !== null) {
-        functions.push(match[1]);
-    }
+    const metrics = {
+        line_count: content.split('\n').length,
+        code_line_count: computeCodeLineCount(content),
+        public_symbol_count: publicSymbolCount(
+            classDetails,
+            functionDetails,
+            exportedClassNames,
+            exportedFunctionNames,
+            publicMethodCountsByClass,
+            extraPublicSurfaceCount,
+        ),
+        max_method_count_per_class: classDetails.reduce(
+            (maximum, item) => Math.max(maximum, item.methods.length),
+            0,
+        ),
+    };
 
     const relPath = path.relative(targetDir, file).split(path.sep).join('/');
-    result[relPath] = { imports, classes, functions };
+    result[relPath] = {
+        imports,
+        classes,
+        functions,
+        class_details: classDetails,
+        function_details: functionDetails,
+        metrics,
+    };
 });
 
 if (extractionFailures.length > 0) {

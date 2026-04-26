@@ -4,70 +4,70 @@ from pathlib import Path
 
 import click
 from agentic.project_layout import AgenticProjectLayout
+from agentic.cli_support import command_error_boundary, echo_lines
 
 from ..application import describe_recipe_generation, generate_recipe, load_code_generation_settings
 from .views import build_default_code_generation_view
 
 
-@click.command(name="code")
+@click.command(
+    name="code",
+    help=(
+        "Generate files from a named packaged recipe into the target path inside "
+        "the current project contract."
+    ),
+)
 @click.argument("recipe_name")
 @click.argument("path", required=False, default=".")
-@click.option("--dry-run", is_flag=True, help="Show what would be created without changing files")
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Preview what the recipe would create without writing files.",
+)
 @click.pass_context
+@command_error_boundary(ValueError)
 def _code_command(ctx: click.Context, recipe_name: str, path: str, dry_run: bool) -> int:
     runtime = ctx.obj
     project_root = runtime.resolve_project_root(".")
     target_path = Path(path)
     view = build_default_code_generation_view()
     layout = AgenticProjectLayout()
-    try:
-        recipe_root = _resolve_recipe_root(project_root, layout=layout)
-        code_config = load_code_generation_settings(
-            project_root=project_root,
-            config_candidate_paths=layout.config_candidate_paths,
-        )
-        recipe_root_label = _present_path(
-            recipe_root, project_root=project_root)
-    except ValueError as exc:
-        raise click.ClickException(str(exc)) from exc
+    recipe_root = _resolve_recipe_root(project_root, layout=layout)
+    code_config = load_code_generation_settings(
+        project_root=project_root,
+        config_candidate_paths=layout.config_candidate_paths,
+    )
+    recipe_root_label = _present_path(recipe_root, project_root=project_root)
 
     if dry_run:
-        try:
-            result = describe_recipe_generation(
-                recipe_name,
-                project_root,
-                target_path,
-                recipe_root=recipe_root,
-                config=code_config,
-            )
-        except ValueError as exc:
-            raise click.ClickException(str(exc)) from exc
-        for line in view.render_dry_run_result(
-            result,
-            project_root=project_root,
-            recipe_root_label=recipe_root_label,
-        ):
-            click.echo(line)
-        if not result["recipe_found"]:
-            ctx.exit(1)
-        return 0
-
-    try:
-        result = generate_recipe(
+        result = describe_recipe_generation(
             recipe_name,
             project_root,
             target_path,
             recipe_root=recipe_root,
             config=code_config,
         )
-    except ValueError as exc:
-        raise click.ClickException(str(exc)) from exc
-    for line in view.render_generate_result(
+        echo_lines(view.render_dry_run_result(
+            result,
+            project_root=project_root,
+            recipe_root_label=recipe_root_label,
+        ))
+        if not result["recipe_found"]:
+            ctx.exit(1)
+        return 0
+
+    result = generate_recipe(
+        recipe_name,
+        project_root,
+        target_path,
+        recipe_root=recipe_root,
+        config=code_config,
+    )
+    echo_lines(view.render_generate_result(
         result,
         project_root=project_root,
         recipe_root_label=recipe_root_label,
-    ):
-        click.echo(line)
+    ))
     if not result["recipe_found"]:
         ctx.exit(1)
     return 0

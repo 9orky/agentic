@@ -11,7 +11,7 @@
 
 ## Maintainer Guidance
 
-- Keep this tree aligned with the runtime loaders under `src/agentic/features/workspace_contract/`.
+- Keep this tree aligned with the runtime loaders under `src/agentic/features/workspace/`.
 - Treat everything here as shipped package data, not as ad hoc project notes.
 - Keep project-facing documentation in `docs/`, not in this packaged resources tree.
 - Do not represent project-local rule policy here unless the runtime is intentionally shipping reusable defaults.
@@ -31,6 +31,6 @@
 
 ## Key References
 
-- [src/agentic/features/workspace_contract/sync/infrastructure/file_repository.py](/Users/gorky/Projects/agentic/src/agentic/features/workspace_contract/sync/infrastructure/file_repository.py)
-- [src/agentic/features/workspace_contract/rules/infrastructure/file_repository.py](/Users/gorky/Projects/agentic/src/agentic/features/workspace_contract/rules/infrastructure/file_repository.py)
+- [src/agentic/features/workspace/sync/infrastructure/file_repository.py](/Users/gorky/Projects/agentic/src/agentic/features/workspace/sync/infrastructure/file_repository.py)
+- [src/agentic/features/workspace/rules/infrastructure/file_repository.py](/Users/gorky/Projects/agentic/src/agentic/features/workspace/rules/infrastructure/file_repository.py)
 - [src/agentic/resources/rules/INDEX.md](/Users/gorky/Projects/agentic/src/agentic/resources/rules/INDEX.md)
