@@ -4,8 +4,6 @@ from pathlib import Path
 from shutil import copy2
 from typing import TypedDict
 
-from agentic.project_layout import AgenticProjectLayout
-
 from ...domain import Recipe, RecipeRepository
 from ...infrastructure import FileRecipeRepository
 
@@ -120,28 +118,22 @@ class RecipeGenerationService:
 
 def build_recipe_generation_service(
     *,
-    cwd: Path,
+    recipe_root: Path | None = None,
     repository: RecipeRepository | None = None,
 ) -> RecipeGenerationService:
+    if repository is None and recipe_root is None:
+        raise ValueError(
+            "recipe_root is required when repository is not provided")
+
+    resolved_repository = repository
+    if resolved_repository is None:
+        resolved_recipe_root = recipe_root
+        assert resolved_recipe_root is not None
+        resolved_repository = FileRecipeRepository(resolved_recipe_root)
+
     return RecipeGenerationService(
-        repository=repository or FileRecipeRepository(
-            _resolve_recipe_root(cwd)),
+        repository=resolved_repository,
     )
-
-
-def _resolve_recipe_root(cwd: Path) -> Path:
-    target_root = Path(cwd).resolve()
-    layout = AgenticProjectLayout()
-
-    for candidate in (target_root, *target_root.parents):
-        code_dir = layout.target_dir(candidate) / "code"
-        if code_dir.is_dir():
-            return code_dir
-
-        if layout.config_path(candidate).is_file():
-            return code_dir
-
-    return layout.target_dir(target_root) / "code"
 
 
 __all__ = [

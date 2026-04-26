@@ -7,6 +7,8 @@ from typing import Any
 
 class SyncSummaryView:
     def render_bootstrap_result(self, result: Mapping[str, Any], *, project_root: Path) -> tuple[str, ...]:
+        target_dir = _present_path(
+            result["target_dir"], project_root=project_root)
         lines = list(self._render_sync_header(
             result, project_root=project_root))
         lines.extend(
@@ -17,14 +19,16 @@ class SyncSummaryView:
             )
         )
         lines.append(
-            "Local profile surface: agentic/rules/local/.")
+            f"Local profile surface: {target_dir}/rules/local/.")
         lines.append(
-            "Safe to rerun: plain 'agentic' preserves existing local files in agentic/rules/local/.")
+            f"Safe to rerun: plain 'agentic' preserves existing local files in {target_dir}/rules/local/.")
         lines.append(
-            "Next step: review agentic/agentic.yaml and agentic/rules/local/ and run 'agentic check'.")
+            f"Next step: review {target_dir}/agentic.yaml and {target_dir}/rules/local/ and run 'agentic check'.")
         return tuple(lines)
 
     def render_update_result(self, result: Mapping[str, Any], *, project_root: Path) -> tuple[str, ...]:
+        target_dir = _present_path(
+            result["target_dir"], project_root=project_root)
         lines = list(self._render_sync_header(
             result, project_root=project_root))
         lines.extend(
@@ -35,7 +39,7 @@ class SyncSummaryView:
             )
         )
         lines.append(
-            "Next step: review refreshed shared rules, agentic/agentic.yaml, and agentic/rules/local/ and run 'agentic check'.")
+            f"Next step: review refreshed shared rules, {target_dir}/agentic.yaml, and {target_dir}/rules/local/ and run 'agentic check'.")
         return tuple(lines)
 
     def _render_sync_header(self, result: Mapping[str, Any], *, project_root: Path) -> tuple[str, ...]:

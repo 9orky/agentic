@@ -51,8 +51,23 @@ class SyncChange:
 
 @dataclass(frozen=True)
 class WorkspaceContractLayout:
+    agentic_dir_names: tuple[str, ...] = ("agentic", ".agentic")
+
     def target_dir(self, project_root: Path) -> Path:
-        return project_root / "agentic"
+        existing_dirs = tuple(
+            path for path in self.target_dir_candidates(project_root) if path.is_dir()
+        )
+        if len(existing_dirs) > 1:
+            labels = ", ".join(path.name for path in existing_dirs)
+            raise ValueError(
+                f"Found multiple agentic directories: {labels}. Delete one of them and rerun agentic."
+            )
+        if existing_dirs:
+            return existing_dirs[0]
+        return self.target_dir_candidates(project_root)[0]
+
+    def target_dir_candidates(self, project_root: Path) -> tuple[Path, ...]:
+        return tuple(project_root / dir_name for dir_name in self.agentic_dir_names)
 
     def code_dir(self, project_root: Path) -> Path:
         return self.target_dir(project_root) / "code"

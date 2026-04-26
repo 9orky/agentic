@@ -94,6 +94,38 @@ class CodeCliTests(unittest.TestCase):
         self.assertTrue((nested_cwd / "domain" / "entity.py").is_file())
         self.assertIn("Generated recipe 'layers'.", result.output)
 
+    def test_code_command_loads_recipe_from_hidden_agentic_directory(self) -> None:
+        recipe_dir = self.project_root / ".agentic" / "code" / "layers" / "domain"
+        recipe_dir.mkdir(parents=True)
+        (recipe_dir / "entity.py").write_text("class Entity: ...\n", encoding="utf-8")
+
+        nested_cwd = self.project_root / "src" / "agentic" / \
+            "features" / "workspace_contract" / "testmod"
+        nested_cwd.mkdir(parents=True)
+
+        result = self._invoke_from_cwd(nested_cwd, ["code", "layers"])
+
+        self.assertEqual(result.exit_code, 0, result.output)
+        self.assertTrue((nested_cwd / "domain").is_dir())
+        self.assertTrue((nested_cwd / "domain" / "entity.py").is_file())
+        self.assertIn("Generated recipe 'layers'.", result.output)
+
+    def test_code_command_fails_when_both_agentic_directories_exist(self) -> None:
+        (self.project_root / "agentic" / "code" /
+         "layers" / "domain").mkdir(parents=True)
+        (self.project_root / ".agentic" / "code" /
+         "layers" / "domain").mkdir(parents=True)
+        target_dir = self.project_root / "src" / "feature_mod"
+        target_dir.mkdir(parents=True)
+
+        result = self._invoke_from_cwd(target_dir, ["code", "layers"])
+
+        self.assertEqual(result.exit_code, 1, result.output)
+        self.assertIn(
+            "Error: Found multiple agentic directories: agentic, .agentic. Delete one of them and rerun agentic.",
+            result.output,
+        )
+
     def test_code_command_preserves_existing_paths_and_reports_skips(self) -> None:
         recipe_dir = self.project_root / "agentic" / "code" / "feature"
         recipe_dir.mkdir(parents=True)
@@ -109,6 +141,28 @@ class CodeCliTests(unittest.TestCase):
         self.assertIn("Skipped 1 existing path(s).", result.output)
         self.assertEqual(
             (target_dir / "entity.py").read_text(encoding="utf-8"), "local change\n")
+
+    def test_code_command_generates_recipe_tree_in_requested_path(self) -> None:
+        recipe_dir = self.project_root / "agentic" / "code" / "feature"
+        (recipe_dir / "module" / "domain").mkdir(parents=True)
+        (recipe_dir / "module" / "domain" / "entity.py").write_text(
+            "class Entity: ...\n",
+            encoding="utf-8",
+        )
+
+        target_dir = self.project_root / "src" / "feature_mod"
+        target_dir.mkdir(parents=True)
+
+        result = self._invoke_from_cwd(
+            target_dir, ["code", "feature", "nested/output"])
+
+        self.assertEqual(result.exit_code, 0, result.output)
+        self.assertTrue((target_dir / "nested" / "output").is_dir())
+        self.assertTrue(
+            (target_dir / "nested" / "output" /
+             "module" / "domain" / "entity.py").is_file()
+        )
+        self.assertIn("- nested/output/module/domain/entity.py", result.output)
 
     def _invoke_from_cwd(self, cwd: Path, args: list[str]):
         previous_cwd = Path.cwd()

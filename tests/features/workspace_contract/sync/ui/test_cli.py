@@ -45,6 +45,30 @@ class SyncCliFunctionalTests(unittest.TestCase):
         self.assertEqual(result.exit_code, 0, result.output)
         self.assertTrue((self.project_root / "agentic" / "code").is_dir())
 
+    def test_init_uses_existing_hidden_agentic_directory(self) -> None:
+        (self.project_root / ".agentic").mkdir()
+
+        result = self._invoke_from_cwd(["init"])
+
+        self.assertEqual(result.exit_code, 0, result.output)
+        self.assertTrue((self.project_root / ".agentic" / "code").is_dir())
+        self.assertTrue((self.project_root / ".agentic" /
+                        "rules" / "local").is_dir())
+        self.assertIn(
+            "Local profile surface: .agentic/rules/local/.", result.output)
+
+    def test_init_fails_when_both_agentic_directories_exist(self) -> None:
+        (self.project_root / "agentic").mkdir()
+        (self.project_root / ".agentic").mkdir()
+
+        result = self._invoke_from_cwd(["init"])
+
+        self.assertEqual(result.exit_code, 1, result.output)
+        self.assertIn(
+            "Error: Found multiple agentic directories: agentic, .agentic. Delete one of them and rerun agentic.",
+            result.output,
+        )
+
     def test_update_rewrites_only_mutated_rule_files(self) -> None:
         packaged_before = _snapshot_packaged_rules()
         init_result = self._invoke_from_cwd(["init"])
@@ -136,7 +160,7 @@ def _reported_rule_update_paths(output: str) -> set[str]:
     return {
         line[2:]
         for line in output.splitlines()
-        if line.startswith("- agentic/rules/")
+        if line.startswith("- agentic/rules/") or line.startswith("- .agentic/rules/")
     }
 
 

@@ -6,9 +6,15 @@ from typing import Any
 
 
 class CodeGenerationView:
-    def render_generate_result(self, result: Mapping[str, Any], *, project_root: Path) -> tuple[str, ...]:
+    def render_generate_result(
+        self,
+        result: Mapping[str, Any],
+        *,
+        project_root: Path,
+        recipe_root_label: str,
+    ) -> tuple[str, ...]:
         if not result["recipe_found"]:
-            return (f"Recipe not found: agentic/code/{result['recipe_name']}/.",)
+            return (f"Recipe not found: {recipe_root_label}/{result['recipe_name']}/.",)
 
         lines = [f"Generated recipe '{result['recipe_name']}'."]
         lines.extend(
@@ -24,9 +30,15 @@ class CodeGenerationView:
                 f"Warning: recipe '{result['recipe_name']}' is empty.")
         return tuple(lines)
 
-    def render_dry_run_result(self, result: Mapping[str, Any], *, project_root: Path) -> tuple[str, ...]:
+    def render_dry_run_result(
+        self,
+        result: Mapping[str, Any],
+        *,
+        project_root: Path,
+        recipe_root_label: str,
+    ) -> tuple[str, ...]:
         if not result["recipe_found"]:
-            return (f"Recipe not found: agentic/code/{result['recipe_name']}/.",)
+            return (f"Recipe not found: {recipe_root_label}/{result['recipe_name']}/.",)
 
         lines = [f"Dry run for recipe '{result['recipe_name']}'."]
         lines.extend(

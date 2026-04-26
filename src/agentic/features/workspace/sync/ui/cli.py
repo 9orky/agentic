@@ -11,7 +11,10 @@ from .views import build_default_sync_summary_view
 @click.pass_obj
 def _init_command(runtime, project_root: str) -> int:
     resolved_project_root = runtime.resolve_project_root(project_root)
-    result = bootstrap_project(resolved_project_root)
+    try:
+        result = bootstrap_project(resolved_project_root)
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
 
     for line in build_default_sync_summary_view().render_bootstrap_result(
         result,
@@ -26,7 +29,10 @@ def _init_command(runtime, project_root: str) -> int:
 @click.pass_obj
 def _update_command(runtime, project_root: str) -> int:
     resolved_project_root = runtime.resolve_project_root(project_root)
-    result = update_project(resolved_project_root)
+    try:
+        result = update_project(resolved_project_root)
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
 
     for line in build_default_sync_summary_view().render_update_result(
         result,
