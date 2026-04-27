@@ -1,7 +1,7 @@
 # agentic
 
-[![PyPI version](https://img.shields.io/pypi/v/agentic.svg)](https://pypi.org/project/agentic/)
-[![Python versions](https://img.shields.io/pypi/pyversions/agentic.svg)](https://pypi.org/project/agentic/)
+[![PyPI version](https://img.shields.io/pypi/v/agentic-oss.svg)](https://pypi.org/project/agentic-oss/)
+[![Python versions](https://img.shields.io/pypi/pyversions/agentic-oss.svg)](https://pypi.org/project/agentic-oss/)
 [![CI](https://img.shields.io/github/actions/workflow/status/9orky/agentic/ci.yml?branch=main&label=ci)](https://github.com/9orky/agentic/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/9orky/agentic/blob/main/LICENSE)
 
@@ -32,13 +32,13 @@ That means you can:
 ## Install
 
 ```bash
-pipx install agentic
+pipx install agentic-oss
 ```
 
 If you prefer to poke it first:
 
 ```bash
-pipx run agentic --help
+pipx run agentic-oss --help
 ```
 
 ## Quick start

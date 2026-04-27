@@ -1,15 +1,15 @@
 [build-system]
-requires = ["setuptools>=77", "wheel"]
+requires = ["setuptools>=77", "setuptools-scm[toml]>=8", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "agentic"
-version = "0.1.0"
+name = "agentic-oss"
 description = "A pipx-first CLI for architecture-aware collaboration between humans and coding agents."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
 license-files = ["LICENSE"]
+dynamic = ["version"]
 authors = [
     {name = "Tomasz Szpak"},
 ]
@@ -78,3 +78,7 @@ agentic = [
     "resources/arch/extractors/*.js",
     "resources/arch/extractors/*.php",
 ]
+
+[tool.setuptools_scm]
+fallback_version = "0.0.0.dev0"
+version_file = "src/agentic/_version.py"

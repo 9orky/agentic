@@ -24,7 +24,7 @@ Trusted Publishing still needs one manual trust relationship on the package inde
 
 For PyPI:
 
-1. Open the `agentic` project on PyPI.
+1. Open the `agentic-oss` project on PyPI.
 2. Go to `Publishing`.
 3. Add a trusted publisher with:
    - owner: `9orky`
@@ -45,8 +45,8 @@ This is the one required manual step. After that, GitHub Actions mints short-liv
 ### Stable release
 
 1. Update `CHANGELOG.md`.
-2. Bump the version in `pyproject.toml`.
-3. Create a GitHub release from the matching tag.
+2. Create an annotated Git tag in the form `vX.Y.Z`.
+3. Create a GitHub release from that tag.
 4. Mark it as a normal release.
 
 That triggers:
@@ -56,8 +56,8 @@ That triggers:
 
 ### Prerelease
 
-1. Bump the version in `pyproject.toml` to a prerelease version if desired.
-2. Create a GitHub release from the matching tag.
+1. Create an annotated prerelease tag in the form `vX.Y.Zrc1`, `vX.Y.Zb1`, or similar.
+2. Create a GitHub release from that tag.
 3. Mark it as a prerelease.
 
 That triggers:
@@ -70,3 +70,25 @@ That triggers:
 - `workflow_dispatch` is available for dry runs of the release pipeline without publishing.
 - If publishing fails before the upload step, GitHub release assets are still preserved for inspection.
 - If you change the package name or repository owner, update both `pyproject.toml` metadata and the Trusted Publisher settings on PyPI/TestPyPI.
+- Package version is derived from Git tags through `setuptools-scm`, not hardcoded in `pyproject.toml`.
+
+## Common failure: invalid-publisher
+
+If PyPI responds with `invalid-publisher`, check these first:
+
+- the PyPI project name matches the distribution name in `pyproject.toml`
+- the trusted publisher points to:
+  - owner `9orky`
+  - repo `agentic`
+  - workflow `release.yml`
+  - environment `pypi` or `testpypi`
+- the release tag matches the version that `setuptools-scm` derives, for example `v0.1.0`
+
+If PyPI says the project already exists and you do not control it, then the package name is taken.
+
+In that case, Trusted Publishing cannot be fixed on the GitHub side alone. You must either:
+
+- publish under a different distribution name, or
+- gain maintainer access to the existing PyPI project
+
+The console command can still remain `agentic` even if the PyPI distribution name changes.
